@@ -1,0 +1,35 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.18.13.44.35;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@port=$1
+[ -z "$port" ] && {
+  echo "no port number" >&2
+  exit 1
+}
+./main_cli 127.0.0.1 $port </etc/services >./x1 &
+./main_cli 127.0.0.1 $port </etc/services >./x2 &
+./main_cli 127.0.0.1 $port </etc/services >./x3 &
+wait
+
+echo finished >&2
+@

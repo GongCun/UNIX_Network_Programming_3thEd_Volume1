@@ -1,0 +1,148 @@
+Q1: 
+#----------------------------------------------
+# Not close the connfd on server's thread process
+#----------------------------------------------
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        ESTABLISHED
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         ESTABLISHED
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        ESTABLISHED
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         ESTABLISHED
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        ESTABLISHED
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         ESTABLISHED
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        ESTABLISHED
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         ESTABLISHED
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        ESTABLISHED
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         ESTABLISHED
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52052        CLOSE_WAIT
+tcp4       0      0  127.0.0.1.52052        127.0.0.1.9886         FIN_WAIT_2
+
+#----------------------------------------------
+# Close the connfd on server's thread process
+#----------------------------------------------
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52054        ESTABLISHED
+tcp4       0      0  127.0.0.1.52054        127.0.0.1.9886         ESTABLISHED
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  127.0.0.1.9886         127.0.0.1.52054        ESTABLISHED
+tcp4       0      0  127.0.0.1.52054        127.0.0.1.9886         ESTABLISHED
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  *.9886                 *.*                    LISTEN
+tcp4       0      0  *.9886                 *.*                    LISTEN
+
+Q2: After the boot:
+   When the client close the connction, will send the FIN, the server will
+   reply the ACK; But because the server will not close the connction, so will not
+   send the FIN to client, leaves the client in the FIN_WAIT_2 state.
+   Berkeley-derived implementations will time out the client's end when it remains
+   in this state for just over 11 minutes (pp.825 827 of TCPv2). The server will
+   also run out of descriptors (eventually).
+
+
+#----------------------------------------------
+# Test thread specified data
+#----------------------------------------------
+# On server
+$ ./main_serv 9886
+98762752: calling the thread_readline_once
+98762752 allocating the thread specified data
+99299328 allocating the thread specified data
+99835904 allocating the thread specified data
+99835904: released the pointer
+98762752: released the pointer
+99299328: released the pointer
+
+# On client
+$ ./debug.ksh 9886
+finished
+$ diff3 x1 x2 x3
+$ diff x1 /etc/services
+
+#----------------------------------------------
+# Check out and don't want to compile again
+#----------------------------------------------
+$ co -l thread_web.c
+$ co -l thread_web_main.c
+$ touch -r thread_web_main thread_web.c
+$ touch -r thread_web_main thread_web_main.c
+$ ls -l | grep thread_web
+-rw-r--r--   1 gongcun  gongcun    3136 Apr 23 21:55 thread_web.c
+-rw-r--r--   1 gongcun  gongcun     727 Apr 23 21:09 thread_web.h
+-rwxr-xr-x   1 gongcun  gongcun   42176 Apr 23 21:55 thread_web_main
+-rw-r--r--   1 gongcun  gongcun    2599 Apr 23 21:55 thread_web_main.c
+drwxr-xr-x   3 gongcun  gongcun     102 Apr 23 21:55 thread_web_main.dSYM
+$ make -n
+make: Nothing to be done for `all'.
+
+#-------------------------------------------------
+# Or use -t option to pretend that make were done
+#-------------------------------------------------
+$ make -t
+
+

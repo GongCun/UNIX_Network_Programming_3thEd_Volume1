@@ -1,0 +1,193 @@
+head	1.6;
+access;
+symbols;
+locks
+	gongcun:1.6; strict;
+comment	@# @;
+
+
+1.6
+date	2016.04.24.07.46.03;	author gongcun;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2016.04.24.07.09.23;	author gongcun;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2016.04.23.14.07.40;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.04.23.13.46.31;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.04.06.14.20.23;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.04.06.13.52.54;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@Add the -D_TEST for test thread specified data.
+@
+text
+@include ../Make.defines
+CFLAGS := $(CFLAGS) -I.
+
+PROGS =	main_cli main_serv thread_web_main
+
+all:	${PROGS}
+
+main_cli: main_cli.c thread_str_cli.c thread_readline.c
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+
+main_serv: main_serv.c thread_str_echo.c thread_readline.c
+		#${CC} ${CFLAGS} -D_DEBUG -o $@@ $^ ${LIBS}
+		#${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+		${CC} ${CFLAGS} -D_TEST -o $@@ $^ ${LIBS}
+
+thread_web_main: thread_web_main.c thread_web.c
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS} 
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@
+
+
+1.5
+log
+@Add the -D_DEBUG and comment it for test (make comment charater is pound sign, #).
+@
+text
+@d8 1
+a8 1
+main_cli: main_cli.o thread_str_cli.o thread_readline.c
+d13 2
+a14 1
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d12 1
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d15 1
+a15 1
+		${CC} ${CFLAGS} -D_TEST -o $@@ $^ ${LIBS} 
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d4 1
+a4 1
+PROGS =	main
+d8 2
+a9 2
+#$(PROGS):   %: %.o
+		#${CC} ${CFLAGS} -o $@@ $< ${LIBS}
+d11 5
+a15 2
+main: main.o thread_str_cli.o
+		${CC} ${CFLAGS} -o $@@ $< ${LIBS}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+d4 1
+a4 3
+PROGS =	web01 web02 web03 \
+	tcpcli01 tcpcli02 tcpserv01 tcpserv02 \
+	test01 example01 example02 example03
+d8 2
+a9 2
+web01:	web01.o
+		${CC} ${CFLAGS} -o $@@ web01.o ${LIBS}
+d11 2
+a12 51
+web02:	web02.o
+		${CC} ${CFLAGS} -o $@@ web02.o ${LIBS}
+
+web03:	web03.o
+		${CC} ${CFLAGS} -o $@@ web03.o ${LIBS}
+
+tcpcli01:	tcpcli01.o strclithread.o
+		${CC} ${CFLAGS} -o $@@ tcpcli01.o strclithread.o ${LIBS}
+
+tcpcli02:	tcpcli02.o strclithread2.o
+		${CC} ${CFLAGS} -o $@@ tcpcli02.o strclithread2.o ${LIBS}
+
+tcpserv01:	tcpserv01.o
+		${CC} ${CFLAGS} -o $@@ tcpserv01.o ${LIBS}
+
+# Broken one that uses readline() from library.
+tcpserv02:	tcpserv02.o
+		${CC} ${CFLAGS} -o $@@ tcpserv02.o ${LIBS}
+
+# Correct one that uses thread-safe readline().
+tcpserv02g:	tcpserv02.o readline.o
+		${CC} ${CFLAGS} -o $@@ tcpserv02.o readline.o ${LIBS}
+
+test01:	test01.o
+		${CC} ${CFLAGS} -o $@@ test01.o ${LIBS}
+
+test02:	test02.o
+		${CC} ${CFLAGS} -o $@@ test02.o ${LIBS}
+
+test03:	test03.o
+		${CC} ${CFLAGS} -o $@@ test03.o ${LIBS}
+
+# Bad version uses readline() from library.
+test04b:	test04.o
+		${CC} ${CFLAGS} -o $@@ test04.o ${LIBS}
+
+# Good version uses readline.c in this directory.
+test04g:	test04.o readline.o
+		${CC} ${CFLAGS} -o $@@ test04.o readline.o ${LIBS}
+
+test05:	test05.o
+		${CC} ${CFLAGS} -o $@@ test05.o ${LIBS}
+
+example01:	example01.o
+		${CC} ${CFLAGS} -o $@@ example01.o ${LIBS}
+
+example02:	example02.o
+		${CC} ${CFLAGS} -o $@@ example02.o ${LIBS}
+
+example03:	example03.o
+		${CC} ${CFLAGS} -o $@@ example03.o ${LIBS}
+@

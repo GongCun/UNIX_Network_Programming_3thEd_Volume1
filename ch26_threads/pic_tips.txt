@@ -1,0 +1,23 @@
+./http_get_file.exp www.firstview.com `sed -n '1p' ./pic.filename` >./x.jpg
+./http_get_file.exp www.firstview.com / >./home_page.txt
+grep jpg ./home_page.txt  >>./pic.filename
+
+
+./thread_web_main 3 www.firstview.com / \
+/themes/default/images/blog-thumb5.jpg \
+/themes/default/images/blogfeaturestrends.jpg \
+/themes/default/images/blogtitle-logo.jpg
+
+function rm_header {
+  sed '1,12d' $1 >tmp.jpg; mv tmp.jpg $1
+}
+
+rm_header ./blog-thumb5.jpg 
+rm_header ./blogtitle-logo.jpg 
+rm_header ./blogfeaturestrends.jpg 
+
+./getjpg.sh
+cat ./pic.filename | while read filename; do rm_header ${filename##*/}; done
+
+
+

@@ -1,0 +1,80 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcun:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2016.04.24.07.19.02;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.04.20.13.27.33;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#include "unpthread_ex.h"
+#include "thread_readline.h"
+
+static int sockfd; /* global for both threads to access */
+static FILE *fp;
+static int stdineof = 0;
+
+void thread_str_cli(FILE *fp_arg, int sockfd_arg)
+{
+    char recvline[MAXLINE];
+    pthread_t tid;
+
+    sockfd = sockfd_arg;
+    fp = fp_arg;
+
+    Pthread_create(&tid, NULL, thread_copyto, NULL);
+
+    while (Thread_readline(sockfd, recvline, MAXLINE) > 0)
+        Fputs(recvline, stdout);
+    thread_readlineflush(STDOUT_FILENO);
+
+    if (stdineof == 0)
+        err_quit("thread_str_cli: server terminated permaturely");
+}
+
+void *thread_copyto(void *arg)
+{
+    char sendline[MAXLINE];
+
+    while (Fgets(sendline, MAXLINE, fp) != NULL)
+        Writen(sockfd, sendline, strlen(sendline));
+
+    Shutdown(sockfd, SHUT_WR); /* EOF on stdin, send FIN */
+    stdineof = 1;
+
+    return NULL;
+
+}
+
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d6 1
+d22 2
+d34 1
+@

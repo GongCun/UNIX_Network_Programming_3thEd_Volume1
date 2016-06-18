@@ -1,0 +1,36 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.04.23.14.07.29;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "unpthread_ex.h"
+
+typedef struct {
+    char buf[MAXLINE];
+    int cnt;
+    char *pchGlobal;
+} Rline;
+
+ssize_t Thread_readline(int fd, char *ptr, ssize_t maxlen);
+ssize_t thread_readlinebuf(char **ppchUser);
+void thread_readlineflush(int fd);
+
+@

@@ -1,0 +1,14 @@
+HTTP/1.1 400 Bad Request
+Date: Sat, 23 Apr 2016 14:06:10 GMT
+Server: Apache
+Connection: close
+Content-Type: text/html; charset=iso-8859-1
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<HTML><HEAD>
+<TITLE>400 Bad Request</TITLE>
+</HEAD><BODY>
+<H1>Bad Request</H1>
+Your browser sent a request that this server could not understand.<P>
+Invalid URI in request GET M_dior_fw16_.jpg HTTP/1.0<P>
+</BODY></HTML>

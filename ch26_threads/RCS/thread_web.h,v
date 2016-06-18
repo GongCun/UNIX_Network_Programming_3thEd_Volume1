@@ -1,0 +1,89 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcun:1.3; strict;
+comment	@ * @;
+
+
+1.3
+date	2016.04.23.14.07.29;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.04.23.06.07.12;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.04.22.14.10.47;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@#pragma once
+#include "unpthread_ex.h"
+
+#define MAXFILES 30
+extern const int WEBSERVPORT;
+extern pthread_mutex_t ndone_mutex;
+extern pthread_cond_t ndone_cond;
+extern int ndone;
+
+struct file {
+    char *f_pchName;
+    char *f_pchHost;
+    int f_iFd;
+    int f_iFlags;
+    pthread_t f_thrId;
+} file[MAXFILES];
+
+#define F_CONNECTING 1 /* connect() in progress */
+#define F_READING 2 /* connect() complete; now reading */
+#define F_DONE 4 /* all done */
+#define F_JOINED 8 /* main has pthread_join'ed */
+#define GET_CMD "GET %s HTTP/1.0\r\n\r\n"
+
+int nconn, nfiles, nlefttoconn, nlefttoread;
+
+void *thread_do_get_read(void *);
+void thread_home_page(const char *, const char *, char **);
+void thread_write_get_cmd(struct file *);
+
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d6 3
+d21 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d5 1
+a5 1
+#define SERVPORT "80"
+d22 4
+a25 3
+void *do_get_read(void *);
+void home_page(const char *, const char *);
+void write_get_cmd(struct file *);
+@

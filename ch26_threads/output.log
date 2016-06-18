@@ -1,0 +1,85 @@
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 2856 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 1428 bytes of home page
+read 2010 bytes of home page
+end-of-file on home page
+web address is 216.213.99.78
+
+nfiles = 3
+sleeping for wait thread
+thread_do_get_read for /themes/default/images/blog-thumb5.jpg, fd 3, thread 4336136192
+wrote 55 bytes for /themes/default/images/blog-thumb5.jpg
+thread_do_get_read for /themes/default/images/blogfeaturestrends.jpg, fd 5, thread 4336672768
+wrote 62 bytes for /themes/default/images/blogfeaturestrends.jpg
+thread_do_get_read for /themes/default/images/blogtitle-logo.jpg, fd 6, thread 4337209344
+wrote 58 bytes for /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 2856 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 2856 bytes from /themes/default/images/blog-thumb5.jpg
+read 2856 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 2856 bytes from /themes/default/images/blogfeaturestrends.jpg
+read 997 bytes from /themes/default/images/blogfeaturestrends.jpg
+end-of-file on /themes/default/images/blogfeaturestrends.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blogtitle-logo.jpg
+read 1000 bytes from /themes/default/images/blogtitle-logo.jpg
+end-of-file on /themes/default/images/blogtitle-logo.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1428 bytes from /themes/default/images/blog-thumb5.jpg
+read 1251 bytes from /themes/default/images/blog-thumb5.jpg
+end-of-file on /themes/default/images/blog-thumb5.jpg

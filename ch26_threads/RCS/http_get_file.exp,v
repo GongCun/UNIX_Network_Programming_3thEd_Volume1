@@ -1,0 +1,71 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcun:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2016.04.22.13.39.05;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.04.22.00.05.59;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#!/usr/bin/expect --
+
+if {[llength $argv] != 2} {
+  puts stderr "Usage: $argv0 <webPage> <fileName>"
+  exit 1
+}
+
+set WEB [lindex $argv 0]
+set FNAME [lindex $argv 1]
+set timeout 20
+
+catch {spawn -noecho telnet $WEB 80}
+expect -ex "Escape character is '^]'." {
+  send "GET $FNAME HTTP/1.0\r\r"
+}
+catch {expect eof}
+catch {close -i $spawn_id}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d4 1
+a4 1
+  puts stderr "Usage: $argv0 <webPage> <fileList>"
+d9 2
+a10 2
+set FD [open [lindex $argv 1] r] 
+set timeout 10
+d12 3
+a14 7
+while {[gets $FD line] > 0} {
+  catch {spawn -noecho telnet $WEB 80}
+  expect -ex "Escape character is '^]'." {
+    send "GET $line HTTP/1.0\r\r"
+  }
+  catch {expect eof}
+  catch {close -i $spawn_id}
+d16 2
+@
