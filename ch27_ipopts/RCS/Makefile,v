@@ -1,0 +1,78 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcun:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2016.04.28.12.40.35;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.04.26.05.45.44;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@include ../Make.defines
+PLATFORM := $(shell uname -s)
+ifeq ($(PLATFORM), Darwin)
+	CFLAGS := $(CFLAGS) -Dmacos
+endif
+CFLAGS := $(CFLAGS) -I.
+
+PROGS =	ipopts_tcpcli_main ipopts_tcpserv_main
+
+all:	${PROGS}
+
+ipopts_tcpcli_main: ipopts_tcpcli_main.c ipopts_sourceroute.c ipopts_str_cli.c
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+
+ipopts_tcpserv_main: ipopts_tcpserv_main.c ipopts_sourceroute.c ipopts_str_echo.c
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+
+ipopts_tcpserv_main_centos: ipopts_tcpserv_main.c ipopts_sourceroute.c ipopts_str_echo.c
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 5
+d8 1
+a8 1
+PROGS =	tcpcli01 tcpserv01
+d12 2
+a13 12
+tcpcli01:	tcpcli01.o sourceroute.o
+		${CC} ${CFLAGS} -o $@@ tcpcli01.o sourceroute.o ${LIBS}
+
+tcpserv01:	tcpserv01.o sourceroute.o sigchldwaitpid.o
+		${CC} ${CFLAGS} -o $@@ tcpserv01.o sourceroute.o sigchldwaitpid.o \
+				${LIBS}
+
+udpcli01:	udpcli01.o 
+		${CC} ${CFLAGS} -o $@@ udpcli01.o ${LIBS}
+
+udpserv01:	udpserv01.o sourceroute6.o dgechoprintroute.o
+		${CC} ${CFLAGS} -o $@@ udpserv01.o sourceroute6.o dgechoprintroute.o ${LIBS}
+d15 2
+d18 2
+@

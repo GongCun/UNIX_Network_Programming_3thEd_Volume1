@@ -1,0 +1,142 @@
+# Error on loop address
+$ ./ipopts_tcpcli_main -s 127.0.0.1 127.0.0.1 9886
+connect error: Operation timed out
+
+# On AIX need setup network option
+# on both server and client
+$ /usr/sbin/no -p -o nonlocsrcroute=1 -o ipsrcroutesend=1 -o ipsrcrouterecv=1 -o ipsrcrouteforward=1 -o ipforwarding=1
+
+# AIX client
+$ ./tcpserv01
+received IP options, len = 16
+received LSRR: 192.168.9.241 192.168.9.38 192.168.9.241
+child 40173860 terminated
+
+# AIX server
+$ ./tcpcli01 -g 192.168.9.38 192.168.9.241 192.168.9.38
+hello
+hello
+
+
+############################################################
+# On Centos and Ubuntu
+# need close iptables and set kernel state
+############################################################
+$ sudo /etc/init.d/iptables save
+$ sudo /etc/init.d/iptables stop
+(or
+$ sudo cp -p /etc/sysconfig/iptables /etc/sysconfig/iptables.bk
+$ sudo cp /dev/null /etc/sysconfig/iptables
+$ sudo service iptables restart
+)
+$ sudo iptables -L
+
+$ sudo sysctl -a
+$ sudo sysctl -w net.ipv4.conf.all.accept_source_route=1
+$ sudo sysctl -w net.ipv4.conf.all.forwarding=1
+$ sudo sysctl -w net.ipv4.conf.wlan0.accept_source_route=1
+$ sudo sysctl -w net.ipv4.conf.wlan0.accept_local=1
+$ sudo sysctl -w net.ipv4.conf.wlan0.route_localnet=1
+
+(or change the setting of /tmp/sysctl.out
+$ sudo sysctl -p - </tmp/sysctl.out
+or change the setting of /proc/sys/net/ipv4/conf/ifname???/*)
+
+############################################################
+# On Macos
+############################################################
+sudo sysctl -a | grep '^net' > /tmp/sysctl.out
+vi /tmp/sysctl.out  
+
+sudo sysctl -w net.inet.ip.forwarding=1
+sudo sysctl -w net.inet.ip.redirect=1
+sudo sysctl -w net.inet.ip.accept_sourceroute=1
+sudo sysctl -w net.inet.ip.sourceroute=1
+
+
+#
+In AIX can see the IP addresses, but on Ubuntu and Centos,
+display the option type is 168
+(because the Linux kernel do _not_ set the first 4 bytes as source route ip,
+but Macos and AIX do it)
+
+
+############################################################
+# Client/Server test
+############################################################
+# Centos as server
+$ ./ipopts_tcpserv_main_centos 9886
+receiced IP options, len = 12
+received LSRR: 192.168.0.102 192.168.0.113
+child 1620 terminated
+
+# Macos as client
+$ ./ipopts_tcpcli_main -l 192.168.0.113 192.168.0.102
+192.168.0.113 9886
+hello
+hello
+goodbye
+goodbye
+
+############################################################
+# Exercises
+############################################################
+Q1. Nothing changes in my test.
+
+Q2. After Books:
+   We would place an EOL (a byte of 0) at the end of the buffer.
+
+* TCPv1 1st Edition
+* Chapter 7. Ping Program
+* 7.3 IP Record Route Option
+
+    The notation EOL at the end of the record route information indicates the IP
+    option "end of list" value appeared. The EOL option has a value of 0. What's
+    happening is that 39 bytes of RR data are in the 40 bytes of option space in
+    the IP header. Since the option space is set to 0 before the datagram is sent,
+    this final byte of 0 that follows the 39 bytes of RR data is interpreted as an
+    EOL. That is what we want to have happen. If there are multiple options in the
+    option field of the IP header, and pad bytes are needed before the next option
+    starts, the other special character NOP ("no operation"), with a value of 1,
+    can be used.
+
+Q3. My test:
+
+src: 22.236.180.216
+dst: 22.236.180.208 (NAT from 192.168.57.73)
+ping -R 22.236.180.208
+RR: 192.168.57.1
+    192.168.57.73
+    22.236.180.4
+    22.236.180.216
+
+* TCPv1 1st Edition
+* Chapter 7. Ping Program
+* 7.3 IP Record Route Option
+
+    The ping program gives us an opportunity to look at the IP record route (RR)
+    option. Most versions of ping provide the -R option that enables the record
+    route feature. It causes ping to set the IP RR option in the outgoing IP
+    datagram (which contains the ICMP echo request message). This causes every
+    router that handles the datagram to add its IP address to a list in the
+    options field. When the datagram reaches the final destination, the list of IP
+    addresses should be copied into the outgoing ICMP echo reply, and all the
+    routers on the return path also add their IP addresses to the list. When ping
+    receives the echo reply it prints the list of IP addresses.
+
+** RR's flaws **
+1. The most router on the Internet disable source routing.
+2. The IP header up to 15 32-bit words (60 bytes). Since the fixed size of the
+   IP header is 20 bytes, and the RR option uses 3 bytes for overhead, this leaves
+   37 bytes (60-20-3) for the list, allowing up to nine IP addresses. 
+
+Q4: After the book:
+   Descriptor 0 is the socket to the client.
+
+Q5: After the book:
+   The problem is that the fifth argument to setsockopt is the pointer to the
+   length, instead of the length. This bug was probably fixed when ANSI C
+   prototypes were first used.
+   As it turns out, the bug is harmless, because as we mentioned, to clear the
+   IP_OPTIONS socket option, we can specify either a null pointer as the fourth
+   argument or a fifth argument (the length) of 0 (p.269 of TCPv2).

@@ -1,0 +1,41 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.04.27.12.12.24;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include	"unp.h"
+
+void
+ipopts_str_cli(FILE *fp, int sockfd)
+{
+	char	sendline[MAXLINE], recvline[MAXLINE];
+
+	while (Fgets(sendline, MAXLINE, fp) != NULL) {
+
+		Writen(sockfd, sendline, strlen(sendline));
+
+		if (Readline(sockfd, recvline, MAXLINE) == 0)
+			err_quit("str_cli: server terminated prematurely");
+
+		Fputs(recvline, stdout);
+	}
+}
+@

@@ -1,0 +1,112 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcun:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2016.04.27.12.41.31;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.04.27.12.38.40;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@# error
+gongcun@@macosx[ipopts-ex]# ./ipopts_tcpcli_main -s 127.0.0.1 127.0.0.1 9886
+connect error: Operation timed out
+
+# On aix
+# on both server and client
+# /usr/sbin/no -p -o nonlocsrcroute=1 -o ipsrcroutesend=1 -o ipsrcrouterecv=1 -o ipsrcrouteforward=1 -o ipforwarding=1
+
+# aix client
+# ./tcpserv01
+received IP options, len = 16
+received LSRR: 192.168.9.241 192.168.9.38 192.168.9.241
+child 40173860 terminated
+
+# aix server
+# ./tcpcli01 -g 192.168.9.38 192.168.9.241 192.168.9.38
+hello
+hello
+
+####
+# roll back
+####
+
+# /usr/sbin/no -p -o nonlocsrcroute=0 -o ipsrcroutesend=0 -o ipsrcrouterecv=0 -o ipsrcrouteforward=0 -o ipforwarding=0
+
+# /usr/sbin/no -L | grep -E -w \
+'(nonlocsrcroute|ipsrcroutesend|ipsrcrouterecv|ipforwarding|routerevalidate)'
+ipforwarding              0      0      0      0      1      boolean           D
+ipsrcrouterecv            0      0      0      0      1      boolean           D
+ipsrcroutesend            0      1      0      0      1      boolean           D
+nonlocsrcroute            0      0      0      0      1      boolean           D
+
+# Test again (success)
+# /usr/sbin/no -p -o nonlocsrcroute=1 -o ipsrcroutesend=1 -o ipsrcrouterecv=1 -o ipsrcrouteforward=1 -o ipforwarding=1
+
+
+# On centos and Ubuntu
+# Close iptables
+sudo /etc/init.d/iptables save
+sudo /etc/init.d/iptables stop
+(or
+sudo cp -p /etc/sysconfig/iptables /etc/sysconfig/iptables.bk
+sudo cp /dev/null /etc/sysconfig/iptables
+sudo service iptables restart
+)
+sudo iptables -L
+
+sudo sysctl -a
+sudo sysctl -w net.ipv4.conf.all.accept_source_route=1
+sudo sysctl -w net.ipv4.conf.all.forwarding=1
+sudo sysctl -w net.ipv4.conf.wlan0.accept_source_route=1
+sudo sysctl -w net.ipv4.conf.wlan0.accept_local=1
+sudo sysctl -w net.ipv4.conf.wlan0.route_localnet=1
+
+(or change the setting of /tmp/sysctl.out
+sudo sysctl -p - </tmp/sysctl.out
+or change the setting of /proc/sys/net/ipv4/conf/ifname???/*)
+
+
+# On macos
+sudo sysctl -a | grep '^net' > /tmp/sysctl.out
+vi /tmp/sysctl.out  
+
+sudo sysctl -w net.inet.ip.forwarding=1
+sudo sysctl -w net.inet.ip.redirect=1
+sudo sysctl -w net.inet.ip.accept_sourceroute=1
+sudo sysctl -w net.inet.ip.sourceroute=1
+
+
+#
+In aix can see the IP addresses, but on Ubuntu and Centos,
+display the option type is 168
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d55 4
+d69 1
+@
