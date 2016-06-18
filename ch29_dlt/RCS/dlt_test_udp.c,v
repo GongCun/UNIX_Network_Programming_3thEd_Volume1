@@ -1,0 +1,126 @@
+head	1.4;
+access;
+symbols;
+locks
+	gongcun:1.4; strict;
+comment	@ * @;
+
+
+1.4
+date	2016.05.22.13.47.56;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.05.22.07.51.15;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.22.01.21.47;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.21.11.58.26;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@#include "udpcksum-ex.h"
+#include <setjmp.h>
+
+static int canjmp = 0;
+static jmp_buf jmpbuf;
+
+/* sends queries and reads responses */
+void dlt_test_udp(void)
+{
+    volatile int isent = 0, timeout = 3;
+
+    if (signal(SIGALRM, dlt_sigalrm) == SIG_ERR)
+        err_sys("signal error");
+
+    if (sigsetjmp(jmpbuf, 1)) {
+        if (isent >= 3)
+            err_quit("no responses");
+        fprintf(stderr, "timeout\n");
+        timeout *= 2; /* 3, 6, 12 */
+    }
+    canjmp = 1;
+    dlt_send_dnsquery();
+    isent++;
+
+    alarm(timeout);
+
+    struct udpiphdr *pui; /* <netinet/udp_var.h>
+                              UDP kernel structures and variables */
+    pui = dlt_udp_read();
+    canjmp = 0;
+    alarm(0);
+
+    if (pui->ui_sum == 0) /* #define ui_sum ui_u.uh_sum */
+        printf("UDP checksums off\n");
+    else
+        printf("UDP checksums on\n");
+
+    printf("received UDP checksum = 0x%x\n", ntohs(pui->ui_sum));
+}
+
+void dlt_sigalrm(int signo)
+{
+    if(canjmp == 0)
+        return;
+    siglongjmp(jmpbuf, 1);
+}
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d35 1
+a35 1
+    else {
+d37 1
+a37 4
+        printf("UDP data length = %d\n", ntohs(pui->ui_ulen)); /* caplen - 14 - 20 */
+        printf("calculate checksum = %d\n",
+                dlt_cksum((uint16_t *)pui, ntohs(pui->ui_ulen)+20));
+    }
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d35 1
+a35 1
+    else
+d37 5
+a41 2
+
+    printf("received UDP checksum = %x\n", ntohs(pui->ui_sum));
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+@

@@ -1,0 +1,38 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.05.21.11.58.26;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "udpcksum-ex.h"
+
+int rawfd;
+
+void dlt_open_raw(void)
+{
+    const int on = 1;
+
+    if ((rawfd = socket(AF_INET, SOCK_RAW, 0)) < 0)
+            err_sys("socket error");
+    if (setsockopt(rawfd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
+        err_sys("setsockopt error");
+}
+
+@

@@ -1,0 +1,238 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.18.01.44.59;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@git clone git@@github.com:intere/hacking
+gcc -Wall -Wextra `libnet-config --defines` -o synflood synflood.c -L/opt/local/lib -lnet
+sudo ./synflood 192.168.0.114 22
+sudo tcpdump -n -l -c 15 -i en0 'host 192.168.0.114 and port 22'
+
+# vctim
+sudo sysctl -w net.ipv4.tcp_syncookies=1
+
+
+# udp cksum test
+gongcun@@macosx[chapter_29]# sudo ./dlt_test_dns 8.8.8.8 domain
+Query to 8.8.8.8:53
+From 192.168.0.103:54146
+send 32 bytes of data
+udp total len = 40
+cksum = 0x4dc7
+ip total len = 60
+local address: 192.168.0.103, len = 16
+dest address: 8.8.8.8, len = 16
+
+gongcun@@macosx[chapter_29]# sudo tcpdump -n -e -vv -i en0 'udp and host 8.8.8.8'
+tcpdump: listening on en0, link-type EN10MB (Ethernet), capture size 65535 bytes
+22:10:29.992436 10:40:f3:86:19:82 > e8:94:f6:be:62:f0, ethertype IPv4 (0x0800), length 74: (tos 0x0, ttl 64, id 53511, offset 0, flags [none], proto UDP (17), length 60)
+    192.168.0.103.54146 > 8.8.8.8.53: [udp sum ok] 1234+ A? www.google.com. (32)
+22:10:30.035408 e8:94:f6:be:62:f0 > 10:40:f3:86:19:82, ethertype IPv4 (0x0800), length 330: (tos 0x0, ttl 48, id 41404, offset 0, flags [none], proto UDP (17), length 316)
+    8.8.8.8.53 > 192.168.0.103.54146: [udp sum ok] 1234 q: A? www.google.com. 16/0/0 www.google.com. A 45.64.20.29, www.google.com. A 45.64.20.49, www.google.com. A 45.64.20.59, www.google.com. A 45.64.20.55, www.google.com. A 45.64.20.20, www.google.com. A 45.64.20.34, www.google.com. A 45.64.20.54, www.google.com. A 45.64.20.30, www.google.com. A 45.64.20.40, www.google.com. A 45.64.20.44, www.google.com. A 45.64.20.45, www.google.com. A 45.64.20.39, www.google.com. A 45.64.20.24, www.google.com. A 45.64.20.50, www.google.com. A 45.64.20.35, www.google.com. A 45.64.20.25 (288)
+^C
+2 packets captured
+102 packets received by filter
+0 packets dropped by kernel
+
+
+gongcun@@macosx[chapter_29]# sudo ./dlt_test_dns 8.8.8.8 domain
+Query to 8.8.8.8:53
+From 192.168.0.103:56281
+send 32 bytes of data
+udp total len = 40
+cksum = 0x0 <<
+ip total len = 60
+local address: 192.168.0.103, len = 16
+dest address: 8.8.8.8, len = 16
+
+gongcun@@macosx[chapter_29]# sudo ./dlt_sniff en0 'udp and host 8.8.8.8'
+en0 net: 192.168.0.0
+en0 mask: 255.255.255.0
+ethernet
+
+Packet number 0:
+2016-05-21 23:07:25.170454
+From 192.168.0.103 to 8.8.8.8
+Src port: 56281, Dst port 53
+data length = 40
+check sum == 0x0 <<
+payload (32 bytes).
+
+Packet number 1:
+2016-05-21 23:07:25.214257
+From 8.8.8.8 to 192.168.0.103
+Src port: 53, Dst port 56281
+data length = 296
+check sum == 0x5b5f <<
+payload (288 bytes).
+
+gongcun@@macosx[chapter_29]# sudo tcpdump -n -e -vv -i en0 'icmp and host 8.8.8.8'                                                       
+tcpdump: listening on en0, link-type EN10MB (Ethernet), capture size 65535 bytes
+23:09:39.440243 10:40:f3:86:19:82 > e8:94:f6:be:62:f0, ethertype IPv4 (0x0800), length 70: (tos 0x0, ttl 64, id 12465, offset 0, flags [none], proto ICMP (1), length 56)
+    192.168.0.103 > 8.8.8.8: ICMP 192.168.0.103 udp port 52630 unreachable, length 36 <<<
+        (tos 0x0, ttl 48, id 60495, offset 0, flags [none], proto UDP (17), length 316)
+    8.8.8.8.53 > 192.168.0.103.52630: [no cksum] [|domain]
+
+gongcun@@macosx[chapter_29]# sudo ./dlt_udpcksum 8.8.8.8 domain en0 0
+Query to 8.8.8.8:53
+From 192.168.0.103:63603
+device = en0
+localnet = 192.168.0.0, netmask = 255.255.255.0
+filtercmd = udp and src host 8.8.8.8 and src port 53
+link type = 1
+send 32 bytes of data
+udp total len = 40
+cksum = 0x0
+ip total len = 60
+local address: 192.168.0.103, len = 16
+dest address: 8.8.8.8, len = 16
+capture protocol: 17
+capture total len: 330
+capture from 8.8.8.8:53 to 192.168.0.103:63603
+UDP checksums on
+received UDP checksum = 0xf863
+
+gongcun@@macosx[chapter_29]# sudo ./dlt_udpcksum 8.8.8.8 domain en0 0
+Query to 8.8.8.8:53
+From 192.168.0.103:62827
+device = en0
+localnet = 192.168.0.0, netmask = 255.255.255.0
+filtercmd = udp and src host 8.8.8.8 and src port 53
+link type = 1
+send 32 bytes of data
+udp total len = 40
+cksum = 0x0
+ip total len = 60
+local address: 192.168.0.103, len = 16
+dest address: 8.8.8.8, len = 16
+capture protocol: 17
+capture total len: 330
+capture UDP cksum = 0x4039
+>> calculate UDP checksum = 0x0
+capture from 8.8.8.8:53 to 192.168.0.103:62827
+UDP checksums on
+received UDP checksum = 0x4039
+gongcun@@macosx[chapter_29]# sudo ./dlt_udpcksum 8.8.8.8 domain en0 1
+Password:
+Query to 8.8.8.8:53
+From 192.168.0.103:52832
+device = en0
+localnet = 192.168.0.0, netmask = 255.255.255.0
+filtercmd = udp and src host 8.8.8.8 and src port 53
+link type = 1
+send 32 bytes of data
+udp total len = 40
+cksum = 0x6fcc
+ip total len = 60
+local address: 192.168.0.103, len = 16
+dest address: 8.8.8.8, len = 16
+capture protocol: 17
+capture total len: 330
+capture UDP cksum = 0x2397
+>> calculate UDP checksum = 0x0
+capture from 8.8.8.8:53 to 192.168.0.103:52832
+UDP checksums on
+received UDP checksum = 0x2397
+
+=======
+gongcun@@macosx[chapter_29]# sudo ./dlt_udpcksum www.google.com 80 en0 0
+Query to 45.64.20.35:80
+From 192.168.0.103:63960
+device = en0
+localnet = 192.168.0.0, netmask = 255.255.255.0
+filtercmd = (icmp and src host 45.64.20.35) or (udp and src host 45.64.20.35 and src port 80)
+link type = 1
+send 32 bytes of data
+udp total len = 40
+cksum = 0x0 <<<
+ip total len = 60
+local address: 192.168.0.103, len = 16
+dest address: 45.64.20.35, len = 16
+capture protocol: 1
+capture total len: 102
+capture ICMP packet
+ICMP port unreachable
+Original from 192.168.0.103 to 45.64.20.35, IP checksum = 0xf9c0
+calculate original IP checksum = 0x0
+capture UDP checksum in ICMP: 0x0 <<<
+Original from 192.168.0.103:63960 to 45.64.20.35:80
+UDP checksums off
+received UDP checksum = 0x0 <<<
+gongcun@@macosx[chapter_29]# sudo ./dlt_udpcksum www.google.com 80 en0 1
+Query to 45.64.20.35:80
+From 192.168.0.103:60109
+device = en0
+localnet = 192.168.0.0, netmask = 255.255.255.0
+filtercmd = (icmp and src host 45.64.20.35) or (udp and src host 45.64.20.35 and src port 80)
+link type = 1
+send 32 bytes of data
+udp total len = 40
+cksum = 0x7e94 <<<
+ip total len = 60
+local address: 192.168.0.103, len = 16
+dest address: 45.64.20.35, len = 16
+capture protocol: 1
+capture total len: 102
+capture ICMP packet
+ICMP port unreachable
+Original from 192.168.0.103 to 45.64.20.35, IP checksum = 0xb2ff
+calculate original IP checksum = 0x0
+capture UDP checksum in ICMP: 0x7e94 <<<
+Original from 192.168.0.103:60109 to 45.64.20.35:80
+UDP checksums on
+received UDP checksum = 0x7e94 <<<
+
+=====
+gongcun@@macosx[chapter_29]# sudo ./dlt_test_tcp 192.168.0.254 www.google.com 80
+
+gongcun@@macosx[chapter_29]# sudo tcpdump -vv -n -i en0 'host www.google.com'
+tcpdump: listening on en0, link-type EN10MB (Ethernet), capture size 65535 bytes
+08:04:17.902691 IP (tos 0x0, ttl 64, id 20705, offset 0, flags [none], proto TCP (6), length 44)
+    192.168.0.254.57680 > 45.64.20.35.80: Flags [S], cksum 0xd35a (correct), seq 0:4, win 4096, length 4
+
+=====
+gongcun@@macosx[chapter_29]# sudo ./dlt_tcp_dnsquery 192.168.0.103 8.8.8.8 domain
+cksum: 0x4f29
+id: 52203
+source port: 60363
+total len: 72
+DNS len: 32
+
+gongcun@@macosx[chapter_29]# sudo tcpdump -vv -n -i en0 'host 8.8.8.8'
+tcpdump: listening on en0, link-type EN10MB (Ethernet), capture size 65535 bytes
+21:48:02.920764 IP (tos 0x0, ttl 64, id 52203, offset 0, flags [none], proto TCP (6), length 72)
+    192.168.0.103.60363 > 8.8.8.8.53: Flags [S], cksum 0x4f29 (correct), seq 0:32, win 4096, length 32256 [b2&3=0x1] [0q] [887au] ar: <ELT 55>[|domain]
+
+sudo ./dlt_tcp_dns 192.168.0.254 8.8.8.8 domain en0 www.google.com | \
+awk '/^>>>/ && $2 ~ /^[0-9]/ {print $2}'
+
+sudo ./dlt_tcp_dns 192.168.0.254 8.8.8.8 domain en0 www.bocmacau.com | \
+awk '/^>>>/ && $2 ~ /^[0-9]/ {print $2}'
+202.99.10.145
+123.124.191.145
+112.64.122.145
+
+#
+while :; do sudo ./x2 202.202.202.202 127.0.0.1 8888;sleep 1;done
+
+#
+sudo ./dlt_sniff en0 'tcp and host 192.168.0.114 and port 23'
+@

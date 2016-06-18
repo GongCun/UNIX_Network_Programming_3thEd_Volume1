@@ -1,0 +1,41 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.05.15.14.15.18;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@include ../Make.defines
+
+LIBNETROOT := /Users/gongcunjust/Develop/libnet
+LIBNETINC := /Users/gongcunjust/Develop/libnet/include
+LIBNETLIB := /Users/gongcunjust/Develop/libnet/src
+
+CFLAGS := ${CFLAGS} -I${LIBNETINC} -I.
+PROGS =	synfloodtest
+
+all:	${PROGS}
+
+# Include special compilation flags from libnet-config program
+synfloodtest:	./synfloodtest.c
+		${CC} ${CFLAGS} -o $@@ $< -L${LIBNETLIB} ${LIBS} $(shell ${LIBNETROOT}/libnet-config --defines --libs) -DHAVE_CONFIG_H
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@

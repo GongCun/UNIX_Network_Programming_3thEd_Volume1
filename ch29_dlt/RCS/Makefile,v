@@ -1,0 +1,210 @@
+head	1.7;
+access;
+symbols;
+locks
+	gongcun:1.7; strict;
+comment	@# @;
+
+
+1.7
+date	2016.05.23.23.45.23;	author gongcun;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2016.05.15.22.52.54;	author gongcun;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2016.05.15.14.02.11;	author gongcun;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2016.05.15.13.13.14;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.05.14.12.20.17;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.14.06.47.26;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.14.06.38.52;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@include ../Make.defines
+
+LIBNETROOT := /Users/gongcunjust/Develop/libnet
+LIBNETINC := ${LIBNETROOT}/include
+LIBNETLIB := ${LIBNETROOT}/src
+LIBNETLIBS := ${LIBNETROOT}/src/libnet.a
+
+LIBPCAPROOT := /Users/gongcunjust/Develop/libpcap-1.1.1
+LIBPCAPINC := ${LIBPCAPROOT}
+LIBPCAPLIB := ${LIBPCAPROOT}
+LIBPCAPLIBS := ${LIBPCAPROOT}/libpcap.a
+
+PROGS =	synfloodtest filtertest a.out
+
+all:	${PROGS}
+
+# Include special linking flags from libnet-config program
+synfloodtest:	./synfloodtest.o
+		${CC} ${CFLAGS} -o $@@ $< ${LIBNETLIBS} ${LIBS}
+
+# Include special compilation flags from libnet-config program
+synfloodtest.o: ./synfloodtest.c
+	${CC} ${CFLAGS} -DHAVE_CONFIG_H $(shell ${LIBNETROOT}/libnet-config --defines --cflags) -I. -I${LIBNETINC} -c -o $@@ $<
+
+# Test libpcap
+filtertest:	./filtertest.c
+		${CC} ${CFLAGS} -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $< ${LIBPCAPLIBS} ${LIBS}
+
+a.out:	./x.c
+		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $< ${LIBPCAPLIBS} ${LIBS}
+
+dlt_sniff:	./dlt_sniff.c
+		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $< ${LIBPCAPLIBS} ${LIBS}
+
+dlt_test_dns:	./dlt_test_dns.c ./dlt_udp_write.c ./dlt_send_dnsquery.c ./dlt_cksum.c ./dlt_open.c
+		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -D_DEBUG -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $^ ${LIBPCAPLIBS} ${LIBS}
+
+dlt_udpcksum:	./dlt_udpcksum.c ./dlt_udp_write.c ./dlt_send_dnsquery.c ./dlt_cksum.c ./dlt_open.c ./dlt_open_pcap.c ./dlt_test_udp.c ./dlt_udp_read.c
+		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -D_DEBUG -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $^ ${LIBPCAPLIBS} ${LIBS}
+
+dlt_test_tcp: dlt_test_tcp.c dlt_cksum.c
+		${CC} ${CFLAGS} -D_DEBUG -o $@@ $^ ${LIBS}
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d13 1
+a13 1
+PROGS =	synfloodtest filtertest
+d29 15
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d4 1
+a4 1
+LIBNETINC := ${LIBNETROOT}/libnet/include
+d17 4
+d22 2
+a23 3
+synfloodtest:	./synfloodtest.c
+		${CC} ${CFLAGS} -DHAVE_CONFIG_H -I. -I${LIBNETINC} -L${LIBNETLIB} -o $@@ $< ${LIBNETLIBS} ${LIBS} $(shell ${LIBNETROOT}/libnet-config --defines)
+
+d25 1
+a25 1
+# Test libpcap compilation
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d4 3
+a6 2
+LIBNETINC := /Users/gongcunjust/Develop/libnet/include
+LIBNETLIB := /Users/gongcunjust/Develop/libnet/src
+d8 6
+a13 2
+CFLAGS := ${CFLAGS} -I${LIBNETINC} -I.
+PROGS =	test
+d18 7
+a24 2
+test:	./test.c
+		${CC} ${CFLAGS} -o $@@ $< -L${LIBNETLIB} -lpcap ${LIBS} $(shell ${LIBNETROOT}/libnet-config --defines --libs) -DHAVE_CONFIG_H
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d3 6
+a8 2
+CFLAGS := ${CFLAGS} -I/opt/local/include -D_DEBUG
+PROGS =	synflood
+d13 2
+a14 2
+synflood:	./synflood.c
+		${CC} ${CFLAGS} -o $@@ $< -L/opt/local/lib -lpcap ${LIBS} $(shell libnet-config --defines --libs --cflags)
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d3 2
+a4 2
+CFLAGS := ${CFLAGS} -I/opt/local/include
+PROGS =	
+a7 7
+udpcksum:	${OBJS}
+		${CC} ${CFLAGS} -o $@@ ${OBJS} -L/opt/local/lib -lpcap ${LIBS}
+
+# Include special linking flags from libnet-config program
+udpcksum-libnet:	${OBJSNET}
+		${CC} ${CFLAGS} -o $@@ ${OBJSNET} -L/opt/local/lib -lpcap ${LIBS} `libnet-config --libs`
+
+d9 2
+a10 2
+senddnsquery-libnet.o:	senddnsquery-libnet.c
+		${CC} ${CFLAGS} `libnet-config --defines --cflags` -c -o $@@ $<
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 2
+a4 3
+OBJS = main.o cleanup.o pcap.o udpcksum.o senddnsquery-raw.o udpread.o udpwrite.o
+OBJSNET = main.o cleanup.o pcap.o udpcksum.o senddnsquery-libnet.o udpread.o
+PROGS =	udpcksum udpcksum-libnet
+d9 1
+a9 1
+		${CC} ${CFLAGS} -o $@@ ${OBJS} -L/usr/local/lib -lpcap ${LIBS}
+d13 1
+a13 1
+		${CC} ${CFLAGS} -o $@@ ${OBJSNET} -L/usr/local/lib -lpcap ${LIBS} `libnet-config --libs`
+@

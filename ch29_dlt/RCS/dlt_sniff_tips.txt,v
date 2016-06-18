@@ -1,0 +1,24 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.18.01.44.33;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@sudo ./dlt_sniff en0 'tcp and host 192.168.0.114 and port 23'
+@

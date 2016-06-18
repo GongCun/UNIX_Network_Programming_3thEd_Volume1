@@ -1,0 +1,266 @@
+head	1.4;
+access;
+symbols;
+locks
+	gongcun:1.4; strict;
+comment	@ * @;
+
+
+1.4
+date	2016.05.23.12.56.23;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.05.21.15.11.52;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.21.13.33.27;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.21.11.58.26;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@#include "udpcksum-ex.h"
+#include <assert.h>
+
+static int byte_order(void)
+{
+    uint32_t i;
+    unsigned char *p;
+
+    i = 0x04030201;
+    p = (unsigned char *)&i;
+    if (*p == 4)
+        return 1; /* BIG */
+    else if (*p == 1)
+        return 0; /* LIT */
+    else
+        return -1;
+} /* no use */
+
+void dlt_udp_write(char *buf, int userlen)
+{
+    struct udpiphdr *pui;
+    struct ip *pip;
+
+    pip = (struct ip *)buf;
+    pui = (struct udpiphdr *)buf;
+    bzero(pui, sizeof(struct udpiphdr)); /* include cksum */
+
+    /* add 8 bytes */
+    pui->ui_len = htons((uint16_t)(userlen + sizeof(struct udphdr))); /* expect 32 + 8 = 40 */
+#if (_DEBUG)
+    printf("udp total len = %d\n", ntohs(pui->ui_len));
+#endif
+    /* add 28 bytes */
+    userlen += sizeof(struct udpiphdr); /* expect 32 + 28 = 60 */
+
+    pui->ui_pr = IPPROTO_UDP;
+    pui->ui_src.s_addr = ((struct sockaddr_in *)local)->sin_addr.s_addr;
+    pui->ui_dst.s_addr = ((struct sockaddr_in *)dest)->sin_addr.s_addr;
+    pui->ui_sport = ((struct sockaddr_in *)local)->sin_port;
+    pui->ui_dport = ((struct sockaddr_in *)dest)->sin_port;
+    pui->ui_ulen = pui->ui_len; /* pseudo UDP header */
+    if (cksum) {
+        if ((pui->ui_sum = dlt_cksum((uint16_t *)pui, userlen)) == 0)
+            pui->ui_sum = 0xffff;
+    } else
+        pui->ui_sum = 0; /* don't check sum */
+#if (_DEBUG)
+    printf("cksum = 0x%x\n", ntohs(pui->ui_sum));
+#endif
+
+    /* fill in rest of IP header */
+    pip->ip_v = IPVERSION;
+    pip->ip_hl = sizeof(struct ip) >> 2; /* /4 */
+    pip->ip_tos = 0; /* type of service */
+#if defined(linux) || defined(__OpenBSD__)
+	pip->ip_len = htons(userlen);	/* network byte order */
+#else
+	pip->ip_len = userlen;			/* host byte order */
+#endif
+    pip->ip_id = 0; /* let IP set this */
+    pip->ip_off = 0; /* frag offset, MF and DF flags */
+    pip->ip_ttl = TTL_OUT;
+
+#if (_DEBUG)
+    printf("ip total len = %d\n", userlen);
+    printf("local address: %s, len = %zd\n", inet_ntoa(((struct sockaddr_in *)local)->sin_addr), sizeof(*local));
+    printf("dest address: %s, len = %zd\n", inet_ntoa(((struct sockaddr_in *)dest)->sin_addr), sizeof(*dest));
+#endif
+    if (sendto(rawfd, buf, userlen, 0, dest, destlen) != userlen)
+        err_sys("sendto error");
+}
+
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d48 1
+a48 1
+    printf("cksum = 0x%x\n", pui->ui_sum);
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d16 2
+a17 2
+        err_quit("Don't know the byte order");
+}
+a23 5
+    /*
+    free(buf);
+    buf = Malloc(128);
+    */
+
+a25 1
+#if 0
+d27 1
+a27 2
+#endif
+    bzero(pui, sizeof(*pui)); /* include cksum */
+d29 1
+a29 1
+    pui->ui_len = htons((uint16_t)(userlen + sizeof(struct udphdr)));
+d31 1
+a31 1
+    printf("ui_len = %d\n", ntohs(pui->ui_len));
+d34 1
+a34 1
+    userlen += sizeof(struct udpiphdr);
+d41 1
+a41 2
+    pui->ui_ulen = pui->ui_len;
+    cksum = 0;
+d48 1
+a48 1
+    printf("cksum = %d\n", pui->ui_sum);
+d55 4
+a58 5
+#if 0
+    if (byte_order()) /* BIG */
+        pip->ip_len = userlen;
+    else
+        pip->ip_len = htons(userlen);
+a59 1
+    pip->ip_len = htons(userlen);
+a63 1
+    printf("rawfd = %d\n", rawfd);
+d65 1
+a65 3
+    char str[64];
+    printf("destlen = %d\n", destlen);
+    printf("userlen = %d\n", userlen);
+a67 7
+#if 0
+    rawfd = socket(dest->sa_family, SOCK_RAW, 0);
+    assert(rawfd >= 0);
+    const int on = 1;
+    if (setsockopt(rawfd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
+        err_sys("setsocketopt error");
+    printf("debug rawfd = %d\n", rawfd);
+a68 2
+#endif
+    printf("now rawfd = %d\n", rawfd);
+a69 1
+    /*if (sendto(rawfd, buf, 28, 0, dest, destlen) != userlen)*/
+a72 54
+
+
+
+#if 0
+void
+dlt_udp_write(char *buf, int userlen)
+{
+	struct udpiphdr		*ui;
+	struct ip			*ip;
+
+		/* 4fill in and checksum UDP header */
+	ip = (struct ip *) buf;
+	ui = (struct udpiphdr *) buf;
+	bzero(ui, sizeof(*ui));
+			/* 8add 8 to userlen for pseudoheader length */
+	ui->ui_len = htons((uint16_t) (sizeof(struct udphdr) + userlen));
+			/* 8then add 28 for IP datagram length */
+	userlen += sizeof(struct udpiphdr);
+
+	ui->ui_pr = IPPROTO_UDP;
+	ui->ui_src.s_addr = ((struct sockaddr_in *) local)->sin_addr.s_addr;
+	ui->ui_dst.s_addr = ((struct sockaddr_in *) dest)->sin_addr.s_addr;
+	ui->ui_sport = ((struct sockaddr_in *) local)->sin_port;
+	ui->ui_dport = ((struct sockaddr_in *) dest)->sin_port;
+	ui->ui_ulen = ui->ui_len;
+#if 0
+	if (zerosum == 0) {
+#if 1	/* change to if 0 for Solaris 2.x, x < 6 */
+		if ( (ui->ui_sum = in_cksum((u_int16_t *) ui, userlen)) == 0)
+			ui->ui_sum = 0xffff;
+#else
+		ui->ui_sum = ui->ui_len;
+#endif
+	}
+#endif
+
+		/* 4fill in rest of IP header; */
+		/* 4ip_output() calcuates & stores IP header checksum */
+	ip->ip_v = IPVERSION;
+	ip->ip_hl = sizeof(struct ip) >> 2;
+	ip->ip_tos = 0;
+#if defined(linux) || defined(__OpenBSD__)
+	ip->ip_len = htons(userlen);	/* network byte order */
+#else
+	ip->ip_len = userlen;			/* host byte order */
+#endif
+	ip->ip_id = 0;			/* let IP set this */
+	ip->ip_off = 0;			/* frag offset, MF and DF flags */
+	ip->ip_ttl = TTL_OUT;
+
+	Sendto(rawfd, buf, userlen, 0, dest, destlen);
+}
+/* end udp_write */
+#endif
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+d24 5
+d37 3
+d49 1
+d55 3
+d63 1
+d68 2
+d76 1
+d79 10
+d90 1
+d92 1
+d98 52
+@

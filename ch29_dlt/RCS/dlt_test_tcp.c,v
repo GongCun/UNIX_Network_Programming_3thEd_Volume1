@@ -1,0 +1,839 @@
+head	1.12;
+access;
+symbols;
+locks
+	gongcun:1.12; strict;
+comment	@ * @;
+
+
+1.12
+date	2016.05.27.05.10.27;	author gongcun;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2016.05.26.14.58.18;	author gongcun;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2016.05.26.13.57.24;	author gongcun;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2016.05.26.13.53.29;	author gongcun;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2016.05.26.13.49.57;	author gongcun;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2016.05.26.13.31.49;	author gongcun;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2016.05.26.12.38.48;	author gongcun;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2016.05.25.23.44.12;	author gongcun;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2016.05.25.14.36.27;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.05.25.12.34.49;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.24.12.44.28;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.24.00.14.16;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.12
+log
+@*** empty log message ***
+@
+text
+@#include "unp.h"
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <libgen.h>
+#include <pcap.h>
+#if (AIX)
+#include <net/bpf.h>
+#endif
+#include <assert.h>
+
+#define SNAPLEN 1514 /* max packet size */
+#define TO_MS 1000
+
+char *device;
+pcap_t *ppt;
+int linktype;
+int rawfd;
+
+struct pseudo_tcphdr {
+    struct in_addr ip_src, ip_dst;
+    u_char pad, ip_p;
+    u_short tcp_len;
+    struct tcphdr tcphdr;
+    u_char data[576]; /* guarantee the host will receive,
+                         will not be truncated */
+};
+
+extern uint16_t dlt_cksum(uint16_t *addr, int len);
+
+void dlt_tcp_push(const u_char *);
+void dlt_tcp_fin(const u_char *);
+void dlt_tcp_ack(const u_char *);
+void dlt_tcp_pcap(struct sockaddr *);
+void dlt_handler(u_char *, const struct pcap_pkthdr *, const u_char *);
+void dlt_encap_ip(u_char *buf, int userlen, struct in_addr src, struct in_addr dst, u_short sport, u_short dport, u_char flags, uint32_t seq, uint32_t ack);
+
+int main(int argc ,char *argv[])
+{
+    const int on = 1;
+    char buf[576];
+
+    if (argc != 5)
+        err_quit("Usage: %s <srcIP> <host> <service> <device>", basename(argv[0]));
+
+    device = argv[4];
+
+    struct addrinfo *res, hint;
+    int ret;
+    struct sockaddr *servaddr;
+    bzero(&hint, sizeof(struct addrinfo));
+    hint.ai_flags = AI_CANONNAME;
+    hint.ai_family = AF_INET;
+    hint.ai_socktype = SOCK_STREAM;
+    if ((ret = getaddrinfo(argv[2], argv[3], &hint, &res)) != 0)
+        err_quit("getaddrinfo error: %s", gai_strerror(ret));
+
+    servaddr = res->ai_addr;
+
+    if ((rawfd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP)) < 0)
+        err_sys("socket error");
+    if (setsockopt(rawfd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
+        err_sys("setsockopt error");
+
+    bzero(buf, sizeof(buf));
+
+	struct in_addr src;
+	if (inet_pton(AF_INET, argv[1], &src) != 1)
+		err_sys("inet_pton error");
+
+	dlt_encap_ip((u_char *)buf, 0, src, ((struct sockaddr_in *)res->ai_addr)->sin_addr,
+			htons((getpid() & 0xffff) | 0x8000), ((struct sockaddr_in *)servaddr)->sin_port,
+			TH_SYN, 0, 0);
+
+    if (sendto(rawfd, buf, 44, 0, res->ai_addr, res->ai_addrlen) < 0)
+        err_sys("sendto error");
+
+    dlt_tcp_pcap(res->ai_addr);
+
+    freeaddrinfo(res);
+    return 0;
+}
+
+
+void dlt_tcp_pcap(struct sockaddr *dest)
+{
+    char errbuf[PCAP_ERRBUF_SIZE];
+
+    bzero(errbuf, sizeof(errbuf));
+    assert(device != NULL);
+
+    bzero(errbuf, sizeof(errbuf));
+    if ((ppt = pcap_open_live(device, SNAPLEN, 1, TO_MS, errbuf)) == NULL) /* 1514 bytes, non-promiscuous mode, timeout = 1000 ms */ 
+        err_quit("pcap_open_live error: %s", errbuf);
+    if (strlen(errbuf) != 0)
+        fprintf(stderr, "pcap_open_live warning: %s", errbuf);
+
+    bpf_u_int32 localnet, netmask;
+    bzero(errbuf, sizeof(errbuf));
+    if (pcap_lookupnet(device, &localnet, &netmask, errbuf) < 0)
+        err_quit("pcap_loopupnet error: %s", errbuf);
+
+    char str1[64], str2[64];
+    int srcport;
+    char srchost[64];
+    if (inet_ntop(AF_INET, &localnet, str1, sizeof(str1)) == NULL)
+        err_sys("inet_ntop error");
+    printf("localnet = %s, ", str1);
+    if (inet_ntop(AF_INET, &netmask, str2, sizeof(str2)) == NULL)
+        err_sys("inet_ntop error");
+    printf("netmask = %s\n", str2);
+
+    char filtercmd[MAXLINE];
+    if (inet_ntop(AF_INET, &((struct sockaddr_in *)dest)->sin_addr, srchost, sizeof(srchost)) == NULL)
+        err_sys("inet_ntop error");
+    srcport = ntohs(((struct sockaddr_in *)dest)->sin_port);
+    snprintf(filtercmd, sizeof(filtercmd),
+            "tcp and src host %s and src port %d",
+            srchost, srcport);
+    printf("filtercmd = %s\n", filtercmd);
+
+    struct bpf_program bpCode;
+    if (pcap_compile(ppt, &bpCode, filtercmd, 0, netmask) < 0)
+        err_quit("pcap_compile error: %s", pcap_geterr(ppt));
+
+    if (pcap_setfilter(ppt, &bpCode) < 0)
+        err_quit("pcap_setfilter eror: %s", pcap_geterr(ppt));
+
+    if ((linktype = pcap_datalink(ppt)) < 0)
+        err_quit("pcap_datalink error: %s", pcap_geterr(ppt));
+
+    if (pcap_loop(ppt, 4, &dlt_handler, NULL) == -1)
+        err_quit("pcap_loop error: %s", pcap_geterr(ppt));
+
+    pcap_freecode(&bpCode);
+    pcap_close(ppt);
+}
+
+void dlt_tcp_push(const u_char *packet)
+{
+    char buf[576], *ptr;
+    int size_eth, userlen = 0;
+    const struct ip *precv;
+    const struct tcphdr *precvtcp;
+
+	if (linktype == 0)
+		size_eth = 4;
+	else if (linktype == 1)
+		size_eth = 14;
+	else
+		err_quit("unknown linktype: %d", linktype);
+
+    precv = (struct ip *)(packet + size_eth);
+	precvtcp = (struct tcphdr *)(packet + size_eth + precv->ip_hl * 4);
+
+    struct sockaddr_in servaddr;
+    servaddr.sin_addr = precv->ip_src;
+    servaddr.sin_family = AF_INET;
+
+	dlt_encap_ip((u_char *)buf, userlen, precv->ip_dst, precv->ip_src, precvtcp->th_dport, precvtcp->th_sport, 
+			TH_ACK, htonl(ntohl(precvtcp->th_ack)), htonl(ntohl(precvtcp->th_seq) + 1));
+
+    if (sendto(rawfd, buf, 44 + userlen, 0, (struct sockaddr *)&servaddr, sizeof(struct sockaddr_in)) < 0)
+        err_sys("send error");
+
+	ptr = buf + 44;
+	strncpy(ptr, "just test\n", sizeof(buf) - 44);
+	userlen = strlen(ptr);
+#if (_DEBUG)
+	printf("string = %s\n", ptr);
+	printf("userlen = %d\n", userlen);
+#endif
+	dlt_encap_ip((u_char *)buf, userlen, precv->ip_dst, precv->ip_src, precvtcp->th_dport, precvtcp->th_sport, 
+			(TH_ACK|TH_PUSH), htonl(ntohl(precvtcp->th_ack)), htonl(ntohl(precvtcp->th_seq) + 1));
+
+    if (sendto(rawfd, buf, 44 + strlen(ptr), 0, (struct sockaddr *)&servaddr, sizeof(struct sockaddr_in)) < 0)
+        err_sys("send error");
+
+}
+
+void dlt_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
+{
+    static int count = 0;
+    if (count++ == 0)
+        dlt_tcp_push(packet);
+    /*
+    else if (count++ == 1)
+        dlt_tcp_fin(packet);*/
+    else
+        dlt_tcp_fin(packet);
+    return;
+}
+
+void dlt_encap_ip(u_char *buf, int userlen, struct in_addr src, struct in_addr dst, u_short sport, u_short dport, u_char flags, uint32_t seq, uint32_t ack)
+{
+	struct ip *pip;
+	static int count = 0;
+	bzero(buf, 44); /* hardcode, IP header + TCP header */
+
+    pip = (struct ip *)buf;
+    pip->ip_hl = 5; /* 5<<2 = 20 bytes */
+    pip->ip_v = IPVERSION; /* IPv4 */
+    pip->ip_tos = 0;
+#if defined(linux) || defined(__OpenBSD__)
+    pip->ip_len = htons(44 + userlen);
+#else
+    pip->ip_len = 44 + userlen;
+#endif
+    pip->ip_id = htons((u_short) (time(0) + count++) & 0xffff); /* id is 16 bits */
+    pip->ip_off = IP_DF; /* Don't Fragment */
+    pip->ip_ttl = 64;
+    pip->ip_p = IPPROTO_TCP;
+    pip->ip_src.s_addr = src.s_addr;
+    pip->ip_dst.s_addr = dst.s_addr;
+    pip->ip_sum = dlt_cksum((uint16_t *)pip, 20); /* IP checksum
+                                                     only include
+                                                     the header */
+    /*
+     * TCP header
+     */
+    struct tcphdr *ptcp;
+    ptcp = (struct tcphdr *)(buf + 20);
+    ptcp->th_sport = sport;
+    ptcp->th_dport = dport;
+    ptcp->th_seq = seq;
+    ptcp->th_ack = ack;
+    ptcp->th_off = 6; /* header length: (5 base + 1 opt) * 4 */
+    ptcp->th_flags = flags;
+    ptcp->th_urp = 0; /* urgent pointer */
+    ptcp->th_win = htons(65535); /* default */
+    ptcp->th_sum = 0; /* calculate later */
+
+    /* MSS TCP option */
+    u_char *ptr;
+    ptr = buf + 40;
+    *ptr++ = 2;
+    *ptr++ = 4;
+    *((u_short *)ptr) = htons(1460);
+
+
+    /* now TCP checksum */
+    struct pseudo_tcphdr pkt;
+    pkt.ip_src = pip->ip_src;
+    pkt.ip_dst = pip->ip_dst;
+    pkt.pad = 0;
+    pkt.ip_p = IPPROTO_TCP;
+    pkt.tcp_len = htons(24 + userlen); /* must by network order */
+    pkt.tcphdr = *ptcp;
+    bzero(pkt.data, sizeof(pkt.data));
+    memmove(pkt.data, buf + 40, 4 + userlen); /* 4 for TCP option length */
+#if (_DEBUG)
+	if (userlen != 0)
+		printf("userdata = %s", buf + 44);
+#endif
+    ptcp->th_sum = dlt_cksum((uint16_t *)&pkt, 12 + 24 + userlen); /* pseudo tcphdr size (12) + 
+																	  tcphdr size (24) + userdata size */
+#if (_DEBUG)
+    printf("id: %d\n", ntohs(pip->ip_id));
+    printf("cksum: 0x%x\n", ntohs(ptcp->th_sum));
+    printf("source port: %d\n", ntohs(ptcp->th_sport));
+    printf("dest port: %d\n", ntohs(ptcp->th_dport));
+	printf("seq: %u\n", ntohl(ptcp->th_seq));
+	printf("ack: %u\n", ntohl(ptcp->th_ack));
+#endif
+
+	return;
+}
+
+
+void dlt_tcp_fin(const u_char *packet)
+{
+    u_char buf[576];
+    const u_char *ptr;
+    int size_eth, userlen = 0;
+    const struct ip *precv;
+    const struct tcphdr *precvtcp;
+
+	if (linktype == 0)
+		size_eth = 4;
+	else if (linktype == 1)
+		size_eth = 14;
+	else
+		err_quit("unknown linktype: %d", linktype);
+
+    precv = (struct ip *)(packet + size_eth);
+	precvtcp = (struct tcphdr *)(packet + size_eth + precv->ip_hl * 4);
+    ptr = packet + size_eth + precv->ip_hl * 4 + 13; /* flags */
+    if ((*ptr) & 0x10)
+        printf("received ACK\n");
+
+    struct sockaddr_in servaddr;
+    servaddr.sin_addr = precv->ip_src;
+    servaddr.sin_family = AF_INET;
+
+	dlt_encap_ip(buf, userlen, precv->ip_dst, precv->ip_src, precvtcp->th_dport, precvtcp->th_sport, 
+			(TH_ACK|TH_FIN), htonl(ntohl(precvtcp->th_ack)), htonl(ntohl(precvtcp->th_seq) + 1));
+
+    if (sendto(rawfd, buf, 44 + userlen, 0, (struct sockaddr *)&servaddr, sizeof(struct sockaddr_in)) < 0)
+        err_sys("send error");
+
+}
+
+void dlt_tcp_ack(const u_char *packet)
+{
+    u_char buf[576];
+    const u_char *ptr;
+    int size_eth, userlen = 0;
+    const struct ip *precv;
+    const struct tcphdr *precvtcp;
+
+	if (linktype == 0)
+		size_eth = 4;
+	else if (linktype == 1)
+		size_eth = 14;
+	else
+		err_quit("unknown linktype: %d", linktype);
+
+    precv = (struct ip *)(packet + size_eth);
+	precvtcp = (struct tcphdr *)(packet + size_eth + precv->ip_hl * 4);
+    ptr = packet + size_eth + precv->ip_hl * 4 + 13; /* flags */
+    if ((*ptr) & 0x01)
+        printf("received FIN\n");
+
+    struct sockaddr_in servaddr;
+    servaddr.sin_addr = precv->ip_src;
+    servaddr.sin_family = AF_INET;
+
+	dlt_encap_ip(buf, userlen, precv->ip_dst, precv->ip_src, precvtcp->th_dport, precvtcp->th_sport, 
+			TH_ACK, htonl(ntohl(precvtcp->th_ack)), htonl(ntohl(precvtcp->th_seq) + 1));
+
+    if (sendto(rawfd, buf, 44 + userlen, 0, (struct sockaddr *)&servaddr, sizeof(struct sockaddr_in)) < 0)
+        err_sys("send error");
+
+}
+@
+
+
+1.11
+log
+@*** empty log message ***
+@
+text
+@d30 2
+d131 1
+a131 1
+    if (pcap_loop(ppt, 1, &dlt_handler, NULL) == -1)
+d138 1
+a138 1
+void dlt_tcp_ack(const u_char *packet)
+d182 8
+a189 1
+    dlt_tcp_ack(packet);
+d267 67
+@
+
+
+1.10
+log
+@*** empty log message ***
+@
+text
+@d167 2
+a168 1
+	printf("string = %s, userlen = %d\n", ptr, userlen);
+d243 1
+a243 1
+		printf("userdata = %s\n", buf + 44);
+@
+
+
+1.9
+log
+@*** empty log message ***
+@
+text
+@d164 1
+a164 1
+	strncpy(ptr, "test", sizeof(buf) - 44);
+d170 1
+a170 1
+			TH_PUSH, htonl(ntohl(precvtcp->th_ack)), htonl(ntohl(precvtcp->th_seq) + 1));
+@
+
+
+1.8
+log
+@*** empty log message ***
+@
+text
+@d223 5
+a227 10
+    struct mss {
+        u_char type;
+        u_char len;
+        u_short val;
+    };
+    struct mss *ptr;
+    ptr = (struct mss *)(buf + 40);
+    ptr->type = 2;
+    ptr->len = 4;
+    ptr->val = htons(1460);
+d239 1
+a239 1
+    memmove(pkt.data, buf + 40, 4 + userlen);
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d244 1
+a244 2
+	if (userlen != 0) {
+		memmove(pkt.data, buf + 44, userlen);
+d246 1
+a248 1
+	}
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d33 1
+a33 1
+void dlt_encap_ip(char *buf, int userlen, struct in_addr src, struct in_addr dst, u_short sport, u_short dport, u_char flags, uint32_t seq, uint32_t ack);
+d68 1
+a68 1
+	dlt_encap_ip(buf, 0, src, ((struct sockaddr_in *)res->ai_addr)->sin_addr,
+d72 1
+a72 1
+    if (sendto(rawfd, buf, 40, 0, res->ai_addr, res->ai_addrlen) < 0)
+d157 1
+a157 1
+	dlt_encap_ip(buf, userlen, precv->ip_dst, precv->ip_src, precvtcp->th_dport, precvtcp->th_sport, 
+d160 1
+a160 1
+    if (sendto(rawfd, buf, 40 + userlen, 0, (struct sockaddr *)&servaddr, sizeof(struct sockaddr_in)) < 0)
+d163 2
+a164 2
+	ptr = buf + 40;
+	strncpy(ptr, "test", sizeof(buf) - 40);
+d169 1
+a169 1
+	dlt_encap_ip(buf, userlen, precv->ip_dst, precv->ip_src, precvtcp->th_dport, precvtcp->th_sport, 
+d172 1
+a172 1
+    if (sendto(rawfd, buf, 40 + strlen(ptr), 0, (struct sockaddr *)&servaddr, sizeof(struct sockaddr_in)) < 0)
+d183 1
+a183 1
+void dlt_encap_ip(char *buf, int userlen, struct in_addr src, struct in_addr dst, u_short sport, u_short dport, u_char flags, uint32_t seq, uint32_t ack)
+d187 1
+a187 1
+	bzero(buf, 40); /* hardcode, IP header + TCP header */
+d194 1
+a194 1
+    pip->ip_len = htons(40 + userlen);
+d196 1
+a196 1
+    pip->ip_len = 40 + userlen;
+d216 1
+a216 1
+    ptcp->th_off = 5; /* header length: 5<<2 = 20 */
+d222 13
+d241 1
+a241 1
+    pkt.tcp_len = htons(20 + userlen); /* must by network order */
+d245 1
+a245 1
+		memmove(pkt.data, buf + 40, userlen);
+d247 1
+a247 1
+		printf("userdata = %s\n", buf + 40);
+d250 2
+a251 2
+    ptcp->th_sum = dlt_cksum((uint16_t *)&pkt, 12 + 20 + userlen); /* pseudo tcphdr size (12) + 
+																	  tcphdr size (20) + userdata size */
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d6 3
+d33 1
+d64 7
+a70 53
+    struct ip *pip;
+    pip = (struct ip *)buf;
+    pip->ip_hl = 5; /* 5<<2 = 20 bytes */
+    pip->ip_v = IPVERSION; /* IPv4 */
+    pip->ip_tos = 0;
+#if defined(linux) || defined(__OpenBSD__)
+    pip->ip_len = htons(40);
+#else
+    pip->ip_len = 40;
+#endif
+    pip->ip_id = htons((u_short) time(0) & 0xffff); /* id is 16 bits */
+    pip->ip_off = IP_DF; /* Don't Fragment */
+    pip->ip_ttl = 64;
+    pip->ip_p = IPPROTO_TCP;
+    if (inet_pton(AF_INET, argv[1], &pip->ip_src) != 1)
+        err_quit("inet_pton source IP error");
+    pip->ip_dst.s_addr = ((struct sockaddr_in *)servaddr)->sin_addr.s_addr;
+    pip->ip_sum = dlt_cksum((uint16_t *)pip, 20); /* IP checksum
+                                                     only include
+                                                     the header */
+    /*
+     * TCP header
+     */
+    struct tcphdr *ptcp;
+    ptcp = (struct tcphdr *)(buf + 20);
+    ptcp->th_sport = htons((getpid() & 0xffff) | 0x8000);
+    ptcp->th_dport = ((struct sockaddr_in *)servaddr)->sin_port;
+    ptcp->th_seq = 0;
+    ptcp->th_ack = 0; /* initial ack no use */
+    ptcp->th_off = 5; /* header length: 5<<2 = 20 */
+    ptcp->th_flags = TH_SYN;
+    ptcp->th_urp = 0; /* urgent pointer */
+    ptcp->th_win = htons(65535); /* default */
+    ptcp->th_sum = 0; /* calculate later */
+
+    /* now TCP checksum */
+    struct pseudo_tcphdr pkt;
+    pkt.ip_src = pip->ip_src;
+    pkt.ip_dst = pip->ip_dst;
+    pkt.pad = 0;
+    pkt.ip_p = IPPROTO_TCP;
+    pkt.tcp_len = htons(20); /* must by network order */
+    pkt.tcphdr = *ptcp;
+    bzero(pkt.data, sizeof(pkt.data));
+    ptcp->th_sum = dlt_cksum((uint16_t *)&pkt,
+            12 + 20); /* pseudo tcphdr size (12) +
+                         tcphdr size (20) + userdata size (0) */
+
+#if (_DEBUG)
+    printf("cksum: 0x%x\n", ntohs(ptcp->th_sum));
+    printf("id: %d\n", ntohs(pip->ip_id));
+    printf("source port: %d\n", ntohs(ptcp->th_sport));
+#endif
+d138 2
+a139 3
+    char buf[576];
+    int size_eth = 14;
+    struct ip *pip;
+d141 9
+d151 37
+d190 2
+a191 2
+    pip->ip_hl = 5;
+    pip->ip_v = IPVERSION;
+d194 1
+a194 1
+    pip->ip_len = htons(40);
+d196 1
+a196 1
+    pip->ip_len = 40;
+d198 2
+a199 2
+    pip->ip_id = htons((u_short) time(0) & 0xffff); /* id is 16 bits */
+    pip->ip_off = IP_DF;
+d202 8
+a209 5
+
+    /* swap the address and port */
+    pip->ip_src = precv->ip_dst;
+    pip->ip_dst = precv->ip_src;
+
+a210 2
+    const struct tcphdr *ptcprecv;
+    ptcprecv = (struct tcphdr *)(packet + size_eth + precv->ip_hl*4);
+d212 9
+a220 10
+    ptcp->th_sport = ptcprecv->th_dport;
+    ptcp->th_dport = ptcprecv->th_sport;
+    ptcp->th_seq = htonl(ntohl(ptcprecv->th_ack));
+    ptcp->th_ack = htonl(ntohl(ptcprecv->th_seq)+1);
+    printf("Seq %u, Ack %u\n", ntohl(ptcp->th_seq), ntohl(ptcp->th_ack));
+    ptcp->th_off = 5; /* 20 bytes */
+    ptcp->th_flags = TH_ACK;
+    ptcp->th_urp = 0;
+    ptcp->th_win = htons(65535);
+    ptcp->th_sum = 0;
+d228 1
+a228 1
+    pkt.tcp_len = htons(20); /* must by network order */
+d231 8
+a238 4
+    ptcp->th_sum = dlt_cksum((uint16_t *)&pkt,
+            12 + 20); /* pseudo tcphdr size (12) +
+                         tcphdr size (20) + userdata size (0) */
+
+d240 1
+a241 1
+    printf("id: %d\n", ntohs(pip->ip_id));
+d244 2
+d248 1
+a248 6
+    struct sockaddr_in servaddr;
+    servaddr.sin_addr = pip->ip_dst;
+    servaddr.sin_family = AF_INET;
+
+    if (sendto(rawfd, buf, 40, 0, (struct sockaddr *)&servaddr, sizeof(struct sockaddr_in)) < 0)
+        err_sys("send error");
+a249 24
+
+void dlt_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
+{
+    const struct ip *pip;
+    const struct tcphdr *ptcp;
+    int size_eth, size_ip;
+
+    if (linktype == 0)
+        size_eth = 4;
+    else if (linktype == 1)
+        size_eth = 14;
+    else
+        err_quit("unknown linktype: %d", linktype);
+
+    pip = (struct ip *)(packet + size_eth);
+#if 0
+    size_ip = pip->ip_hl * 4;
+    ptcp = (struct tcphdr *)(packet + size_eth + size_ip);
+	printf("Src port: %d, Dst port %d\n", ntohs(ptcp->th_sport), ntohs(ptcp->th_dport));
+#endif
+    dlt_tcp_ack(packet);
+    return;
+}
+
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d27 1
+a27 1
+void dlt_tcp_ack(const struct ip *);
+d168 1
+a168 1
+    if ((linktype = pcap_datalink(ppt)) < 0 || linktype == PCAP_ERROR_NOT_ACTIVATED)
+a169 6
+}
+
+const u_char *dlt_tcp_next(int *len)
+{
+    const u_char *ptr;
+    struct pcap_pkthdr *hdr;
+d171 2
+a172 2
+    if ((ptr = malloc(SNAPLEN)) == NULL)
+        err_sys("malloc error");
+d174 2
+a175 11
+    /* keep looping until packet ready */
+    while (pcap_next_ex(ppt, &hdr, &ptr) != 1)
+        ;
+    *len = hdr->caplen;
+#if (_DEBUG)
+    const struct ip *pip = (struct ip *)(ptr +14);
+    printf("dlt_tcp_next src: %s\n", inet_ntoa(pip->ip_src));
+    const struct tcphdr *ptcp = (struct tcphdr *)(ptr + pip->ip_hl*4);
+    printf("dlt_tcp_next sport: %d\n", ntohs(ptcp->th_sport));
+#endif
+    return ptr;
+d178 1
+a178 1
+void dlt_tcp_ack(const struct ip *precv)
+d181 1
+d183 3
+d206 1
+a206 1
+    ptcprecv = (struct tcphdr *)(precv + precv->ip_hl*4);
+d210 3
+a212 2
+    ptcp->th_seq = htonl((uint32_t)time(0));
+    ptcp->th_ack = htonl(ntohl(ptcprecv->th_ack)+1);
+d246 24
+a269 1
+    
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d5 10
+d27 4
+a32 1
+    int rawfd;
+d36 4
+a39 2
+    if (argc != 4)
+        err_quit("Usage: %s <srcIP> <host> <service>", basename(argv[0]));
+d70 2
+a71 2
+    pip->ip_id = getpid() & 0xffff; /* id is 16 bits */
+    pip->ip_off = 0; /* Don't Fragment */
+d92 1
+a92 1
+    ptcp->th_win = htons(4096); /* default */
+d116 3
+d124 133
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d21 1
+a21 1
+    char buf[576], *ptr;
+a43 3
+    ptr = buf + 20 + 20; /* hardcode:
+                            IP header size + TCP header size */
+    strncpy(ptr, "test", sizeof(buf)-40);
+d51 1
+a51 1
+    pip->ip_len = htons(20 + 20 + strlen(ptr));
+d53 1
+a53 1
+    pip->ip_len = 20 + 20 + strlen(ptr);
+d86 1
+a86 2
+    pkt.tcp_len = htons(20 + strlen(ptr)); /* must by
+                                              network order */
+d88 1
+a88 1
+    memmove(pkt.data, ptr, strlen(ptr));
+d90 2
+a91 3
+            12 + 20 + strlen(ptr)); /* pseudo tcphdr size (12) +
+                                       tcphdr size (20) +
+                                       userdata size */
+d99 1
+a99 1
+    if (sendto(rawfd, buf, 20+20+strlen(ptr), 0, res->ai_addr, res->ai_addrlen) < 0)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d76 1
+d99 3
+a101 1
+    printf("cksum 0x%x\n", ntohs(ptcp->th_sum));
+@

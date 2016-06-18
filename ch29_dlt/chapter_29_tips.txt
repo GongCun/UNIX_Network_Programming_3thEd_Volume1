@@ -1,0 +1,15 @@
+#-+- Tcpdump -+-
+sudo tcpdump -n -e -vv -i en0 'udp and host 8.8.8.8'
+
+#-+- Test send dns packet by tcp -+-
+sudo ./dlt_test_dns 8.8.8.8 domain
+
+#-+- Test sniffer and capture data to record.cap -+-
+sudo ./dlt_sniff en0 'tcp and host 192.168.0.114 and port 23'
+
+#-+- UDP cksum test -+-
+sudo ./dlt_udpcksum 8.8.8.8 domain en0 0
+
+#-+- Test send DNS packet and get reponse by TCP -+-
+arp -s 192.168.0.254 *ether_addr* pub
+sudo ./dlt_tcp_dns 192.168.0.254 8.8.8.8 domain en0 www.bocmacau.com

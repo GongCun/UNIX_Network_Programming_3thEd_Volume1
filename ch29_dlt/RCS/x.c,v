@@ -1,0 +1,80 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.05.23.12.33.12;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "udpcksum-ex.h"
+#include <setjmp.h>
+
+static jmp_buf jb;
+
+static int byte_order(void)
+{
+    uint32_t i;
+    unsigned char *p;
+
+    i = 0x04030201;
+    p = (unsigned char *)&i;
+    if (*p == 4)
+        return 1; /* BIG */
+    else if (*p == 1)
+        return 0; /* LIT */
+    else
+        err_quit("Don't know the byte order");
+}
+
+int main(int argc, char *argv[])
+{
+
+    int i;
+    printf("argc = %d\n", argc);
+    for (i=1; i<argc; i++)
+        printf("argv[%d] = %s\n", i, argv[i]);
+
+    if (byte_order())
+        printf("big\n");
+    else
+        printf("lit\n");
+
+    char buf[PCAP_ERRBUF_SIZE];
+    strncpy(buf, "a", 1);
+    printf("len = %zd\n", strlen(buf));
+    bzero(buf, sizeof(buf));
+    printf("len = %zd\n", strlen(buf));
+
+    volatile int a = 0;
+    if (setjmp(jb) != 0) {
+        printf("after jmp a = %d\n", a);
+        exit(1);
+    }
+
+    a = 99;
+    printf("before jmp a = %d\n", a);
+    printf("size of in_addr = %zd\n", sizeof(struct in_addr));
+    printf("size of u_char = %zd\n", sizeof(u_char));
+    printf("size of unsigned char = %zd\n", sizeof(unsigned char));
+    printf("size of u_short = %zd\n", sizeof(u_short));
+
+    longjmp(jb, 1);
+
+    return 0;
+}
+@

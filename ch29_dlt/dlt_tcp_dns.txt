@@ -1,0 +1,79 @@
+# tcpdump out put:
+# tcpdump -l -n -vv -i en1 'host 22.236.180.220' | tee ./dlt_test_tcp.tcpdump
+#
+09:33:08.777689 IP (tos 0x0, ttl  64, id 41940, offset 0, flags [DF], proto: TCP (6), length: 44) 22.236.180.254.32930 > 22.236.180.220.9877: S, cksum 0x593c (correct) 0:0(0) win 65535 <mss 1460>
+09:33:08.783994 IP (tos 0x0, ttl  60, id 39582, offset 0, flags [DF], proto: TCP (6), length: 48) 22.236.180.220.9877 > 22.236.180.254.32930: S, cksum 0x740f (correct) 125946245:125946245(0) ack 1 win 65535 <mss 1460,nop,opt-14:03>
+09:33:08.784104 IP (tos 0x0, ttl  64, id 41941, offset 0, flags [DF], proto: TCP (6), length: 44) 22.236.180.254.32930 > 22.236.180.220.9877: ., cksum 0x8825 (correct) 1:1(0) ack 1 win 65535 <mss 1460>
+09:33:08.784204 IP (tos 0x0, ttl  64, id 41942, offset 0, flags [DF], proto: TCP (6), length: 54) 22.236.180.254.32930 > 22.236.180.220.9877: P, cksum 0xb037 (correct) 1:11(10) ack 1 win 65535 <mss 1460>
+09:33:08.814370 IP (tos 0x0, ttl  60, id 39584, offset 0, flags [DF], proto: TCP (6), length: 50) 22.236.180.220.9877 > 22.236.180.254.32930: P, cksum 0xc7e9 (correct) 1:11(10) ack 11 win 65535
+09:33:08.814498 IP (tos 0x0, ttl  64, id 41943, offset 0, flags [DF], proto: TCP (6), length: 44) 22.236.180.254.32930 > 22.236.180.220.9877: F, cksum 0x8819 (correct) 11:11(0) ack 2 win 65535 <mss 1460>
+09:33:08.814631 IP (tos 0x0, ttl  60, id 39586, offset 0, flags [DF], proto: TCP (6), length: 40) 22.236.180.220.9877 > 22.236.180.254.32930: ., cksum 0x9fcc (correct) 11:11(0) ack 12 win 65535
+09:33:08.814673 IP (tos 0x0, ttl  60, id 39587, offset 0, flags [DF], proto: TCP (6), length: 40) 22.236.180.220.9877 > 22.236.180.254.32930: F, cksum 0x9fcb (correct) 11:11(0) ack 12 win 65535
+09:33:08.815129 IP (tos 0x0, ttl  64, id 41944, offset 0, flags [DF], proto: TCP (6), length: 44) 22.236.180.254.32930 > 22.236.180.220.9877: ., cksum 0x880f (correct) 12:12(0) ack 12 win 65535 <mss 1460>
+
+# on 22.236.180.216 (client)
+# Add ARP entry as agent for host 22.236.180.254
+# arp -d 22.236.180.254
+# arp -s ether 22.236.180.254 8a:0b:b2:fa:97:06 pub
+# ./dlt_test_tcp 22.236.180.254 22.236.180.220 9877 en1
+
+
+# on 22.236.180.220 (server)
+# server port 9877
+# ./tcpserv04 
+fork pid 6029372
+just test
+child 6029372 terminated
+
+#
+dig @22.236.196.60 its.bocmacau.com +tcp
+
+; <<>> DiG 9.4.1 <<>> @22.236.196.60 www.google.com +tcp
+; (1 server found)
+;; global options:  printcmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 2035
+;; flags: qr rd ra; QUERY: 1, ANSWER: 6, AUTHORITY: 0, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;www.google.com.                        IN      A
+
+;; ANSWER SECTION:
+www.google.com.         44      IN      A       74.125.203.147
+www.google.com.         44      IN      A       74.125.203.106
+www.google.com.         44      IN      A       74.125.203.104
+www.google.com.         44      IN      A       74.125.203.99
+www.google.com.         44      IN      A       74.125.203.103
+www.google.com.         44      IN      A       74.125.203.105
+
+;; Query time: 9 msec
+;; SERVER: 22.236.196.60#53(22.236.196.60)
+;; WHEN: Fri May 27 15:04:25 2016
+;; MSG SIZE  rcvd: 128
+
+./dlt_sniff en1  'src host 22.236.180.216 and dst port 53 and tcp[13:1] & 8 != 0'
+
+#
+./dlt_tcp_dns 22.236.180.254 22.236.196.60 domain en1
+./dlt_sniff en1  'src host 22.236.180.254 and dst port 53 and tcp[13:1] & 8 != 0'
+
+#
+od -h ./record.pcap
+
+
+#
+./dlt_sniff en1  'src host 22.236.196.60 and src port 53 and tcp[13:1] & 8 != 0'
+
+diff record.pcap.libpcap record.pcap
+(no difference, success)
+
+root@gccapco1[/c_program/sys_program/unp/test]# od -h ./record.pcap
+0000000  04d2 0100 0001 0000 0000 0000 0377 7777
+0000020  0667 6f6f 676c 6503 636f 6d00 0001 0001
+0000040
+root@gccapco1[/c_program/sys_program/unp/test]# od -h ./record.pcap.dig
+0000000  0020 0682 0100 0001 0000 0000 0000 0377
+0000020  7777 0667 6f6f 676c 6503 636f 6d00 0001
+0000040  0001
+0000042
+
