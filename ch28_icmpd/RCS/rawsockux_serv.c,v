@@ -1,0 +1,615 @@
+head	1.16;
+access;
+symbols;
+locks
+	gongcun:1.16; strict;
+comment	@ * @;
+
+
+1.16
+date	2016.05.14.05.09.11;	author gongcun;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2016.05.14.02.33.08;	author gongcun;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2016.05.14.00.49.29;	author gongcun;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2016.05.14.00.31.15;	author gongcun;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2016.05.13.14.58.51;	author gongcun;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2016.05.13.14.33.33;	author gongcun;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2016.05.13.14.08.10;	author gongcun;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2016.05.13.13.22.54;	author gongcun;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2016.05.12.23.30.51;	author gongcun;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2016.05.11.14.42.21;	author gongcun;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2016.05.11.14.17.52;	author gongcun;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2016.05.11.13.12.30;	author gongcun;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2016.05.11.12.05.07;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.05.10.22.59.21;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.09.14.55.56;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.09.14.41.06;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.16
+log
+@*** empty log message ***
+@
+text
+@#include "raw_icmpd.h"
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#define MAXCLIENT 1024
+int cursize = 0, idx = -1;
+struct cli_fd_port cli_fd_port[MAXCLIENT];
+void *raw_icmpd(void *);
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void sig_io(int signo, siginfo_t *siginfo, void *context)
+{
+    int i, port;
+    char c;
+    pid_t pid = siginfo->si_pid;
+    port = (pid & 0xffff) | 0x8000;
+
+#ifdef _DEBUG
+    printf("si_pid = %ld\n", (long)pid);
+#endif
+
+    for (i=0; i<MAXCLIENT; i++) {
+        if (cli_fd_port[i].sport == port && read(cli_fd_port[i].unixfd, &c, 1) == 0) {
+            idx = i;
+#ifdef _DEBUG
+            fprintf(stderr, ">>> signal got the port %d, pid %ld, idx %d exited\n", port, (long)pid, idx);
+#endif
+            break;
+        }
+    }
+    return;
+}
+
+int main(int argc, char *argv[])
+{
+    int listenfd, clifd, sockfd, val;
+    pthread_t tid;
+    struct sockaddr_in cliaddr;
+    socklen_t len;
+    char strhost[64];
+    int i = 0, n, sport;
+    const int on = 1;
+
+    bzero(cli_fd_port, sizeof(struct cli_fd_port) * MAXCLIENT);
+
+    if ((n = pthread_create(&tid, NULL, &raw_icmpd, NULL)) != 0) {
+        errno = n;
+        err_sys("pthread_create error");
+    }
+
+    listenfd = raw_serv_listen();
+
+    struct sigaction act;
+    bzero(&act, sizeof(struct sigaction));
+    act.sa_handler = NULL;
+    act.sa_sigaction = sig_io;
+    act.sa_flags = SA_SIGINFO;
+    if (sigaction(SIGIO, &act, NULL) < 0)
+        err_sys("sigaction error");
+
+    sigset_t iomask, savemask;
+    sigemptyset(&iomask);
+    sigaddset(&iomask, SIGIO);
+
+    for (;;) {
+        clifd = raw_serv_accept(listenfd);
+
+        /* make write wouldn't block */
+        if ((val = fcntl(clifd, F_GETFL, 0)) < 0)
+            err_sys("fcntl F_GETFL error");
+        if (fcntl(clifd, F_SETFL, val | O_NONBLOCK) < 0)
+            err_sys("fcntl F_SETFL error");
+
+        /* signal driver */
+        if (fcntl(clifd, F_SETOWN, getpid()) < 0)
+            err_sys("fcntl F_SETOWN error");
+        if (ioctl(clifd, FIOASYNC, &on) < 0)
+            err_sys("ioctl error");
+
+#ifdef _DEBUG
+        printf("setup O_NONBLOCK, FIOASYNC ok\n");
+#endif
+
+        sockfd = raw_recv_fd(clifd);
+        len = sizeof(struct sockaddr_in);
+        if (getsockname(sockfd, (struct sockaddr *)&cliaddr, &len) < 0)
+            err_sys("getsockname error");
+        if (inet_ntop(AF_INET, &cliaddr.sin_addr, strhost, sizeof(strhost)) == NULL)
+            err_sys("inet_ntop error");
+        sport = ntohs(cliaddr.sin_port);
+#ifdef _DEBUG
+        printf("client is %s:%d\n", strhost, sport);
+#endif
+        /* pad the array of cli_fd_port */
+        if (sigprocmask(SIG_BLOCK, &iomask, &savemask) < 0)
+            err_sys("SIG_BLOCK error");
+
+        if ((n = pthread_mutex_lock(&mutex)) != 0) {
+            errno = n;
+            err_sys("pthread_mutex_lock error");
+        }
+        if (idx >= 0) {
+#ifdef _DEBUG
+            printf(">>> the client port %d closed\n", cli_fd_port[idx].sport);
+#endif
+            cli_fd_port[idx].unixfd = clifd;
+            cli_fd_port[idx].sport = sport;
+            idx = -1;
+        } else {
+            for (i = 0; i < MAXCLIENT; i++) {
+                if (cli_fd_port[i].sport == 0) {
+                    cli_fd_port[i].unixfd = clifd;
+                    cli_fd_port[i].sport = sport;
+                    break;
+                }
+            }
+            if (i >= MAXCLIENT) /* TODO: need extend */
+                err_quit("too many connection");
+            if (i > cursize)
+                cursize = i;
+        }
+        if ((n = pthread_mutex_unlock(&mutex)) != 0) {
+            errno = n;
+            err_sys("pthread_mutex_unlock error");
+        }
+        if (sigprocmask(SIG_SETMASK, &savemask, NULL) < 0)
+            err_sys("SIG_SETMASK error");
+    }
+
+    return 0;
+}
+
+void *raw_icmpd(void *arg) 
+{
+    int icmpfd, i;
+    char recvbuf[1500], errbuf[MAXLINE];
+    ssize_t n;
+    int iplen, subiplen, icmplen, ret;
+    struct ip *ip, *subip;
+    struct icmp *icmp;
+    struct udphdr *udp;
+
+    if ((icmpfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
+        err_sys("socket error");
+    setuid(getuid());
+
+    for (;;) {
+        if ((n = recvfrom(icmpfd, recvbuf, sizeof(recvbuf), 0, NULL, NULL)) < 0) {
+            if (errno == EINTR)
+                continue;
+            err_sys("recvfrom error");
+        }
+        ip = (struct ip *)recvbuf;
+        iplen = ip->ip_hl * 4;
+        icmp = (struct icmp *)(recvbuf + iplen);
+        if ((icmplen = n - iplen) < 8 + sizeof(struct ip))
+            continue;
+        subip = (struct ip *)(recvbuf + iplen + 8);
+        subiplen = subip->ip_hl * 4; 
+        /* icmplen >= 8 + subiplen + uh_sport + uh_dport */
+        if (icmplen < 8 + subiplen + sizeof(u_short) * 2)
+            continue;
+        udp = (struct udphdr *)(recvbuf + iplen + 8 + subiplen);
+#ifdef _DEBUG
+        printf("udp->uh_sport = %d\n", ntohs(udp->uh_sport));
+        printf("udp->uh_dport = %d\n", ntohs(udp->uh_dport));
+        printf("%s\n", raw_icmpcode(icmp->icmp_code));
+#endif
+
+        if ((ret = pthread_mutex_lock(&mutex)) != 0) {
+            errno = ret;
+            err_sys("pthread_mutex_lock error");
+        }
+        for (i = 0; i <= cursize; i++) {
+            if (ntohs(udp->uh_sport) == cli_fd_port[i].sport) {
+#ifdef _DEBUG
+                printf("client port %d: %s\n", cli_fd_port[i].sport, raw_icmpcode(icmp->icmp_code));
+#endif
+                strncpy(errbuf, raw_icmpcode(icmp->icmp_code), sizeof(errbuf));
+                if (write(cli_fd_port[i].unixfd, errbuf, strlen(errbuf)) < 0
+                        && errno != EAGAIN && errno != EWOULDBLOCK)
+                    err_sys("write error");
+                break;
+            }
+        }
+        if ((ret = pthread_mutex_unlock(&mutex)) != 0) {
+            errno = ret;
+            err_sys("pthread_mutex_lock error");
+        }
+    }
+
+    return NULL;
+}
+@
+
+
+1.15
+log
+@*** empty log message ***
+@
+text
+@d24 1
+d26 1
+a26 1
+            fprintf(stderr, ">>> signal got the port %d exited\n", port);
+a27 1
+            idx = i;
+@
+
+
+1.14
+log
+@*** empty log message ***
+@
+text
+@d6 1
+a6 1
+int cursize = 0;
+a18 1
+    printf("get port = %d\n", port);
+a21 6
+#if 0
+    struct timeval tv = {.tv_sec = 0, .tv_usec = 1000};
+    select(0, NULL, NULL, NULL, &tv);
+    if (kill(pid, 0) < 0 && errno == ESRCH)
+        fprintf(stderr, "the pid %ld exited\n", (long) pid);
+#endif
+d24 4
+a27 1
+            fprintf(stderr, "the pid %ld exited\n", (long) pid);
+a41 4
+    fd_set zset, rset;
+    FD_ZERO(&zset);
+    struct timeval tv = {.tv_sec = 0, .tv_usec = 0}; /* no wait */
+    char c;
+d61 4
+d95 3
+d102 1
+a102 11
+        for (i = 0; i < MAXCLIENT; i++) {
+            if (cli_fd_port[i].sport == 0) {
+                cli_fd_port[i].unixfd = clifd;
+                cli_fd_port[i].sport = sport;
+                break;
+            }
+            rset = zset;
+            FD_SET(cli_fd_port[i].unixfd, &rset);
+            tv.tv_sec = 0; tv.tv_usec = 0;
+            if (select(cli_fd_port[i].unixfd+1, &rset, NULL, NULL, &tv) > 0) {
+                if (read(cli_fd_port[i].unixfd, &c, 1) == 0) {
+d104 1
+a104 1
+                    printf("the client port %d closed\n", cli_fd_port[i].sport);
+d106 6
+d117 4
+a121 4
+        if (i >= MAXCLIENT) /* TODO: need extend */
+            err_quit("too many connection");
+        if (i > cursize)
+            cursize = i;
+d126 2
+@
+
+
+1.13
+log
+@*** empty log message ***
+@
+text
+@d13 2
+d16 1
+d19 1
+a25 1
+#endif
+d28 7
+@
+
+
+1.12
+log
+@*** empty log message ***
+@
+text
+@d13 7
+a19 1
+    pid_t pid;
+d22 2
+a23 1
+    if (kill((pid = siginfo->si_pid, pid), 0) < 0 && errno == ESRCH)
+@
+
+
+1.11
+log
+@*** empty log message ***
+@
+text
+@d13 4
+a16 4
+    pid_t pid = siginfo->si_pid;
+    printf("pid = %ld\n", (long)pid);
+    sleep(1);
+    if (kill(pid, 0) < 0 && errno == ESRCH)
+d66 1
+d68 1
+a68 1
+        printf("setup O_NONBLOCK ok\n");
+d70 1
+@
+
+
+1.10
+log
+@*** empty log message ***
+@
+text
+@d13 4
+a16 2
+    pid_t pid;
+    if (kill((pid = siginfo->si_pid, pid), 0) < 0 && errno == ESRCH)
+@
+
+
+1.9
+log
+@*** empty log message ***
+@
+text
+@d11 1
+a11 1
+static void sig_io(int signo)
+d13 3
+a15 1
+    printf(">>> someone exited\n");
+d31 1
+d41 8
+a48 3
+    const int on = 1;
+    if (signal(SIGIO, sig_io) == SIG_ERR)
+        err_sys("signal error");
+@
+
+
+1.8
+log
+@*** empty log message ***
+@
+text
+@d11 6
+d38 3
+d50 6
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d13 1
+a13 1
+    int listenfd, clifd, sockfd;
+d35 9
+d79 1
+a79 1
+        if (i >= MAXCLIENT)
+d139 3
+a141 1
+                write(cli_fd_port[i].unixfd, errbuf, strlen(errbuf));
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d86 1
+a86 1
+    char recvbuf[1500];
+d115 2
+a116 2
+        printf("udp_>uh_sport = %d\n", ntohs(udp->uh_sport));
+        printf("udp_>uh_dport = %d\n", ntohs(udp->uh_dport));
+d126 1
+d128 3
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d8 2
+a9 1
+void *icmpd(void *);
+d14 1
+a14 1
+    pid_t pid;
+d18 1
+a18 1
+    int i = 0, n, icmp_sport, icmp_code, icmp_type, sport;
+d26 5
+d46 4
+d74 4
+d82 56
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d5 4
+a8 10
+static void sig_chld(int signo)
+{
+    pid_t pid;
+
+    while ((pid = waitpid(-1, NULL, WNOHANG)) > 0)
+#ifdef _DEBUG
+        printf("exited child pid = %u\n", pid)
+#endif
+            ;
+}
+d17 5
+a21 3
+    char strPwrite[1024], strCread[1024];
+    int pipefd[2];
+    int n, icmp_sport, icmp_code, icmp_type, sport;
+d23 1
+a23 2
+    if (signal(SIGCHLD, sig_chld) == SIG_ERR)
+        err_sys("signal error");
+a26 3
+    if (pipe(pipefd) < 0)
+        err_sys("pipe error");
+
+d29 22
+a50 10
+        if ((pid = fork()) < 0)
+            err_sys("fork error");
+        else if (pid == (pid_t) 0) {
+            sockfd = raw_recv_fd(clifd);
+            len = sizeof(struct sockaddr_in);
+            if (getsockname(sockfd, (struct sockaddr *)&cliaddr, &len) < 0)
+                err_sys("getsockname error");
+            if (inet_ntop(AF_INET, &cliaddr.sin_addr, strhost, sizeof(strhost)) == NULL)
+                err_sys("inet_ntop error");
+            sport = ntohs(cliaddr.sin_port);
+d52 1
+a52 1
+            printf("client is %s:%d\n", strhost, sport);
+d54 5
+a58 1
+            exit(0);
+d60 4
+a63 2
+        /* parent continue ... */
+        Close(clifd);
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d23 3
+d32 3
+a39 1
+            Close(listenfd);
+d46 4
+a49 1
+            printf("client is %s:%d\n", strhost, ntohs(cliaddr.sin_port));
+d52 1
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d18 1
+a18 1
+    int listenfd, clifd;
+d20 3
+d35 7
+a41 1
+            str_echo(clifd);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a20 2
+    listenfd = raw_serv_listen();
+
+d24 2
+a27 1
+        /*
+d30 2
+a31 2
+        else if (pid == 0) {
+            close(listenfd);
+d35 1
+a35 3
+        */
+        if (close(clifd) < 0)
+            err_sys("close error");
+@

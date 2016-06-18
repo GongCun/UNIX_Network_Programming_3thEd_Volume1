@@ -1,0 +1,37 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.05.09.12.47.41;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@include ../Make.defines
+
+PROGS =	rawtracert
+
+all:	${PROGS}
+
+rawtracert:	raw_main.c raw_tracert.c 
+		sudo ${CC} ${CFLAGS} -D_DEBUG -o $@@ $^ ${LIBS}
+		sudo chown root $@@
+		sudo chmod u+s $@@
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@

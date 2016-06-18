@@ -1,0 +1,201 @@
+#include "raw_icmpd.h"
+
+int raw_serv_listen(void) /* return listen fd */
+{
+    struct sockaddr_un un;
+    int fd, len;
+
+    bzero(&un, sizeof(struct sockaddr_un));
+
+    if (unlink(SOCKNAME) < 0 && errno != ENOENT)
+        err_sys("unlink error");
+
+    strncpy(un.sun_path, SOCKNAME, sizeof(un.sun_path));
+    un.sun_family = AF_UNIX;
+
+    if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+        err_sys("socket error");
+
+    len = offsetof(struct sockaddr_un, sun_path) + strlen(un.sun_path);
+    if (bind(fd, (struct sockaddr *)&un, len) < 0)
+        err_sys("bind error");
+    if (listen(fd, 1024) < 0)
+        err_sys("listen error");
+    return fd;
+}
+
+int raw_serv_accept(int listenfd) /* return accept fd */
+{
+    int len, clifd;
+    struct sockaddr_un un;
+    struct stat statbuf;
+
+    bzero(&un, sizeof(struct sockaddr_un));
+    len = sizeof(struct sockaddr_un);
+    while ((clifd = accept(listenfd, (struct sockaddr *)&un, (socklen_t *)&len)) < 0) {
+       if (errno != EINTR)
+           err_sys("accept error");
+       else
+           continue;
+    }
+
+    len -= offsetof(struct sockaddr_un, sun_path);
+    un.sun_path[len] = 0;
+#ifdef _DEBUG
+    printf("client UNIX domain name: %s\n", un.sun_path);
+#endif
+
+    if (stat(un.sun_path, &statbuf) < 0)
+        err_sys("stat error");
+#ifdef S_ISSOCK
+    if (S_ISSOCK(statbuf.st_mode) == 0)
+        err_sys("not a UNIX domain socket");
+#endif
+    if (unlink(un.sun_path) < 0)
+        err_sys("unlink error");
+    return clifd;
+}
+
+int raw_cli_conn(void)
+{
+    struct sockaddr_un un;
+    int fd, len;
+
+    if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+        err_sys("socket error");
+
+    bzero(&un, sizeof(struct sockaddr_un));
+    un.sun_family = AF_UNIX;
+    snprintf(un.sun_path, sizeof(un.sun_path), "/tmp/%d", (getpid() & 0xffff) | 0x8000);
+
+    len = offsetof(struct sockaddr_un, sun_path) + strlen(un.sun_path);
+
+    if (unlink(un.sun_path) < 0 && errno != ENOENT)
+        err_sys("unlink error");
+
+    if (bind(fd, (struct sockaddr *)&un, len) < 0)
+        err_sys("bind error");
+
+    /* fill socket address structure with server's address */
+    bzero(&un, sizeof(struct sockaddr_un));
+    un.sun_family = AF_UNIX;
+    strncpy(un.sun_path, SOCKNAME, sizeof(un.sun_path));
+    len = offsetof(struct sockaddr_un, sun_path) + strlen(un.sun_path);
+    if (connect(fd, (struct sockaddr *)&un, len) < 0)
+        err_sys("connect error");
+    return fd;
+}
+
+
+int raw_send_fd(int fd, int fd_to_send)
+{
+    struct iovec iov[1];
+    struct msghdr msg;
+    char buf[1]; /* send/recv 2-byte protocol */
+
+    iov[0].iov_base = buf;
+    iov[0].iov_len = 1;
+    msg.msg_iov = iov;
+    msg.msg_iovlen = 1;
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+
+    if (fd_to_send < 0)
+        err_sys("fd to send < 0");
+
+    buf[0] = 0; /* just pad out the buf */
+
+    struct cmsghdr *cmptr = NULL;
+    if ((cmptr = malloc(CMSG_LEN(sizeof(int)))) == NULL)
+        err_sys("malloc error");
+    cmptr->cmsg_level = SOL_SOCKET;
+    cmptr->cmsg_type = SCM_RIGHTS;
+    cmptr->cmsg_len = CMSG_LEN(sizeof(int));
+    msg.msg_control = cmptr;
+    msg.msg_controllen = CMSG_LEN(sizeof(int));
+
+    *((int *)CMSG_DATA(cmptr)) = fd_to_send;
+    int len = sendmsg(fd, &msg, 0);
+    free(cmptr);
+    return len == 1 ? 0 : -1;
+}
+
+int raw_recv_fd(int fd) /* return recv fd */
+{
+    struct iovec iov[1];
+    struct msghdr msg;
+    char buf[1500];
+
+    iov[0].iov_base = buf;
+    iov[0].iov_len = sizeof(buf);
+    msg.msg_iov = iov;
+    msg.msg_iovlen = 1;
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+
+    struct cmsghdr *cmptr = NULL;
+    if ((cmptr = malloc(CMSG_LEN(sizeof(int)))) == NULL)
+        err_sys("malloc error");
+    msg.msg_control = cmptr;
+    msg.msg_controllen = CMSG_LEN(sizeof(int));
+
+    ssize_t len;
+    if ((len = recvmsg(fd, &msg, 0)) < 0)
+        err_sys("recvmsg error");
+    if (len == 0)
+        err_quit("connection closed by server");
+    if ((buf[0] & 0xff) != 0)
+        err_quit("message format error");
+    if (msg.msg_controllen != CMSG_LEN(sizeof(int)))
+        err_quit("no fd");
+
+    int fd_to_recv = *((int *)CMSG_DATA(cmptr));
+    free(cmptr);
+
+    return fd_to_recv;
+}
+
+const char *
+raw_icmpcode(int code)
+{
+	static char errbuf[100];
+	switch (code) {
+	case 0:
+		return ("network unreachable");
+	case 1:
+		return ("host unreachable");
+	case 2:
+		return ("protocol unreachable");
+	case 3:
+		return ("port unreachable");
+	case 4:
+		return ("fragmentation required but DF bit set");
+	case 5:
+		return ("source route failed");
+	case 6:
+		return ("destination network unknown");
+	case 7:
+		return ("destination host unknown");
+	case 8:
+		return ("source host isolated (obsolete)");
+	case 9:
+		return ("destination network administratively prohibited");
+	case 10:
+		return ("destination host administratively prohibited");
+	case 11:
+		return ("network unreachable for TOS");
+	case 12:
+		return ("host unreachable for TOS");
+	case 13:
+		return ("communication administratively prohibited by filtering");
+	case 14:
+		return ("host recedence violation");
+	case 15:
+		return ("precedence cutoff in effect");
+	default:
+		sprintf(errbuf, "[unknown code %d]", code);
+		return errbuf;
+	}
+}
+
+

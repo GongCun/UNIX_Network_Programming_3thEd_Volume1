@@ -1,0 +1,84 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcun:1.3; strict;
+comment	@ * @;
+
+
+1.3
+date	2016.05.11.14.42.26;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.10.22.59.21;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.09.14.55.56;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@#pragma once
+
+#include "unp.h"
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
+#include <netinet/udp.h>
+
+#define SOCKNAME "/tmp/icmpd"
+
+#define offsetof(type, f) ((size_t) \
+        ((char *)&((type *)0)->f - (char *)(type *)0))
+
+/* return listen fd */
+int raw_serv_listen(void);
+
+/* return accept fd */
+int raw_serv_accept(int);
+
+/* return client connect fd */
+int raw_cli_conn(void);
+
+/* other function prototype */
+int raw_send_fd(int fd, int fd_to_send);
+int raw_recv_fd(int fd); /* return recv fd */
+const char * raw_icmpcode(int code);
+
+struct cli_fd_port {
+    int unixfd;
+    int sport;
+};
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d4 4
+d26 6
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d18 4
+@

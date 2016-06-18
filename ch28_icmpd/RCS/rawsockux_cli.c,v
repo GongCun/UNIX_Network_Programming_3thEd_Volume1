@@ -1,0 +1,163 @@
+head	1.4;
+access;
+symbols;
+locks
+	gongcun:1.4; strict;
+comment	@ * @;
+
+
+1.4
+date	2016.05.14.00.31.15;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.05.11.14.42.21;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.10.22.59.21;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.09.14.55.56;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@#include "raw_icmpd.h"
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <libgen.h>
+
+int main(int argc, char *argv[])
+{
+    int maxfd, fd, sockfd;
+    struct sockaddr_in servaddr, cliaddr;
+    struct timeval tv;
+    fd_set rset;
+
+    if (argc != 3)
+        err_quit("Usage: %s <IPaddress> <Port>", basename(argv[0]));
+
+    fd = raw_cli_conn();
+
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+        err_sys("socket error");
+
+    /* bind client's port */
+    bzero(&cliaddr, sizeof(struct sockaddr_in));
+    cliaddr.sin_family = AF_INET;
+    cliaddr.sin_port = htons((getpid() & 0xffff) | 0x8000);
+    cliaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    if (bind(sockfd, (struct sockaddr *)&cliaddr, sizeof(cliaddr)) < 0)
+        err_sys("bind error");
+
+    if (raw_send_fd(fd, sockfd) < 0)
+        err_sys("raw_send_fd error");
+
+    bzero(&servaddr, sizeof(struct sockaddr_in));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(atoi(argv[2]));
+    if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) < 0)
+        err_sys("inet_pton error");
+
+    char sendline[MAXLINE], recvline[MAXLINE];
+    int n, ret;
+	while (Fgets(sendline, MAXLINE, stdin) != NULL) {
+
+		Sendto(sockfd, sendline, strlen(sendline), 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
+
+        tv.tv_sec = 5;
+        tv.tv_usec = 0;
+        FD_ZERO(&rset);
+        FD_SET(sockfd, &rset);
+        FD_SET(fd, &rset);
+        maxfd = sockfd > fd ? sockfd : fd;
+AGAIN:
+        if ((ret = select(maxfd+1, &rset, NULL, NULL, &tv)) < 0) {
+            if (errno == EINTR)
+                goto AGAIN;
+            err_sys("select error");
+        }
+        if (ret == 0) {
+            fprintf(stderr, "socket timeout\n");
+            continue;
+        }
+        if (FD_ISSET(sockfd, &rset)) {
+		    n = Recvfrom(sockfd, recvline, MAXLINE, 0, NULL, NULL);
+		    recvline[n] = 0;	/* null terminate */
+		    Fputs(recvline, stdout);
+        }
+        if (FD_ISSET(fd, &rset)) {
+            if ((n = Read(fd, recvline, MAXLINE)) == 0)
+                err_quit("ICMP daemon terminated");
+            recvline[n] = 0;
+            fprintf(stderr, "%s\n", recvline);
+        }
+	}
+
+#ifdef _SOCKTCP
+    if (send(fd, "a", 1, MSG_OOB) != 1)
+        err_sys("send error");
+#endif
+
+    return 0;
+}
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d73 5
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d8 1
+a8 1
+    int fd, sockfd;
+d10 2
+d39 1
+a39 1
+    int n;
+d44 27
+a70 4
+		n = Recvfrom(sockfd, recvline, MAXLINE, 0, NULL, NULL);
+
+		recvline[n] = 0;	/* null terminate */
+		Fputs(recvline, stdout);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d4 1
+d8 5
+a12 1
+    int fd;
+d16 31
+a46 1
+    str_cli(stdin, fd);
+@

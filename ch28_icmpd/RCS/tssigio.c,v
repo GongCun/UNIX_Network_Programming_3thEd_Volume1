@@ -1,0 +1,96 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.05.13.13.22.54;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "unp.h"
+#include <stropts.h>
+
+typedef void (*_signal)(int);
+typedef void (*_sa_sigaction)(int, siginfo_t *, void *);
+
+static _signal Sighand(int, _sa_sigaction); 
+
+static void sig_io(int signo, siginfo_t *siginfo, void *context)
+{
+	printf("caught SIGIO: si_signo = %d, si_code = %d, si_pid = %ld, si_band = %ld, si_errno = %d\n",
+			siginfo->si_signo, siginfo->si_code, (long)siginfo->si_pid, (long)siginfo->si_band, siginfo->si_errno);
+	return;
+}
+
+
+int main(void)
+{
+	char buf[1024];
+	int val, n;
+	const int on = 1;
+
+	if (Sighand(SIGIO, sig_io) == SIG_ERR)
+		err_sys("Sighand error");
+
+	printf("PID = %ld\n", (long)getpid());
+
+	if ((val = fcntl(0, F_GETFL, 0)) < 0)
+		err_sys("fcntl F_GETFL error");
+	if (fcntl(0, F_SETOWN, getpid()) < 0)
+		err_sys("fcntl F_SETOWN error");
+
+#ifdef _DEBUG
+	if (fcntl(0, F_SETFL, val |	FASYNC) < 0)
+		err_sys("fcntl F_SETFL error");
+#else
+	if (ioctl(1, FIOASYNC, &on) < 0)
+		err_sys("ioctl error");
+#endif
+
+	if ((n = read(0, buf, sizeof(buf))) < 0)
+		err_sys("read error");
+
+	if (write(1, buf, n) != n)
+		err_sys("write error");
+	sleep(1);
+
+	return 0;
+}
+
+static _signal Sighand(int signo, _sa_sigaction func)
+{
+	struct sigaction act, oact;
+
+	bzero(&act, sizeof(struct sigaction));
+	act.sa_handler = NULL;
+	act.sa_sigaction = func;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = SA_SIGINFO;
+
+	if (signo == SIGALRM) {
+#ifdef	SA_INTERRUPT
+		act.sa_flags |= SA_INTERRUPT;	/* SunOS 4.x */
+#endif
+	} else {
+#ifdef	SA_RESTART
+		act.sa_flags |= SA_RESTART;		/* SVR4, 44BSD */
+#endif
+	}
+	if (sigaction(signo, &act, &oact) < 0)
+		return SIG_ERR;
+	return oact.sa_handler;
+}
+@

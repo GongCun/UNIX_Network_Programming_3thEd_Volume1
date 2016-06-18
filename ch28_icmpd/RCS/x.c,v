@@ -1,0 +1,48 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.05.11.13.12.30;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include <stdlib.h>
+#include <stdio.h>
+#include <strings.h>
+
+
+struct x {
+    int a;
+    int b;
+};
+
+int main(void)
+{
+    struct x x[1024];
+    int i;
+
+    x[0].a = x[0].b = 5;
+
+    bzero(x, sizeof(struct x) * 1024);
+
+    for (i = 0; i < 5; i++)
+        printf("%d: %d %d\n", i, x[i].a, x[i].b);
+
+    return 0;
+}
+@

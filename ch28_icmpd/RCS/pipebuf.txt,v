@@ -1,0 +1,29 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.18.06.52.21;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@$ ./rawsockux01
+UNIX domain socket bound: /tmp/icmpd
+write error: Resource temporarily unavailable, errno = 35
+pipe buf = 8192
+
+@
