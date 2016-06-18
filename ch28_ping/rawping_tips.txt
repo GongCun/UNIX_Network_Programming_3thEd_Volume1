@@ -1,8 +1,16 @@
-./rawping www.google.com
-64 bytes from 202.86.162.177: seq=11, ttl=60, rtt=3388.104 ms
- 40 bytes from 202.86.162.177: type = 3, code = 3
- 40 bytes from 202.86.162.177: type = 3, code = 3
-64 bytes from 202.86.162.177: seq=12, ttl=60, rtt=3421.508 ms
+# ex03: ping the broadcast address
+$ ./rawping 192.168.0.255
+rawping 192.168.0.255 (192.168.0.255): 56 data bytes
+64 bytes from 192.168.0.255: seq=0, ttl=64, rtt=0.126 ms
+64 bytes from 192.168.0.255: seq=1, ttl=64, rtt=0.218 ms
+^C
+
+# ex04: ping the all-hosts multicast group (224.0.0.1)
+$ ./rawping 224.0.0.1
+rawping 224.0.0.1 (224.0.0.1): 56 data bytes
+64 bytes from 224.0.0.1: seq=0, ttl=64, rtt=0.102 ms
+64 bytes from 224.0.0.1: seq=1, ttl=64, rtt=0.344 ms
+^C
 
 # see the thread id on mac os
-sudo dtruss -ap *pid*
+$ sudo dtruss -ap *pid*
