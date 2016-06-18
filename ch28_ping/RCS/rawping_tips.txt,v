@@ -1,0 +1,32 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.18.06.40.18;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@./rawping www.google.com
+64 bytes from 202.86.162.177: seq=11, ttl=60, rtt=3388.104 ms
+ 40 bytes from 202.86.162.177: type = 3, code = 3
+ 40 bytes from 202.86.162.177: type = 3, code = 3
+64 bytes from 202.86.162.177: seq=12, ttl=60, rtt=3421.508 ms
+
+# see the thread id on mac os
+sudo dtruss -ap *pid*
+@

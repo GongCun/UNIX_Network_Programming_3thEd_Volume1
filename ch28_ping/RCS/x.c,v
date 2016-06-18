@@ -1,0 +1,39 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.05.03.14.15.22;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include <stdlib.h>
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    struct t {
+        int a:5;
+    };
+
+    struct t t = { 10 };
+
+    printf("a = %d\n", t.a);
+
+    return 0;
+}
+@
