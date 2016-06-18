@@ -1,0 +1,80 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcun:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2016.06.17.13.10.45;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.29.07.26.31;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#include "modeserv.h"
+
+int mode_connect(char *hostname, char *servname, int socktype)
+{
+    struct addrinfo *res, hint;
+    int ret, fd;
+
+    bzero(&hint, sizeof(struct addrinfo));
+    hint.ai_flags = AI_CANONNAME;
+    hint.ai_family = AF_INET;
+    hint.ai_socktype = socktype;
+    if ((ret = getaddrinfo(hostname, servname, &hint, &res)) != 0)
+        err_quit("getaddrinfo error: %s", gai_strerror(ret));
+
+    do {
+        if ((fd = socket(AF_INET, res->ai_socktype, res->ai_protocol)) < 0) {
+            err_ret("socket error");
+            continue;
+        }
+        if (connect(fd, res->ai_addr, res->ai_addrlen) < 0) {
+            err_ret("connect error (%d): %s:%d", errno,
+                    inet_ntoa(((struct sockaddr_in *)res->ai_addr)->sin_addr),
+                    ntohs(((struct sockaddr_in *)res->ai_addr)->sin_port));
+            if (close(fd) < 0)
+                err_sys("close error");
+        } else
+            break;
+    } while ((res = res->ai_next) != NULL);
+
+    if (res == NULL)
+        err_quit("socket/connect error");
+
+    freeaddrinfo(res);
+    return fd;
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d16 2
+a17 1
+        if ((fd = socket(AF_INET, res->ai_socktype, res->ai_protocol)) < 0)
+d19 1
+d21 3
+d31 1
+a31 1
+        err_sys("socket/connect error");
+@

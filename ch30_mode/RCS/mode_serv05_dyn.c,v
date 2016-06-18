@@ -1,0 +1,780 @@
+head	1.7;
+access;
+symbols;
+locks
+	gongcun:1.7; strict;
+comment	@ * @;
+
+
+1.7
+date	2016.06.15.23.31.46;	author gongcun;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2016.06.15.14.44.14;	author gongcun;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2016.06.15.14.27.52;	author gongcun;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2016.06.15.13.42.30;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.06.15.00.07.37;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.06.08.14.02.42;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.06.06.23.28.26;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@#include "modeserv.h"
+#include <libgen.h>
+#include <assert.h>
+#include <sys/mman.h>
+#include <signal.h>
+
+/* Server: prefork, passing FD */
+
+struct child *cptr;
+
+int nchildren, listenfd, maxfd, minchildren, maxchildren, lock_fd=-1;
+static int navail;
+fd_set masterset;
+volatile sig_atomic_t quitflag = 0;
+
+static void 
+sig_term(int signo)
+{
+	printf("process %ld terminated\n", (long)getpid());
+	exit(0);
+}
+static void sig_chld(int signo);
+static void _sig_int(int signo);
+
+#if (AIX) /* AIX not have pselect(), but Linux and Mac OSX have */
+int pselect(int nfds, fd_set *rset, fd_set *wset, fd_set *xset,
+        const struct timespec *pts, const sigset_t *sigmask)
+{
+    int n;
+    struct timeval tv;
+    sigset_t saveset;
+
+    if (ts != NULL) {
+        tv.tv_sec = pts->tv_sec;
+        tv.tv_usec = pts->tv_nsec / 1000;
+    }
+    sigprocmask(SIG_SETMASK, sigmask, &saveset);
+    n = select(nfds, rset, wset, xset, (ts == NULL) ? NULL : &tv);
+    sigprocmask(SIG_SETMASK, &saveset, NULL);
+    return n;
+}
+#endif
+
+
+pid_t 
+mode_child_make(int i, int listenfd)
+{
+	int sockfd[2], connfd;
+	pid_t pid;
+	char c;
+
+	if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sockfd) < 0)
+		err_sys("socketpair error");
+	if ((pid = Fork()) > 0) {	/* parent */
+		Close(sockfd[1]);
+		cptr[i].child_pid = pid;
+		cptr[i].child_pipefd = sockfd[0];
+		cptr[i].child_status = 0;
+		cptr[i].child_count = 0;
+		return pid;	/* parent return */
+	}
+	/* child continue... */
+	if (setsid() < 0)
+		err_sys("setsid error");
+
+	Close(sockfd[0]);
+	Close(listenfd);
+
+	printf("child process %ld (%d) starting\n", (long)getpid(), i);
+	for (;;) {
+		if (mode_read_fd(sockfd[1], &c, 1, &connfd) != 1) { /* timeout */
+            if (errno == EINTR)
+                continue;
+            else
+                err_sys("read_fd error");
+        }
+#if (_DEBUG)
+		printf("process %ld read fd %d\n", (long)getpid(), connfd);
+#endif
+		mode_reply(connfd);	/* process the request */
+		Close(connfd);
+		Write(sockfd[1], "", 1);	/* tell parent we're ready again */
+	}
+	exit(0);
+}
+
+int
+main(int argc, char **argv)
+{
+	int connfd, i, nsel;
+	socklen_t clilen;
+	struct sockaddr_in cliaddr, servaddr;
+	fd_set rset;
+	char c;
+    sigset_t sigset;
+    struct timespec ts;
+
+	if (argc != 4)
+		err_quit("Usage: %s <port> <#minchildren> <#maxchildren>", basename(argv[0]));
+
+	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
+
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servaddr.sin_port = htons(atoi(argv[1]));
+
+	Bind(listenfd, (SA *) & servaddr, sizeof(servaddr));
+
+	Listen(listenfd, LISTENQ);
+	minchildren = nchildren = atoi(argv[2]);
+    maxchildren = atoi(argv[3]);
+
+	if ((cptr = calloc(maxchildren, sizeof(struct child))) == NULL)
+		err_sys("calloc error");
+
+	Signal(SIGTERM, sig_term);
+
+	FD_ZERO(&masterset);
+	FD_SET(listenfd, &masterset);
+	maxfd = listenfd;
+	navail = nchildren;
+
+
+	for (i = 0; i < nchildren; i++) {
+		mode_child_make(i, listenfd);
+		FD_SET(cptr[i].child_pipefd, &masterset);
+		maxfd = max(maxfd, cptr[i].child_pipefd);
+	}
+	Signal(SIGINT, _sig_int);
+	Signal(SIGCHLD, sig_chld);
+	for (;;) {
+		rset = masterset;	/* keep listenfd and child pipefd */
+        if (navail <= 0) {
+            if (nchildren == maxchildren)
+                FD_CLR(listenfd, &rset);
+            else {
+                for (i = 0; i < maxchildren; i++) {
+                    if (cptr[i].child_pid == 0)
+                        break;
+                }
+                if (i == maxchildren)
+                    err_sys("can't allocate process resource");
+                mode_child_make(i, listenfd);
+                FD_SET(cptr[i].child_pipefd, &masterset);
+                rset = masterset;
+                maxfd = max(maxfd, cptr[i].child_pipefd);
+                navail++; nchildren++;
+            }
+        }
+
+PSELECT:
+        sigemptyset(&sigset);
+        sigaddset(&sigset, SIGCHLD);
+        ts.tv_sec = 5; ts.tv_nsec = 0;
+		if ((nsel = pselect(maxfd + 1, &rset, NULL, NULL, &ts, &sigset)) < 0) {
+			if (errno == EINTR)
+				goto PSELECT;
+			else
+				err_sys("select error");
+		}
+        if (nsel == 0 && nchildren > minchildren && navail >0 ) { /* timeout */
+            for (i = 0; i < maxchildren; i++) {
+                if (cptr[i].child_status == 0) {
+                    kill(cptr[i].child_pid, SIGTERM);
+				    printf(">>> exited pid %ld (%d): %ld\n",
+                            (long)cptr[i].child_pid, i, cptr[i].child_count);
+				    FD_CLR(cptr[i].child_pipefd, &masterset);
+				    Close(cptr[i].child_pipefd);
+                    cptr[i].child_pid = 0;
+				    cptr[i].child_count = 0;
+                    cptr[i].child_status = 0;
+                    cptr[i].child_pipefd = -1;
+                    if (--navail == 0 || --nchildren == minchildren)
+                        break;
+                }
+            }
+            continue;
+        }
+		if (FD_ISSET(listenfd, &rset)) {
+			clilen = sizeof(cliaddr);
+			connfd = Accept(listenfd, (SA *) & cliaddr, &clilen);
+
+#if (_DEBUG)
+            printf("connected client port: %d\n", ntohs(cliaddr.sin_port));
+#endif
+
+			for (i = 0; i < maxchildren; i++) {
+				if (cptr[i].child_status == 0 && cptr[i].child_pid != 0)
+					break;
+			}
+			if (i == maxchildren)
+				err_quit("no available children");
+			cptr[i].child_status = 1;
+			cptr[i].child_count++;
+			navail--;
+			mode_write_fd(cptr[i].child_pipefd, &c, 1, connfd);
+#if (_DEBUG)
+			printf("write process %ld (%d) fd %d\n", (long)cptr[i].child_pid, i, connfd);
+			/*
+			 * the number of fd which parent sent, is probably
+			 * different from that child received, see APUE
+			 * section 17.4
+			 */
+#endif
+			Close(connfd);
+			if (--nsel == 0)
+				continue;	/* no children return, all
+						 * done with select() result */
+		}
+
+		for (i = 0; i < maxchildren; i++) {
+            if (cptr[i].child_pid == 0)
+                continue;
+			if (FD_ISSET(cptr[i].child_pipefd, &rset)) {
+				if (Read(cptr[i].child_pipefd, &c, 1) <= 0) /* SOCK_DGRAM can't receive the EOF,
+                                                               so use SIGCHLD to known child exited. */
+					err_quit("unknown error for pid %ld (%d)", cptr[i].child_pid, i);
+				cptr[i].child_status = 0;
+				navail++;
+				if (--nsel == 0)
+					break;	/* all done */
+			}
+		}
+	}
+
+	exit(0);
+}
+
+static void 
+sig_chld(int signo)
+{
+	pid_t pid;
+
+	if (quitflag == 1)
+		return;
+	while ((pid = waitpid(-1, NULL, WNOHANG)) > 0)
+        ;
+	/* expect: pid == 0, no stopped or exited process */
+}
+
+static void _sig_int(int signo)
+{
+    int i;
+    quitflag = 1;
+    for (i = 0; i < maxchildren; i++) {
+        if (cptr[i].child_pid) {
+            kill(cptr[i].child_pid, SIGTERM);
+            printf(">>> pid %ld: %ld\n", (long)cptr[i].child_pid, cptr[i].child_count);
+        }
+    }
+
+    while (wait(NULL) > 0)
+        ;
+    if (errno != ECHILD)
+        err_sys("wait error");
+
+    mode_cpu_time();
+    exit(0);
+}
+
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d11 1
+a11 1
+int *nchildren, listenfd, maxfd, minchildren, maxchildren, lock_fd=-1;
+a23 4
+static void sig_alrm(int signo)
+{
+    return;
+}
+a65 1
+    Signal(SIGALRM, sig_alrm);
+a70 1
+        alarm(5);
+d72 3
+a74 12
+            if (errno == EINTR) {
+                mode_lock_wait(lock_fd);
+                if (*nchildren > minchildren) {
+                    printf("pid %ld will exit, *nchildren = %d, minchildren = %d\n",
+                            getpid(), *nchildren, minchildren);
+                    kill(getpid(), SIGTERM); /* process exit will release the file lock */
+                } else {
+                    mode_lock_release(lock_fd);
+                    alarm(0); /* no need */
+                    continue;
+                }
+            } else
+a76 1
+        alarm(0);
+d82 1
+a82 2
+		Write(sockfd[1], "", 1);	/* tell parent we're ready
+						 * again */
+d96 1
+a100 10
+	if ((nchildren = mmap(0, sizeof(int),
+			    PROT_READ | PROT_WRITE,
+			    MAP_ANON | MAP_SHARED, -1, 0)) == MAP_FAILED)
+		err_sys("mmap error");
+
+    if ((lock_fd = open("/tmp/lock.fd", O_WRONLY|O_CREAT|O_TRUNC, 0644)) < 0)
+        err_sys("open lock_fd error");
+    if (unlink("/tmp/lock.fd") < 0)
+        err_sys("unlink error");
+
+d111 1
+a111 1
+	minchildren = *nchildren = atoi(argv[2]);
+d122 1
+a122 1
+	navail = *nchildren;
+d125 1
+a125 1
+	for (i = 0; i < *nchildren; i++) {
+d135 1
+a135 1
+            if (*nchildren == maxchildren)
+d148 1
+a148 1
+                navail++; (*nchildren)++;
+d152 5
+a156 8
+SELECT:
+        if (!FD_ISSET(listenfd, &rset)) {
+            rset = masterset;
+            FD_CLR(listenfd, &rset);
+        } else {
+            rset = masterset;
+        }
+		if ((nsel = select(maxfd + 1, &rset, NULL, NULL, NULL)) < 0) {
+d158 1
+a158 1
+				goto SELECT;
+d162 18
+d211 1
+a233 1
+	int i;
+d237 2
+a238 20
+	while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+		for (i = 0; i < maxchildren; i++) {
+			if (cptr[i].child_pid == pid) {
+				printf(">>> pid %ld (%d): %ld\n", (long)pid, i, cptr[i].child_count);
+				FD_CLR(cptr[i].child_pipefd, &masterset);
+				Close(cptr[i].child_pipefd);
+                cptr[i].child_pid = 0;
+				cptr[i].child_count = 0;
+                cptr[i].child_status = 0;
+                cptr[i].child_pipefd = -1;
+                mode_lock_wait(lock_fd);
+                (*nchildren)--;
+                printf("got child pid exited, *nchildren = %d\n", *nchildren);
+                mode_lock_release(lock_fd);
+				break;
+			}
+		}
+		if (i == maxchildren)
+			err_quit("can't find the child %ld\n", (long)pid);
+	}
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d178 8
+a185 4
+PSELECT:
+        sigemptyset(&sigset);
+        sigaddset(&sigset, SIGCHLD);
+		if ((nsel = pselect(maxfd + 1, &rset, NULL, NULL, NULL, &sigset)) < 0) {
+d187 1
+a187 1
+				goto PSELECT;
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d11 1
+a11 1
+int nchildren, listenfd, maxfd, minchildren, maxchildren;
+d24 4
+d69 2
+d76 17
+a92 2
+		if (mode_read_fd(sockfd[1], &c, 1, &connfd) != 1)
+			err_sys("read_fd error");
+a111 1
+    struct timeval tv;
+d117 10
+d137 1
+a137 1
+	minchildren = nchildren = atoi(argv[2]);
+d148 1
+a148 1
+	navail = nchildren;
+d151 1
+a151 1
+	for (i = 0; i < nchildren; i++) {
+d161 1
+a161 1
+            if (nchildren == maxchildren)
+d174 1
+a174 1
+                navail++; nchildren++;
+d177 1
+d224 1
+a224 1
+					err_quit("child %d terminated unexpected\n", i);
+a244 1
+		/* err_msg("child %ld terminated unexpected\n", (long)pid); */
+d254 4
+a257 1
+                nchildren--;
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d5 1
+d25 19
+d92 1
+d147 4
+a150 2
+SELECT:
+		if ((nsel = select(maxfd + 1, &rset, NULL, NULL, NULL)) < 0) {
+d152 1
+a152 1
+				goto SELECT;
+d165 1
+a165 1
+				if (cptr[i].child_status == 0)
+d191 2
+a192 1
+				if (Read(cptr[i].child_pipefd, &c, 1) <= 0)
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d10 1
+a10 1
+int nchildren, listenfd, maxfd;
+d22 1
+a68 2
+	void sig_chld(int);
+	void sig_int(int);
+d71 1
+d73 2
+a74 2
+	if (argc != 3)
+		err_quit("Usage: %s <port> <#children>", basename(argv[0]));
+d86 2
+a87 1
+	nchildren = atoi(argv[2]);
+d89 1
+a89 1
+	if ((cptr = calloc(nchildren, sizeof(struct child))) == NULL)
+d105 1
+a105 1
+	Signal(SIGINT, sig_int);
+a107 10
+		while (navail <= 0) {
+			nchildren++;
+			if ((cptr = realloc(cptr, sizeof(struct child) * nchildren)) == NULL)
+				err_sys("realloc error");
+			mode_child_make(nchildren - 1, listenfd);
+			FD_SET(cptr[nchildren - 1].child_pipefd, &masterset);
+			maxfd = max(maxfd, cptr[nchildren - 1].child_pipefd);
+			navail++;
+		}
+		/* FD_CLR(listenfd, &rset); */
+d109 18
+d129 1
+a129 1
+				continue;
+d136 2
+d139 3
+a141 1
+			for (i = 0; i < nchildren; i++) {
+d145 1
+a145 1
+			if (i == nchildren)
+d152 1
+a152 1
+			printf("write process %ld fd %d\n", (long)cptr[i].child_pid, connfd);
+d164 3
+a166 1
+		for (i = 0; i < nchildren; i++) {
+d190 2
+a191 2
+		err_msg("child %ld terminated unexpected\n", (long)pid);
+		for (i = 0; i < nchildren; i++) {
+d193 1
+a193 2
+				printf(">>> pid %ld: %ld\n", (long)pid, cptr[i].child_count);
+				cptr[i].child_count = 0;
+d196 5
+a200 4
+				if (cptr[i].child_status == 1) {
+					cptr[i].child_status = 0;
+					navail++;
+				}
+d204 1
+a204 1
+		if (i == nchildren)
+a205 5
+		else {
+			mode_child_make(i, listenfd);
+			FD_SET(cptr[i].child_pipefd, &masterset);
+			maxfd = max(maxfd, cptr[i].child_pipefd);
+		}
+d209 21
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d15 2
+a16 1
+static void sig_term(int signo)
+d18 2
+a19 2
+    printf("process %ld terminated\n", (long) getpid());
+    exit(0);
+d24 2
+a25 1
+pid_t mode_child_make(int i, int listenfd)
+d27 24
+a50 25
+    int sockfd[2], connfd;
+    pid_t pid;
+    char c;
+
+    if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sockfd) < 0)
+        err_sys("socketpair error");
+    if ((pid = Fork()) > 0) { /* parent */
+        Close(sockfd[1]);
+        cptr[i].child_pid = pid;
+        cptr[i].child_pipefd = sockfd[0];
+        cptr[i].child_status = 0;
+        cptr[i].child_count = 0;
+        return pid; /* parent return */
+    }
+
+    /* child continue... */
+    if (setsid() < 0)
+        err_sys("setsid error");
+    Close(sockfd[0]);
+    Close(listenfd);
+
+    printf("child process %ld (%d) starting\n", (long)getpid(), i);
+    for (;;) {
+        if (mode_read_fd(sockfd[1], &c, 1, &connfd) != 1)
+            err_sys("read_fd error");
+d52 1
+a52 1
+        printf("process %ld read fd %d\n", (long)getpid(), connfd);
+d54 6
+a59 5
+        mode_reply(connfd);	/* process the request */
+        Close(connfd);
+        Write(sockfd[1], "", 1); /* tell parent we're ready again */
+    }
+    exit(0);
+d65 7
+a71 7
+	int					connfd, i, nsel;
+	socklen_t			clilen;
+	struct sockaddr_in	cliaddr, servaddr;
+	void				sig_chld(int);
+	void				sig_int(int);
+    fd_set rset;
+    char c;
+d73 2
+a74 2
+    if (argc != 3)
+        err_quit("Usage: %s <port> <#children>", basename(argv[0]));
+d79 1
+a79 1
+	servaddr.sin_family      = AF_INET;
+d81 1
+a81 1
+	servaddr.sin_port        = htons(atoi(argv[1]));
+d83 1
+a83 1
+	Bind(listenfd, (SA *) &servaddr, sizeof(servaddr));
+d86 1
+a86 1
+    nchildren = atoi(argv[2]);
+d88 2
+a89 2
+    if ((cptr = calloc(nchildren, sizeof(struct child))) == NULL)
+        err_sys("calloc error");
+d91 1
+a91 1
+    Signal(SIGTERM, sig_term);
+d93 4
+a96 4
+    FD_ZERO(&masterset);
+    FD_SET(listenfd, &masterset);
+    maxfd = listenfd;
+    navail = nchildren;
+d100 38
+a137 37
+        mode_child_make(i, listenfd);
+        FD_SET(cptr[i].child_pipefd, &masterset);
+        maxfd = max(maxfd, cptr[i].child_pipefd);
+    }
+    Signal(SIGINT, sig_int);
+    Signal(SIGCHLD, sig_chld);
+    for (;;) {
+        while (navail <= 0) {
+            nchildren++;
+            if ((cptr = realloc(cptr, sizeof(struct child) * nchildren)) == NULL)
+                err_sys("realloc error");
+            mode_child_make(nchildren-1, listenfd);
+            FD_SET(cptr[nchildren-1].child_pipefd, &masterset);
+            maxfd = max(maxfd, cptr[nchildren-1].child_pipefd);
+            navail++;
+        }
+        /* FD_CLR(listenfd, &rset); */
+        rset = masterset; /* keep listenfd and child pipefd */
+        if ((nsel = select(maxfd+1, &rset, NULL, NULL, NULL)) < 0) {
+            if (errno == EINTR)
+                continue;
+            else
+                err_sys("select error");
+        }
+        if (FD_ISSET(listenfd, &rset)) {
+            clilen = sizeof(cliaddr);
+            connfd = Accept(listenfd, (SA *)&cliaddr, &clilen);
+            for (i = 0; i < nchildren; i++) {
+                if (cptr[i].child_status == 0)
+                    break;
+            }
+            if (i == nchildren)
+                err_quit("no available children");
+            cptr[i].child_status = 1;
+            cptr[i].child_count++;
+            navail--;
+            mode_write_fd(cptr[i].child_pipefd, &c, 1, connfd);
+d139 6
+a144 3
+            printf("write process %ld fd %d\n", (long)cptr[i].child_pid, connfd);
+            /* the number of fd which parent sent, is probably different from
+             * that child received, see APUE section 17.4 */
+d146 16
+a161 16
+            Close(connfd);
+            if (--nsel == 0)
+                continue; /* no children return,
+                             all done with select() result */
+        }
+        for (i = 0; i < nchildren; i++) {
+            if (FD_ISSET(cptr[i].child_pipefd, &rset)) {
+                if (Read(cptr[i].child_pipefd, &c, 1) <= 0)
+                    err_quit("child %d terminated unexpected\n", i);
+                cptr[i].child_status = 0;
+                navail++;
+                if (--nsel == 0)
+                    break; /* all done */
+            }
+        }
+    }
+d163 1
+a163 1
+    exit(0);
+d166 2
+a167 1
+static void sig_chld(int signo)
+d169 2
+a170 2
+    pid_t pid;
+    int i;
+d172 26
+a197 26
+    if (quitflag == 1)
+        return;
+    while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+        err_msg("child %ld terminated unexpected\n", (long)pid);
+    for (i = 0; i < nchildren; i++) {
+        if (cptr[i].child_pid == pid) {
+            printf(">>> pid %ld: %ld\n", (long)pid, cptr[i].child_count);
+            cptr[i].child_count = 0;
+            FD_CLR(cptr[i].child_pipefd, &masterset);
+            Close(cptr[i].child_pipefd);
+            if (cptr[i].child_status == 1) {
+                cptr[i].child_status = 0;
+                navail++;
+            }
+            break;
+        }
+    }
+    if (i == nchildren)
+        err_quit("can't find the child %ld\n", (long)pid);
+    else {
+        mode_child_make(i, listenfd);
+        FD_SET(cptr[i].child_pipefd, &masterset);
+        maxfd = max(maxfd, cptr[i].child_pipefd);
+    }
+    }
+    /* expect: pid == 0, no stopped or exited process */
+@

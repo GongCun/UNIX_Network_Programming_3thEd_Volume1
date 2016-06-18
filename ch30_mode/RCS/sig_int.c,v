@@ -1,0 +1,173 @@
+head	1.6;
+access;
+symbols;
+locks
+	gongcun:1.6; strict;
+comment	@ * @;
+
+
+1.6
+date	2016.06.17.13.10.45;	author gongcun;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2016.06.04.14.25.46;	author gongcun;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2016.06.04.13.34.43;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.05.31.13.55.23;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.30.13.14.19;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.29.07.26.31;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@#include "modeserv.h"
+#include <sys/mman.h>
+
+#if ((_PREFORK) || (_PASSFD))
+extern int nchildren;
+extern pid_t *ppids;
+extern long *pservice;
+extern struct child *cptr;
+#if(__DYNAMIC)
+extern volatile sig_atomic_t quitflag;
+#endif
+#endif
+
+#if (_PRETHREAD)
+extern struct Thread *pThread;
+extern int nthreads;
+#endif
+
+void sig_int(int signo)
+{
+    void mode_cpu_time(void);
+    int i;
+#if (_PREFORK)
+    for (i = 0; i < nchildren; i++) {
+#if (_DEBUG)
+        printf("pid[i] = %ld\n", (long) ppids[i]);
+#endif
+        kill(ppids[i], SIGTERM);
+        printf(">>> pid %ld: %ld\n", (long)ppids[i], pservice[i]);
+    }
+    while (wait(NULL) > 0)
+        ;
+    if (errno != ECHILD)
+        err_sys("wait error");
+#elif (_PASSFD)
+#if(__DYNAMIC)
+    quitflag = 1; /* must before kill */
+#endif
+    for (i = 0; i< nchildren; i++) {
+        kill(cptr[i].child_pid, SIGTERM);
+        printf(">>> pid %ld: %ld\n", (long)cptr[i].child_pid, cptr[i].child_count);
+    }
+    while (wait(NULL) > 0)
+        ;
+    if (errno != ECHILD)
+        err_sys("wait error");
+#elif (_PRETHREAD)
+    for (i = 0; i < nthreads; i++)
+        printf(">>> tid %ld: %ld\n", (long)pThread[i].tid, (long)pThread[i].count);
+#endif
+    mode_cpu_time();
+#if (_PREFORK)
+    if (munmap(pservice, sizeof(long) * nchildren) < 0)
+        err_sys("munmap error");
+#endif
+
+    exit(0);
+}
+
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d9 3
+d36 3
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a11 1
+extern pthread_mutex_t mlock;
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@a1 1
+#include <sys/mman.h>
+d3 1
+a3 1
+#if (_PREFORK)
+d7 7
+d19 1
+d21 1
+a21 2
+    int i;
+    for (i = 0; i <nchildren; i++) {
+d32 12
+d46 1
+d49 2
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d2 1
+d7 1
+d20 1
+d28 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 5
+d11 13
+@

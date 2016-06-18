@@ -1,0 +1,121 @@
+head	1.4;
+access;
+symbols;
+locks
+	gongcun:1.4; strict;
+comment	@ * @;
+
+
+1.4
+date	2016.06.17.13.10.45;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.06.04.13.34.43;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.30.13.14.19;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.29.07.26.31;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@#include "modeserv.h"
+/* extern ssize_t readlinebuf(void **vptrptr); */
+
+void mode_reply(int fd)
+{
+    int ntowrite, done=0;
+    size_t nread;
+    char line[MAXLINE], reply[MAXN];
+    char *ptr;
+    struct sockaddr_in cliaddr;
+    socklen_t addrlen;
+    if (setvbuf(stdout, NULL, _IOLBF, 0) != 0)
+        err_sys("setvbuf error");
+    for (;;) {
+#if ! (__PTHREAD)
+        if ((nread  = Readline(fd, line, MAXLINE)) <= 0)
+#else
+        if ((nread  = mode_readline_r(fd, line, MAXLINE)) <= 0)
+#endif
+        {
+            if (done)
+                return;
+            addrlen = sizeof(struct sockaddr_in);
+            if (getpeername(fd, (struct sockaddr *)&cliaddr, &addrlen) != 0)
+                err_sys("getpeername error");
+            printf("read %zd bytes from client port: %d, done = %d, ", nread, ntohs(cliaddr.sin_port), done);
+            nread = readlinebuf((void **)&ptr);
+            printf("buflen = %zd\n", nread);
+            fflush(stdout);
+            if (nread > 0) {
+                Writen(1, ptr, nread);
+                puts("\n");
+            }
+            return;
+        }
+        ntowrite = atoi(line);
+        if (ntowrite <= 0 || ntowrite > MAXN)
+            err_quit("client request out of range: %d bytes", ntowrite);
+
+        Writen(fd, reply, ntowrite);
+        done=1;
+    }
+}
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d2 1
+d6 1
+a6 1
+    int ntowrite;
+d9 5
+d20 16
+a35 1
+           return;
+d41 1
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d9 1
+d11 3
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a11 3
+#if 0
+        printf("ntowrite = %d\n", ntowrite);
+#endif
+@

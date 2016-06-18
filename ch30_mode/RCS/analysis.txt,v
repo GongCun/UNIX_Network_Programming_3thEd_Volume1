@@ -1,0 +1,39 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.18.00.48.21;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Mode                          UserTime(ms)   SysTime(ms)    ClientRealTime(s)
+mode_serv00                   31.259         319.181        23.603         
+mode_serv01                   341.859        1394.7         14.122         
+mode_serv02                   21.425         344.518        12.249         
+mode_serv02_dyn               5915.6         31539.7        12.894         
+mode_serv02_dyn_v02           46.788         448.764        8.056          
+mode_serv03                   33.667         351.653        6.048          
+mode_serv04                   31.066         318.687        5.345          
+mode_serv04b                  37.983         348.66         8.559          
+mode_serv05                   38.452         436.58         5.849          
+mode_serv05_dyn               44.628         482.705        5.294          
+mode_serv06                   80.674         526.065        6.246          
+mode_serv07                   35.469         316.811        7.743          
+mode_serv07_dyn               73.447         434.703        6.557          
+mode_serv08                   45.853         394.579        7.983          
+@

@@ -1,0 +1,216 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.06.17.13.10.45;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "modeserv.h"
+#include <libgen.h>
+#include <assert.h>
+#include <sys/mman.h>
+
+/* Server: prefork, no locking */
+
+volatile sig_atomic_t quitflag = 0;
+int nchildren;
+static void sig_term(int signo)
+{
+    printf("process %ld terminated\n", (long) getpid());
+    exit(0);
+}
+
+struct child *Pch;
+static pid_t child_make(int, int);
+int *Pnchild;
+long *Pstat;
+static void _sig_int(int signo);
+
+int
+main(int argc, char **argv)
+{
+	int					listenfd, connfd, maxconn, minconn, n;
+	socklen_t			clilen;
+	struct sockaddr_in	cliaddr, servaddr;
+	void				sig_chld(int);
+	void				sig_int(int);
+    char c;
+
+    if (argc != 4)
+        err_quit("Usage: %s <port> <#children> <#max>", basename(argv[0]));
+
+	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
+
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family      = AF_INET;
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servaddr.sin_port        = htons(atoi(argv[1]));
+
+	Bind(listenfd, (SA *) &servaddr, sizeof(servaddr));
+
+	Listen(listenfd, LISTENQ);
+    minconn = nchildren = atoi(argv[2]);
+    maxconn = atoi(argv[3]);
+
+    Pch = Calloc(maxconn, sizeof(struct child));
+    if ((Pnchild = mmap(0, sizeof(int),
+                    PROT_READ|PROT_WRITE,
+                    MAP_ANON|MAP_SHARED, -1, 0)) == MAP_FAILED)
+        err_sys("mmap error");
+    if ((Pstat = mmap(0, sizeof(long) * maxconn,
+                    PROT_READ|PROT_WRITE,
+                    MAP_ANON|MAP_SHARED, -1, 0)) == MAP_FAILED)
+        err_sys("mmap error");
+
+#if 0
+	Signal(SIGCHLD, sig_chld);	/* must call waitpid() */
+#endif
+    Signal(SIGTERM, sig_term);
+
+    int i, nsel, maxfd = 0, nconn;
+    fd_set masterset, rset;
+
+	for (i = 0; i < nchildren; i++) {
+        /* parent prefork children */
+        child_make(i, listenfd);
+        FD_SET(Pch[i].child_pipefd, &masterset);
+        maxfd = max(maxfd, Pch[i].child_pipefd);
+	}
+
+    Signal(SIGINT, _sig_int);
+
+    for (;;) {
+        nconn = 0;
+        rset = masterset;
+        if ((nsel = select(maxfd+1, &rset, NULL, NULL, NULL)) < 0) {
+            if (errno == EINTR)
+                continue;
+            else
+                err_sys("select error");
+        } else if (nsel == 0) { /* _no_ need */
+            err_msg("select timeout");
+            continue;
+        }
+        for (i = 0; i < nchildren; i++) {
+            if (FD_ISSET(Pch[i].child_pipefd, &rset)) {
+                if ((n = Read(Pch[i].child_pipefd, &c, 1)) > 0) {
+                    if (c == '1')
+                        nconn++;
+                } else if (n == 0) {
+                    printf("The %ld terminated\n", (long)Pch[i].child_pid);
+                    Pch[i].child_pid = 0;
+                    Pch[i].child_pipefd = -1;
+                    if (--nchildren < minconn) {
+                        child_make(i, listenfd);
+                        FD_SET(Pch[i].child_pipefd, &masterset);
+                        maxfd = max(maxfd, Pch[i].child_pipefd);
+                    }
+                }
+            }
+            if (--nsel == 0)
+                break;
+        }
+        if (nconn == nchildren) {
+            if (nconn < maxconn) {
+                child_make(nchildren, listenfd);
+                FD_SET(Pch[nchildren].child_pipefd, &masterset);
+                maxfd = max(maxfd, Pch[nchildren].child_pipefd);
+                *Pnchild = ++nchildren;
+                printf("Busy, increase to %d\n", nchildren);
+            } else {
+                printf("Now max %d\n", nconn);
+            }
+        }
+    }
+    exit(0);
+}
+
+pid_t child_make(int i, int listenfd)
+{
+    int fd[2];
+    pid_t pid;
+
+    if (pipe(fd) < 0)
+        err_sys("pipe error");
+
+		if ((pid = Fork()) == 0) {	/* child process */
+            int connfd;
+            const int opt = 1;
+            struct sockaddr_in cliaddr;
+            socklen_t clilen;
+
+            close(fd[0]); /* close read */
+            /* setup non-block, if the parent terminated unexpeceted,
+             * write to pipe will no block
+             */
+            if (ioctl(fd[1], FIONBIO, &opt) < 0)
+                err_sys("iotcl error");
+
+            if (setsid() < 0) /* won't allocate
+                                 controlling terminal */
+                err_sys("setsid error");
+            printf("process %ld starting\n", (long) getpid());
+		    clilen = sizeof(cliaddr);
+            for (;;) {
+                Write(fd[1], "0", 1); /* Free */
+                if ((connfd = accept(listenfd, (SA *) &cliaddr, &clilen)) < 0) {
+		    	    if (errno == EINTR)
+		    		    continue;		/* back to for() */
+		    	    else
+		    	    	err_sys("accept error");
+                }
+                Write(fd[1], "1", 1); /* BUSY */
+                Pstat[i]++;
+                mode_reply(connfd);	/* process the request */
+                Close(connfd);
+		    }
+			exit(0);
+        }
+        /* parent continue */
+        Close(fd[1]); /* close write */
+        Pch[i].child_pid = pid;
+        Pch[i].child_pipefd = fd[0];
+        return pid;
+}
+
+static void _sig_int(int signo)
+{
+    void mode_cpu_time(void);
+    int i;
+
+    quitflag = 1; /* must before kill */
+    for (i = 0; i< nchildren; i++) {
+        kill(Pch[i].child_pid, SIGTERM);
+        printf(">>> pid %ld: %ld\n", (long)Pch[i].child_pid, Pstat[i]);
+    }
+    while (wait(NULL) > 0)
+        ;
+    if (errno != ECHILD)
+        err_sys("wait error");
+    mode_cpu_time();
+    if (munmap(Pstat, sizeof(long) * nchildren) < 0)
+        err_sys("munmap error");
+    if (munmap(Pnchild, sizeof(int)) < 0)
+        err_sys("munmap error");
+
+    exit(0);
+}
+
+
+@

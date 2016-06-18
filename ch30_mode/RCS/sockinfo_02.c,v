@@ -1,0 +1,255 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcun:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2016.06.10.12.47.50;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.06.09.13.12.54;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#include "modeserv.h"
+#include <libgen.h>
+#include <assert.h>
+#include <sys/mman.h>
+#include <libproc.h>
+#include <sys/proc_info.h>
+
+/* Server: prefork, no locking */
+
+int nchildren;
+pid_t *ppids;
+static void 
+sig_term(int signo)
+{
+	printf("process %ld terminated\n", (long)getpid());
+	exit(0);
+}
+
+long *pservice;			/* a array record the service count of each
+				 * child */
+
+int
+main(int argc, char **argv)
+{
+	int listenfd, connfd, nb;
+	socklen_t clilen;
+	struct sockaddr_in cliaddr, servaddr;
+	void sig_chld(int);
+	void sig_int(int);
+	struct socket_fdinfo si;
+
+	if (argc != 3)
+		err_quit("Usage: %s <port> <#children>", basename(argv[0]));
+
+	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
+
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servaddr.sin_port = htons(atoi(argv[1]));
+
+	Bind(listenfd, (SA *) & servaddr, sizeof(servaddr));
+
+	Listen(listenfd, LISTENQ);
+	nchildren = atoi(argv[2]);
+	/*
+	 * save the child pid to allow the main() to terminate all the
+	 * children
+	 */
+	if ((ppids = calloc(nchildren, sizeof(pid_t))) == NULL)
+		err_sys("calloc error");
+
+#if 0
+	int fd;
+	if ((fd = open("/dev/zero", O_RDWR, 0)) < 0)
+		err_sys("open error");
+	if ((pservice = mmap(0, sizeof(long) * nchildren,
+			     PROT_READ | PROT_WRITE,
+			     MAP_SHARED, fd, 0)) == MAP_FAILED)
+		err_sys("mmap error");
+	if (close(fd) < 0)
+		err_sys("close error");
+#endif				/* Mac OS X doesn't support the /dev/zero
+				 * mapping */
+	if ((pservice = mmap(0, sizeof(long) * nchildren,
+			     PROT_READ | PROT_WRITE,
+			     MAP_ANON | MAP_SHARED, -1, 0)) == MAP_FAILED)
+		err_sys("mmap error");
+
+#if 0
+	Signal(SIGCHLD, sig_chld);	/* must call waitpid() */
+#endif
+	Signal(SIGTERM, sig_term);
+
+	int i;
+
+	for (i = 0; i < nchildren; i++) {
+		if ((ppids[i] = Fork()) == 0) {	/* child process */
+			if (setsid() < 0)	/* won't allocate controlling
+						 * terminal */
+				err_sys("setsid error");
+			printf("process %ld starting\n", (long)getpid());
+			clilen = sizeof(cliaddr);
+			for (;;) {
+				if ((connfd = accept(listenfd, (SA *) & cliaddr, &clilen)) < 0) {
+					if (errno == EINTR)
+						continue;	/* back to for() */
+					else
+						err_sys("accept error");
+				}
+				pservice[i]++;
+				mode_reply(connfd);	/* process the request */
+				Close(connfd);
+			}
+			exit(0);
+		}
+		/* parent prefork children */
+	}
+
+	Signal(SIGINT, sig_int);
+
+	for (;;) {
+		if ((nb = proc_pidfdinfo(getpid(), listenfd, PROC_PIDFDSOCKETINFO, &si, sizeof(si))) <= 0)
+			err_sys("proc_pidfdinfo error");
+		if (nb < sizeof(si))
+			err_quit("proc_pidfdinfo failed");
+
+		printf("Recv-Q: %d; Send-Q: %d; Qlen: %hd; InQlen: %hd\n",
+		       si.psi.soi_rcv.sbi_cc,
+		       si.psi.soi_snd.sbi_cc,
+               si.psi.soi_qlen, si.psi.soi_incqlen);
+        printf("lport = %d; fport = %d\n",
+                ntohs(si.psi.soi_proto.pri_tcp.tcpsi_ini.insi_lport),
+                ntohs(si.psi.soi_proto.pri_tcp.tcpsi_ini.insi_fport));
+		sleep(1);
+	}
+	exit(0);
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d12 2
+a13 1
+static void sig_term(int signo)
+d15 2
+a16 2
+    printf("process %ld terminated\n", (long) getpid());
+    exit(0);
+d19 2
+a20 2
+long *pservice; /* a array record the service count of 
+               each child */
+d25 6
+a30 6
+	int					listenfd, connfd, nb;
+	socklen_t			clilen;
+	struct sockaddr_in	cliaddr, servaddr;
+	void				sig_chld(int);
+	void				sig_int(int);
+    struct socket_fdinfo si;
+d32 2
+a33 2
+    if (argc != 3)
+        err_quit("Usage: %s <port> <#children>", basename(argv[0]));
+d38 1
+a38 1
+	servaddr.sin_family      = AF_INET;
+d40 1
+a40 1
+	servaddr.sin_port        = htons(atoi(argv[1]));
+d42 1
+a42 1
+	Bind(listenfd, (SA *) &servaddr, sizeof(servaddr));
+d45 7
+a51 6
+    nchildren = atoi(argv[2]);
+    /* save the child pid to allow the main() to
+     * terminate all the children
+     */
+    if ((ppids = calloc(nchildren, sizeof(pid_t))) == NULL)
+        err_sys("calloc error");
+d54 15
+a68 14
+    int fd;
+    if ((fd = open("/dev/zero", O_RDWR, 0)) < 0)
+        err_sys("open error");
+    if ((pservice = mmap(0, sizeof(long) * nchildren,
+                    PROT_READ|PROT_WRITE,
+                    MAP_SHARED, fd, 0)) == MAP_FAILED)
+        err_sys("mmap error");
+    if (close(fd) < 0)
+        err_sys("close error");
+#endif /* Mac OS X doesn't support the /dev/zero mapping */
+    if ((pservice = mmap(0, sizeof(long) * nchildren,
+                    PROT_READ|PROT_WRITE,
+                    MAP_ANON|MAP_SHARED, -1, 0)) == MAP_FAILED)
+        err_sys("mmap error");
+d73 1
+a73 1
+    Signal(SIGTERM, sig_term);
+d75 1
+a75 1
+    int i;
+d79 16
+a94 16
+            if (setsid() < 0) /* won't allocate
+                                 controlling terminal */
+                err_sys("setsid error");
+            printf("process %ld starting\n", (long) getpid());
+		    clilen = sizeof(cliaddr);
+            for (;;) {
+                if ((connfd = accept(listenfd, (SA *) &cliaddr, &clilen)) < 0) {
+		    	    if (errno == EINTR)
+		    		    continue;		/* back to for() */
+		    	    else
+		    	    	err_sys("accept error");
+                }
+                pservice[i]++;
+                mode_reply(connfd);	/* process the request */
+                Close(connfd);
+		    }
+d97 1
+a97 1
+        /* parent prefork children */
+d100 1
+a100 1
+    Signal(SIGINT, sig_int);
+d102 16
+a117 12
+    for (;;) {
+    if ((nb = proc_pidfdinfo(getpid(), listenfd, PROC_PIDFDSOCKETINFO, &si, sizeof(si))) < 0)
+        err_sys("proc_pidfdinfo error");
+    if (nb < sizeof(si))
+        err_quit("proc_pidfdinfo failed");
+
+    printf("Recv-Q: %d; Send-Q: %d\n",
+            si.psi.soi_rcv.sbi_cc,
+            si.psi.soi_snd.sbi_cc);
+    sleep(1);
+    }
+    exit(0);
+@

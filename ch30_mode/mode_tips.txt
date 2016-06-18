@@ -1,0 +1,111 @@
+# ./mode_client 127.0.0.1 8888 5 1 4000
+
+tid 4536864768 will allocate thread data
+tid (4536864768) key (258) readline: 4000
+
+tid 4537401344 will allocate thread data
+tid (4537401344) key (258) readline: 4000
+
+tid 4537937920 will allocate thread data
+tid (4537937920) key (258) readline: 4000
+
+tid 4538474496 will allocate thread data
+tid (4538474496) key (258) readline: 4000
+
+tid 4536864768 will allocate thread data
+tid (4536864768) key (258) readline: 4000
+
+# ./mode_client 127.0.0.1 8888 1 5 4000
+
+tid 4369436672 will allocate thread data
+tid (4369436672) key (258) readline: 4000
+
+tid 4369436672 will allocate thread data
+tid (4369436672) key (258) readline: 4000
+
+tid 4369436672 will allocate thread data
+tid (4369436672) key (258) readline: 4000
+
+tid 4369973248 will allocate thread data
+tid (4369973248) key (258) readline: 4000
+
+tid 4369436672 will allocate thread data
+tid (4369436672) key (258) readline: 4000
+
+# ./mode_client 127.0.0.1 8888 2 5 4000
+
+tid 4509790208 will allocate thread data
+tid 4510326784 will allocate thread data
+tid (4509790208) key (258) readline: 4000
+
+tid (4510326784) key (258) readline: 4000
+
+tid 4509790208 will allocate thread data
+tid (4509790208) key (258) readline: 4000
+
+tid 4510326784 will allocate thread data
+tid (4510326784) key (258) readline: 4000
+
+tid 4509790208 will allocate thread data
+tid (4509790208) key (258) readline: 4000
+
+tid 4510326784 will allocate thread data
+tid (4510326784) key (258) readline: 4000
+
+tid 4509790208 will allocate thread data
+tid (4509790208) key (258) readline: 4000
+
+tid 4510326784 will allocate thread data
+tid (4510326784) key (258) readline: 4000
+
+tid 4509790208 will allocate thread data
+tid (4509790208) key (258) readline: 4000
+
+tid 4510326784 will allocate thread data
+tid (4510326784) key (258) readline: 4000
+
+# many client process
+connect error (49): 127.0.0.1:8888: Can't assign requested address
+
+# Client
+while :;do date; ./mode_client 127.0.0.1 8888 5 250 4000; sleep 3; done
+child (1): server returned 0 bytes: client port: 53367
+child (3): server returned 0 bytes: client port: 53370
+
+# Server
+grep 'done = 0' ./typescript
+read 0 bytes from client port: 53367, done = 0
+read 0 bytes from client port: 53370, done = 0
+
+# Client
+child (4): server returned 0 bytes: client port: 51263 (sent 5 bytes)
+# Server
+read 0 bytes from client port: 51263, done = 0, buflen = 0
+
+
+
+ps -ef | grep -w 8888 | grep -v grep | awk '{system("kill "$2)}'
+while :; do date; ps -ef | grep -w 8888 | grep -v grep; sleep 1; done
+
+#
+gongcun@macosx[chapter_30]# ./mode_serv02_dyn_v03 8888 3 3
+process 95906 (0) starting
+process 95907 (1) starting
+process 95908 (2) starting
+recv error: Socket is not connected
+recv got -1
+iotcl got -4294967296
+recv error: Socket is not connected
+recv got -1
+iotcl got -4294967296
+read 0 bytes from client port: 52179, done = 0, buflen = 0
+^C>>> pid 95906: 224
+process 95906 terminated
+>>> pid 95907: 226
+>>> pid 95908: 225
+process 95907 terminated
+process 95908 terminated
+
+user time = 10.472 ms, sys time = 91.745 ms 
+gongcun@macosx[chapter_30]# 
+

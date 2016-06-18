@@ -1,0 +1,116 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcun:1.3; strict;
+comment	@ * @;
+
+
+1.3
+date	2016.06.17.13.10.45;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.29.07.26.31;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.28.08.13.36;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@#include "unp.h"
+#include "modeserv.h"
+#include <libgen.h>
+#include <assert.h>
+
+
+int main(int argc, char *argv[])
+{
+    if (argc != 6)
+        err_quit("Usage: %s <hostname or IPaddr> <port> <#children> "
+                "<#loop/child> <#bytes/request>", basename(argv[0]));
+    int nchildren = atoi(argv[3]);
+    int nloops = atoi(argv[4]);
+    int nbytes = atoi(argv[5]);
+    if (nbytes >= MAXN || nbytes <=0)
+        err_quit("nbytes = %d", nbytes);
+    char request[MAXLINE], reply[MAXN];
+    snprintf(request, sizeof(request), "%d\n", nbytes);
+    int i, j, fd;
+    size_t n, nw;
+    pid_t pid;
+
+    for (i = 0; i < nchildren; i++) {
+        if ((pid = fork()) < 0) err_sys("fork error");
+        if (pid == 0) { /* child */
+            for (j = 0; j < nloops; j++) {
+                fd = mode_connect(argv[1], argv[2], SOCK_STREAM);
+                if ((nw = write(fd, request, strlen(request))) != strlen(request))
+                    err_sys("write error");
+                if ((n = Readn(fd, reply, nbytes)) != nbytes) {
+                    struct sockaddr_in localaddr;
+                    socklen_t addrlen = sizeof(struct sockaddr_in);
+                    if (getsockname(fd, (struct sockaddr *)&localaddr, &addrlen) < 0)
+                        err_sys("getsockname error");
+                    err_quit("child (%d): server returned %d bytes: client port: %d (sent %zd bytes)", 
+                            i, n, ntohs(localaddr.sin_port), nw);
+                }
+                if (close(fd) < 0)
+                    err_sys("close error");
+            }
+            printf("child %d done\n", i);
+            exit(0);
+        }
+        /* parent loops to fork() again */
+    }
+
+    while (wait(NULL) > 0)
+        ;
+    if (errno != ECHILD)
+        err_sys("wait error");
+    exit(0);
+}
+
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d15 2
+d20 1
+a20 1
+    size_t n;
+d28 1
+a28 1
+                if (write(fd, request, strlen(request)) != strlen(request))
+d30 8
+a37 2
+                if ((n = Readn(fd, reply, nbytes)) != nbytes)
+                    err_quit("server returned %d bytes", n);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a5 1
+#define MAXN 16384 /* max bytes to request from server */
+@

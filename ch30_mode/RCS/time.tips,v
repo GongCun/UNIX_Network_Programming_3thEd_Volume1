@@ -1,0 +1,369 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcun:1.3; strict;
+comment	@# @;
+
+
+1.3
+date	2016.06.17.13.31.04;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.06.17.13.07.07;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.06.17.13.03.02;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@gongcun@@macosx[chapter_30]# ./mode_serv00 8888
+^C
+user time = 31.259 ms, sys time = 319.181 ms 
+gongcun@@macosx[chapter_30]# 
+
+gongcun@@macosx[chapter_30]# ./mode_serv01 8888
+^C
+user time = 341.859 ms, sys time = 1394.7 ms 
+
+gongcun@@macosx[chapter_30]# ./mode_serv02 8888 5
+process 21354 starting
+process 21355 starting
+process 21356 starting
+process 21357 starting
+process 21358 starting
+^Cprocess 21354 terminated
+>>> pid 21354: 456
+>>> pid 21355: 655
+>>> pid 21356: 462
+>>> pid 21357: 457
+>>> pid 21358: 470
+process 21356 terminated
+process 21355 terminated
+process 21357 terminated
+process 21358 terminated
+
+user time = 21.425 ms, sys time = 344.518 ms 
+
+gongcun@@macosx[chapter_30]# ./mode_serv02_dyn 8888 5 10                                                                                
+process 21895 starting (0)
+process 21896 starting (1)
+process 21897 starting (2)
+process 21898 starting (3)
+process 21899 starting (4)
+^Cprocess 21895 terminated
+>>> pid 21895: 549
+>>> pid 21896: 369
+process 21896 terminated
+process 21897 terminated
+>>> pid 21897: 743
+>>> pid 21898: 502
+>>> pid 21899: 337
+process 21898 terminated
+process 21899 terminated
+
+user time = 5915.6 ms, sys time = 31539.7 ms 
+
+gongcun@@macosx[chapter_30]# ./mode_serv02_dyn_v02 8888 5 10
+process 25171 (0) starting
+process 25172 (1) starting
+process 25173 (2) starting
+process 25175 (4) starting
+process 25174 (3) starting
+process 25500 (5) starting
+process 25501 (6) starting
+process 25502 (7) starting
+process 25503 (8) starting
+process 25504 (9) starting
+process 25173 terminated
+process 25504 terminated
+process 25175 terminated
+process 25171 terminated
+process 25172 terminated
+^Cprocess 25174 terminated
+>>> pid 25174: 251
+>>> pid 25500: 251
+>>> pid 25501: 246
+>>> pid 25502: 244
+>>> pid 25503: 251
+process 25500 terminated
+process 25501 terminated
+process 25502 terminated
+process 25503 terminated
+
+user time = 46.788 ms, sys time = 448.764 ms
+
+gongcun@@macosx[chapter_30]# ./mode_serv03 8888 5
+process 25615 starting
+process 25616 starting
+process 25617 starting
+process 25618 starting
+process 25619 starting
+^Cprocess 25615 terminated
+>>> pid 25615: 516
+>>> pid 25616: 512
+>>> pid 25617: 479
+>>> pid 25618: 511
+>>> pid 25619: 482
+process 25616 terminated
+process 25617 terminated
+process 25618 terminated
+process 25619 terminated
+
+user time = 33.667 ms, sys time = 351.653 ms
+
+gongcun@@macosx[chapter_30]# ./mode_serv04 8888 5
+process 25837 starting
+process 25838 starting
+process 25839 starting
+process 25840 starting
+process 25841 starting
+^Cprocess 25837 terminated
+>>> pid 25837: 501
+>>> pid 25838: 496
+>>> pid 25839: 505
+>>> pid 25840: 497
+>>> pid 25841: 501
+process 25839 terminated
+process 25840 terminated
+process 25838 terminated
+process 25841 terminated
+
+user time = 31.066 ms, sys time = 318.687 ms
+
+gongcun@@macosx[chapter_30]# ./mode_serv04b 8888 5
+process 26118 starting
+process 26119 starting
+process 26120 starting
+process 26121 starting
+process 26122 starting
+^Cprocess 26118 terminated
+>>> pid 26118: 528
+>>> pid 26119: 517
+>>> pid 26120: 329
+>>> pid 26121: 337
+process 26119 terminated
+>>> pid 26122: 789
+process 26121 terminated
+process 26122 terminated
+process 26120 terminated
+
+user time = 37.983 ms, sys time = 348.66 ms
+
+gongcun@@macosx[chapter_30]# ./mode_serv05 8888 5
+child process 26236 starting
+child process 26237 starting
+child process 26238 starting
+child process 26239 starting
+child process 26240 starting
+^C>>> pid 26236: 552
+>>> pid 26237: 510
+>>> pid 26238: 490
+>>> pid 26239: 463
+>>> pid 26240: 485
+
+user time = 38.452 ms, sys time = 436.58 ms
+
+gongcun@@macosx[chapter_30]# ./mode_serv05_dyn 8888 5 10
+child process 26371 (0) starting
+child process 26372 (1) starting
+child process 26373 (2) starting
+child process 26375 (4) starting
+child process 26374 (3) starting
+child process 26500 (5) starting
+child process 26501 (6) starting
+child process 26502 (7) starting
+child process 26503 (8) starting
+child process 26504 (9) starting
+^Cprocess 26371 terminated
+>>> pid 26371: 431
+>>> pid 26372: 392
+>>> pid 26373: 382
+>>> pid 26374: 362
+>>> pid 26375: 311
+>>> pid 26500: 203
+>>> pid 26501: 190
+>>> pid 26502: 154
+>>> pid 26503: 58
+>>> pid 26504: 17
+process 26373 terminated
+process 26372 terminated
+process 26375 terminated
+process 26374 terminated
+process 26501 terminated
+process 26500 terminated
+process 26503 terminated
+process 26502 terminated
+process 26504 terminated
+
+user time = 44.628 ms, sys time = 482.705 ms
+
+gongcun@@macosx[chapter_30]# ./mode_serv06 8888
+^C
+user time = 80.674 ms, sys time = 526.065 ms
+
+gongcun@@macosx[chapter_30]# ./mode_serv07 8888 5
+tid 4545236992 (0) starting
+tid 4545773568 (1) starting
+tid 4546310144 (2) starting
+tid 4546846720 (3) starting
+tid 4547383296 (4) starting
+^C>>> tid 4545236992: 505
+>>> tid 4545773568: 495
+>>> tid 4546310144: 503
+>>> tid 4546846720: 495
+>>> tid 4547383296: 502
+
+user time = 35.469 ms, sys time = 316.811 ms 
+
+gongcun@@macosx[chapter_30]# ./mode_serv07_dyn 8888 5 10
+tid 4458475520 (0) starting
+tid 4459012096 (1) starting
+tid 4459548672 (2) starting
+tid 4460085248 (3) starting
+tid 4460621824 (4) starting
+tid 4461158400 (5) starting
+tid 4461694976 (6) starting
+tid 4462231552 (7) starting
+tid 4462768128 (8) starting
+tid 4463304704 (9) starting
+thread 4461694976 (6) exit: 252
+^C>>> tid 4458475520: 253
+>>> tid 4459012096: 242
+>>> tid 4459548672: 243
+>>> tid 4460085248: 254
+>>> tid 4460621824: 252
+>>> tid 4461158400: 245
+>>> tid 4462231552: 254
+>>> tid 4462768128: 254
+>>> tid 4463304704: 251
+
+user time = 73.447 ms, sys time = 434.703 ms
+
+
+gongcun@@macosx[chapter_30]# ./mode_serv08 8888 5
+tid 4455616512 (0) starting
+tid 4456153088 (1) starting
+tid 4456689664 (2) starting
+tid 4457226240 (3) starting
+tid 4457762816 (4) starting
+^C>>> tid 4455616512: 506
+>>> tid 4456153088: 502
+>>> tid 4456689664: 508
+>>> tid 4457226240: 505
+>>> tid 4457762816: 479
+
+user time = 45.853 ms, sys time = 394.579 ms 
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@a47 20
+gongcun@@macosx[chapter_30]# ./mode_serv02_dyn 8888 5 10                                                                                
+process 21895 starting (0)
+process 21896 starting (1)
+process 21897 starting (2)
+process 21898 starting (3)
+process 21899 starting (4)
+^Cprocess 21895 terminated
+>>> pid 21895: 549
+>>> pid 21896: 369
+process 21896 terminated
+process 21897 terminated
+>>> pid 21897: 743
+>>> pid 21898: 502
+>>> pid 21899: 337
+process 21898 terminated
+process 21899 terminated
+
+user time = 5915.6 ms, sys time = 31539.7 ms 
+
+
+d133 105
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a67 19
+gongcun@@macosx[chapter_30]# ./mode_serv02_dyn 8888 5 10                                                                                
+process 21895 starting (0)
+process 21896 starting (1)
+process 21897 starting (2)
+process 21898 starting (3)
+process 21899 starting (4)
+^Cprocess 21895 terminated
+>>> pid 21895: 549
+>>> pid 21896: 369
+process 21896 terminated
+process 21897 terminated
+>>> pid 21897: 743
+>>> pid 21898: 502
+>>> pid 21899: 337
+process 21898 terminated
+process 21899 terminated
+
+user time = 5915.6 ms, sys time = 31539.7 ms 
+
+d77 19
+a115 38
+gongcun@@macosx[chapter_30]# ./mode_serv02_dyn 8888 5 10                                                                                
+process 21895 starting (0)
+process 21896 starting (1)
+process 21897 starting (2)
+process 21898 starting (3)
+process 21899 starting (4)
+^Cprocess 21895 terminated
+>>> pid 21895: 549
+>>> pid 21896: 369
+process 21896 terminated
+process 21897 terminated
+>>> pid 21897: 743
+>>> pid 21898: 502
+>>> pid 21899: 337
+process 21898 terminated
+process 21899 terminated
+
+user time = 5915.6 ms, sys time = 31539.7 ms 
+process 25503 (8) starting
+process 25504 (9) starting
+process 25173 terminated
+process 25504 terminated
+process 25175 terminated
+process 25171 terminated
+process 25172 terminated
+^Cprocess 25174 terminated
+>>> pid 25174: 251
+>>> pid 25500: 251
+>>> pid 25501: 246
+>>> pid 25502: 244
+>>> pid 25503: 251
+process 25500 terminated
+process 25501 terminated
+process 25502 terminated
+process 25503 terminated
+
+user time = 46.788 ms, sys time = 448.764 ms
+
+@

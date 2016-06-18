@@ -1,0 +1,140 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcun:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2016.06.17.13.10.45;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.06.09.13.12.48;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#include "modeserv.h"
+#include <libgen.h>
+#include <libproc.h>
+#include <sys/proc_info.h>
+
+int
+main(int argc, char **argv)
+{
+	int listenfd, connfd;
+	pid_t childpid;
+	socklen_t clilen;
+	struct sockaddr_in cliaddr, servaddr;
+
+	if (argc != 2)
+		err_quit("Usage: %s <port>", basename(argv[0]));
+
+	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
+
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servaddr.sin_port = htons(atoi(argv[1]));
+
+	Bind(listenfd, (SA *) & servaddr, sizeof(servaddr));
+
+	Listen(listenfd, LISTENQ);
+	int i;
+
+	for (i = 0; i < 5; i++) {
+		if ((childpid = Fork()) == 0) {	/* child process */
+			for (;;) {
+				clilen = sizeof(cliaddr);
+				connfd = Accept(listenfd, (SA *) & cliaddr, &clilen);
+				str_echo(connfd);	/* process the request */
+			}
+			exit(0);
+		}
+	}
+
+	/* parent continue... */
+	struct socket_fdinfo si;
+	int nb;
+
+	for (;;) {
+		if ((nb = proc_pidfdinfo(getpid(), listenfd, PROC_PIDFDSOCKETINFO, &si, sizeof(si))) <= 0)
+			err_sys("proc_pidfdinfo error");
+		if (nb < sizeof(si))
+			err_quit("proc_pidfdinfo failed");
+
+		printf("Recv-Q: %d; Send-Q: %d\n",
+		       si.psi.soi_rcv.sbi_cc,
+		       si.psi.soi_snd.sbi_cc);
+		sleep(1);
+	}
+
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d9 4
+a12 4
+	int					listenfd, connfd;
+	pid_t				childpid;
+	socklen_t			clilen;
+	struct sockaddr_in	cliaddr, servaddr;
+d14 2
+a15 2
+    if (argc != 2)
+        err_quit("Usage: %s <port>", basename(argv[0]));
+d20 1
+a20 1
+	servaddr.sin_family      = AF_INET;
+d22 1
+a22 1
+	servaddr.sin_port        = htons(atoi(argv[1]));
+d24 1
+a24 1
+	Bind(listenfd, (SA *) &servaddr, sizeof(servaddr));
+d27 1
+a27 1
+    int i;
+d30 6
+a35 6
+		if ( (childpid = Fork()) == 0) {	/* child process */
+            for (;;) {
+		    clilen = sizeof(cliaddr);
+		    connfd = Accept(listenfd, (SA *) &cliaddr, &clilen);
+			str_echo(connfd);	/* process the request */
+            }
+d40 15
+a54 15
+    /* parent continue... */
+    struct socket_fdinfo si;
+    int nb;
+
+    for (;;) {
+    if ((nb = proc_pidfdinfo(getpid(), listenfd, PROC_PIDFDSOCKETINFO, &si, sizeof(si))) < 0)
+        err_sys("proc_pidfdinfo error");
+    if (nb < sizeof(si))
+        err_quit("proc_pidfdinfo failed");
+
+    printf("Recv-Q: %d; Send-Q: %d\n",
+            si.psi.soi_rcv.sbi_cc,
+            si.psi.soi_snd.sbi_cc);
+    sleep(1);
+    }
+@

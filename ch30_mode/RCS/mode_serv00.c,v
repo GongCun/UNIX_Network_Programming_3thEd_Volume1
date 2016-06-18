@@ -1,0 +1,131 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcun:1.3; strict;
+comment	@ * @;
+
+
+1.3
+date	2016.05.29.07.26.31;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.05.29.01.39.39;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.28.13.32.29;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@#include "modeserv.h"
+#include <libgen.h>
+#include <assert.h>
+
+/* TCP Iterative Server */
+int
+main(int argc, char **argv)
+{
+	int					listenfd, connfd;
+	socklen_t			clilen;
+	struct sockaddr_in	cliaddr, servaddr;
+	void				sig_chld(int);
+
+    if (argc != 2)
+        err_quit("Usage: %s <port>", basename(argv[0]));
+
+	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
+
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family      = AF_INET;
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servaddr.sin_port        = htons(atoi(argv[1]));
+
+	Bind(listenfd, (SA *) &servaddr, sizeof(servaddr));
+
+	Listen(listenfd, LISTENQ);
+
+    if (signal(SIGINT, sig_int) == SIG_ERR)
+        err_sys("signal error");
+
+	for (;;) {
+		clilen = sizeof(cliaddr);
+		if ((connfd = accept(listenfd, (SA *) &cliaddr, &clilen)) < 0) {
+			if (errno == EINTR)
+				continue;
+			else
+				err_sys("accept error");
+		}
+
+        mode_reply(connfd); /* process the request */
+		Close(connfd);
+	}
+    exit(0);
+}
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@a4 1
+
+a12 1
+    int count;
+d31 1
+a31 1
+	for (count = 0; ;count++ ) {
+a41 1
+        printf("reply %d finished\n", count);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d5 1
+a10 1
+	pid_t				childpid;
+d14 4
+d24 1
+a24 1
+	servaddr.sin_port        = htons(SERV_PORT);
+d30 2
+a31 1
+	Signal(SIGCHLD, sig_chld);	/* must call waitpid() */
+d33 1
+a33 1
+	for ( ; ; ) {
+d35 1
+a35 1
+		if ( (connfd = accept(listenfd, (SA *) &cliaddr, &clilen)) < 0) {
+d37 1
+a37 1
+				continue;		/* back to for() */
+d42 3
+a44 6
+		if ( (childpid = Fork()) == 0) {	/* child process */
+			Close(listenfd);	/* close listening socket */
+			str_echo(connfd);	/* process the request */
+			exit(0);
+		}
+		Close(connfd);			/* parent closes connected socket */
+d46 1
+@

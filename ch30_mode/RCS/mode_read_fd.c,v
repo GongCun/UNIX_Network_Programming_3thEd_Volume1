@@ -1,0 +1,74 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcun:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2016.06.17.13.10.45;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.06.04.13.34.43;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#include "modeserv.h"
+
+ssize_t mode_read_fd(int fd, void *ptr, size_t nbytes, int *pfd)
+{
+    struct iovec iov[1];
+    struct msghdr msg;
+    struct cmsghdr *pcmsg;
+    int n;
+    u_char control[sizeof(struct cmsghdr) + sizeof(int)];
+
+    iov[0].iov_base = ptr;
+    iov[0].iov_len = nbytes;
+    msg.msg_iov = iov;
+    msg.msg_iovlen = 1;
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+    msg.msg_control = control;
+    msg.msg_controllen = sizeof(control);
+
+    if ((n = recvmsg(fd, &msg, 0)) < 0)
+        return n;
+
+    if ((pcmsg = CMSG_FIRSTHDR(&msg)) != NULL &&
+            pcmsg->cmsg_len ==  CMSG_LEN(sizeof(int))) {
+        if (pcmsg->cmsg_level != SOL_SOCKET)
+            err_quit("control level != SOL_SOCKET");
+        if (pcmsg->cmsg_type != SCM_RIGHTS)
+            err_quit("control type != SCM_RIGHTS");
+        *pfd = *((int *)CMSG_DATA(pcmsg));
+    } else 
+        err_quit("control len != CMSG_LEN(sizeof(int))");
+    return n;
+}
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d21 1
+a21 1
+        err_sys("recvmsg error");
+@
