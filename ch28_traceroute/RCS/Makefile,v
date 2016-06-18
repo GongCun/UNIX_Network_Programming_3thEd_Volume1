@@ -1,0 +1,57 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcun:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2016.05.07.00.55.18;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.05.07.00.54.03;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@include ../Make.defines
+
+PROGS =	rawtracert
+
+all:	${PROGS}
+
+rawtracert:	raw_main.c raw_tracert.c 
+		sudo ${CC} ${CFLAGS} -D_DEBUG -o $@@ $^ ${LIBS}
+		sudo chown root $@@
+		sudo chmod u+s $@@
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 1
+a3 1
+PROGS =	rawping
+d7 2
+a8 2
+rawping:	raw_main.c raw_ping.c 
+		sudo ${CC} ${CFLAGS} -D_DEBUG -D_THREAD_TEST -o $@@ $^ ${LIBS}
+@
