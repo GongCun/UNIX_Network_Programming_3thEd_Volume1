@@ -1,0 +1,42 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.19.23.24.18;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@CC = xlc
+CFLAGS = -g -q64
+
+PROGS = sockq
+
+all:	$(PROGS)
+
+sockq:	sockq.o procfile.o
+		$(CC) $(CFLAGS) -o $@@ $^
+
+sockq.o:	sockq.c
+		$(CC) $(CFLAGS) -c -o $@@ $^
+
+procfile.o:	procfile.c
+		$(CC) $(CFLAGS) -D_KERNEL -c -o $@@ $^
+
+clean:
+		rm -f $(PROGS) core *.o
+@

@@ -1,0 +1,19 @@
+* If want to see if the server is busy and need to fork new child to process
+* the connection, another apporach is to look at the length of Send-Q & Recv-Q.
+* But this approach has two inconveniences:
+*
+*   1. Parent process can only check the Q-length of listen FD, but the listen FD
+*      can't use recv(MSG_PEEK|MSG_DONTWAIT) or ioctl(FIONREAD), these two
+*      functions can only use in established FD.
+*
+*   2. If want to check the Q-length of listen FD, must check the kernel
+*      information, and therefore can't be used cross-platform.
+*
+*      - Linux: check the /proc/*pid*/fd/*fd#* and /proc/net/tcp
+*
+*      - MaxOS: use proc_pidfdinfo()
+*
+*      - AIX:   use getprocs() to get the file pointer, then read the socket
+*               information from file table entry from /dev/kmem
+*
+* I just put the key file in the corresponding directory.
