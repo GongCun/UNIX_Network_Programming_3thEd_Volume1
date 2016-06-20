@@ -1,0 +1,33 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2015.11.07.13.04.52;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef _MY_ADVUDP_H
+#define _MY_ADVUDP_H
+
+#include "unp.h"
+ssize_t 
+my_recvfrom_flags(int fd, void *ptr, size_t nbytes, int *flagsp,
+        SA *sa, socklen_t *salenptr, struct unp_in_pktinfo *pktp);
+
+#endif
+@

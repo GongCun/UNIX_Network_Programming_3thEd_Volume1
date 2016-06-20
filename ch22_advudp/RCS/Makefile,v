@@ -1,0 +1,133 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcun:1.3; strict;
+comment	@# @;
+
+
+1.3
+date	2016.06.20.13.37.31;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2015.11.08.12.35.22;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.11.07.12.57.46;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@include ../Make.defines
+
+PROGS = 
+
+all:	${PROGS} adv_udpserv01 adv_udpcli01 test_getifaddrs
+
+$(PROGS):	%: %.o	
+		${CC} ${CFLAGS} -o $@@ $< ${LIBS}
+
+adv_udpserv01:	adv_udpserv01.o adv_dg_echo.o adv_recvfrom_flags.o
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+
+adv_udpcli01:	adv_udpcli01.o adv_dg_cli.o adv_dg_send_recv.o rtt_lib.o
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+
+test_getifaddrs: test_getifaddrs.o adv_inet_masktop.o
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+
+adv_udpserv02: adv_udpserv02.o adv_mydg_echo.o
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d5 1
+a5 1
+all:	${PROGS} 
+d10 10
+a19 1
+tcp_connect_timeo: tcp_connect_timeo.o my_connect_timeo.o
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 1
+a3 4
+PROGS =	tcpcli01 tcpcli02 tcpserv02 \
+		udpcli01 udpcli02 udpcli03 \
+		udpserv01 udpserv03 udpserv04 \
+		daytimetcpcli daytimeudpcli3 daytimeudpcli4
+d5 1
+a5 1
+all:	${PROGS}
+d7 2
+a8 2
+tcpcli01:	tcpcli01.o
+		${CC} ${CFLAGS} -o $@@ tcpcli01.o ${LIBS}
+d10 2
+a11 39
+tcpcli02:	tcpcli02.o str_cli_select02.o
+		${CC} ${CFLAGS} -o $@@ tcpcli02.o str_cli_select02.o ${LIBS}
+
+tcpcli03:	tcpcli03.o str_cli_poll03.o
+		${CC} ${CFLAGS} -o $@@ tcpcli03.o str_cli_poll03.o ${LIBS}
+
+tcpcli04:	tcpcli04.o str_cli_kqueue04.o
+		${CC} ${CFLAGS} -o $@@ tcpcli04.o str_cli_kqueue04.o ${LIBS}
+
+tcpserv02:	tcpserv02.o str_echo_stdio02.o sig_chld_waitpid.o
+		${CC} ${CFLAGS} -o $@@ tcpserv02.o str_echo_stdio02.o \
+			sig_chld_waitpid.o ${LIBS}
+
+udpcli01:	udpcli01.o dgclitimeo1.o
+		${CC} ${CFLAGS} -o $@@ udpcli01.o dgclitimeo1.o ${LIBS}
+
+udpcli02:	udpcli02.o dgclitimeo2.o
+		${CC} ${CFLAGS} -o $@@ udpcli02.o dgclitimeo2.o ${LIBS}
+
+udpcli03:	udpcli03.o dgclitimeo3.o
+		${CC} ${CFLAGS} -o $@@ udpcli03.o dgclitimeo3.o ${LIBS}
+
+udpserv01:	udpserv01.o dgechoaddr.o recvfromflags.o
+		${CC} ${CFLAGS} -o $@@ udpserv01.o dgechoaddr.o recvfromflags.o ${LIBS}
+
+udpserv03:	udpserv03.o
+		${CC} ${CFLAGS} -o $@@ udpserv03.o ${LIBS}
+
+udpserv04:	udpserv04.o
+		${CC} ${CFLAGS} -o $@@ udpserv04.o ${LIBS}
+
+daytimetcpcli:	daytimetcpcli.o
+		${CC} ${CFLAGS} -o $@@ daytimetcpcli.o ${LIBS}
+
+daytimeudpcli3:	daytimeudpcli3.o
+		${CC} ${CFLAGS} -o $@@ daytimeudpcli3.o ${LIBS}
+
+daytimeudpcli4:	daytimeudpcli4.o
+		${CC} ${CFLAGS} -o $@@ daytimeudpcli4.o ${LIBS}
+@

@@ -1,0 +1,119 @@
+/*
+ * function get_ifi_info returns a linked list of structures, 
+ * one for each interface that is currently "up".
+ *
+ * The Linux provides a function named getifaddrs with similar functionality.
+ *
+ */
+
+/*
+>> Initialization of 'ifconf' structure before 'SIOCGIFCONF'
+ifconf{}
+ifc_len
+ifc_buf (input from user -> kernel)
+
+>> Values returned by 'SIOCGIFCONF'
+ifconf{}
+ifc_len (64 or more, returned by kernel)
+ifc_req --> -----------------
+            | ifr_name[] | 
+            |------------|ifreq{}
+            | socket addr|
+            | structure  |
+            |------------|---
+            | ifr_name[] |
+            |------------|ifreq{}
+            | socket addr|
+            | structure  |
+            |------------|---
+
+*/
+
+struct ifreq {
+    char ifr_name[IFNAMESIZ];
+    union {
+        struct sockaddr ifru_addr;
+        struct sockaddr ifru_dstaddr;
+        struct sockaddr ifru_broadaddr;
+        short ifru_flags;
+        int ifru_metric;
+        caddr_t ifru_data;
+    } ifr_ifru;
+};
+
+
+struct ifi_info {
+    char ifi_name[IFI_NAME]; /* interface name, null-terminated */
+    short ifi_index; /* interface index */
+    short ifi_mtu; /* interface MTU */
+    u_char ifi_haddr[IFI_HADDR]; /* hardware address */
+    u_short ifi_hlen; /*# bytes in hardware address: 0, 6, 8 */
+    short ifi_flags; /* IFF_xxx contains from <net/if.h> */
+    short ifi_myflags; /* our own IFI_xxx flags */
+    struct sockaddr *ifi_addr; /* primary address */
+    struct sockaddr *ifi_brdaddr; /* broadcase address */
+    struct sockaddr *ifi_dstaddr; /* destination address */
+    struct ifi_info *ifi_next; /* next of these structures */
+};
+    
+/*
+ * sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+ *
+ * struct ifconf ifc;
+ * buf = malloc(len);
+ *
+ * ifc.ifc_len = len;
+ * ifc.ifc_buf = buf;
+ *
+ * struct ifi_info *ifi, *ifihead, **ifipnext;
+ * struct ifreq ifrcopy, *ifr;
+ *
+ * ifihead = NULL;
+ * ifipnext = &ifihead;
+ *
+ * ioctl(sockfd, SIOCGIFCONF, &ifc);
+ *
+ * for (ptr = buf; ptr < buf + ifc.ifc.len; ) {
+ *   ifr = (struct ifreq *) ptr;
+ *   ifrcopy = *ifr
+ *
+ *   len = sizeof(struct sockaddr);
+ *   ptr += sizeof(ifr->ifr_name) + len;
+ *   
+ *   ioctl(sockfd, SIOCGIFFLAGS, &ifcopy);
+ *   flags = ifrcopy.ifr_ifru.ifru_flags;
+ *   if ((flags & IFF_UP) == 0)
+ *     continue;
+ *
+ *   ifi = calloc(1, sizeof(struct ifi_info));
+ *   *ifipnext = ifi;
+ *   ifipnext = &ifi->ifi_next;
+ *
+ *   ifi->ifi_flags = flags;
+ *
+ *   ioctl(sockfd, SIOCGIFMTU, &ifrcopy);
+ *   ifi->ifi_mtu = ifrcopy.ifr_ifru.ifru_mtu;
+ *
+ *   memcpy(ifi->ifi_name, ifr->ifr_name, IFI_NAME);
+ *
+ *   sinptr = (struct sockaddr_in *)ifr->ifr_ifru.ifru_addr;
+ *   ifi->ifi_addr = calloc(1, sizeof(sockaddr_in));
+ *   memcpy(ifi->ifi_addr, sinptr, sizeof(struct sockaddr_in));
+ *
+ *   ioctl(sockfd, SIOCGIFBRDADDR, &ifrcopy);
+ *   sinptr = (struct sockaddr_in *)ifr->ifr_ifru.ifru_broadaddr;
+ *   ifi->ifi_brdaddr = calloc(1, sizeof(sockaddr_in));
+ *   memcpy(ifi->ifi_brdaddr, sinptr, sizeof(struct sockaddr_in));
+ *   
+ *   ioctl(sockfd, SIOCGIFDSTADDR, &ifrcopy);
+ *   sinptr = (struct sockaddr_in *)ifr->ifr_ifru.ifru_dstaddr;
+ *   ifi->ifi_dstaddr = calloc(1, sizeof(sockaddr_in));
+ *   memcpy(ifi->ifi_dstaddr, sinptr, sizeof(struct sockaddr_in));
+ *
+ *   ...
+ * }
+ *
+ */
+
+
+

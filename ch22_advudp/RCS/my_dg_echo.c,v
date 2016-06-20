@@ -1,0 +1,40 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2015.11.08.13.24.22;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include	"unp.h"
+
+void
+dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
+{
+	int			n;
+	socklen_t	len;
+	char		mesg[MAXLINE];
+
+	for ( ; ; ) {
+		len = clilen;
+		n = Recvfrom(sockfd, mesg, MAXLINE, 0, pcliaddr, &len);
+
+		Sendto(sockfd, mesg, n, 0, pcliaddr, len);
+	}
+}
+@

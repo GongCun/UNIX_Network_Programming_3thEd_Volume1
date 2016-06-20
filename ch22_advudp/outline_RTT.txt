@@ -1,0 +1,37 @@
+/*
+ * delta = mesuredRTT - srtt
+ * srtt <- srtt + g * delta
+ * rttvar <- rttvar + h(|delta| - rttvar)
+ * RTO = srtt + 4 * rttvar
+ * (g = 1/8, h = 1/4)
+ */
+static sigjmp_buf jmpbuf;
+{
+    ...;
+    /* from request */
+
+    signal(SIGALRM, sig_alrm); /* establish signal handler */
+    rtt_network(); /* initialize rexmt counter to 0 */
+sendagain:
+    sendto();
+    alarm(rtt_start()); /* set alarm for RTO seconds */
+    if (sigsetjmp(jmpbuf, 1) != 0) {
+        if (rtt_timeout()) /* double RTO, retransmitted enough? */
+            give up;
+        goto sendagain; /* retransmit */
+    }
+    do {
+        recvfrom();
+    } while (wrong sequence#);
+
+    alarm(0); /* turn off alarm */
+    rtt_stop(); /* calculate RTT and update estimators */
+
+    process reply;
+    ...;
+}
+
+void sig_alrm(int signo)
+{
+    siglongjmp(jmpbuf, 1);
+}

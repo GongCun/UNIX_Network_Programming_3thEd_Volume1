@@ -1,0 +1,33 @@
+Script started on Mon 23 Nov 2015 08:15:55 PM CST
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudp[?1034hgongcun@centos6[advudp]# ./adv_udpserv01_m[Kcentos &
+[1] 28668
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudpgongcun@centos6[advudp]# 6-bytes datagram from 192.168.0.104:63068
+5-bytes datagram from 192.168.0.104:63068
+16-bytes datagram from 192.168.0.104:63068
+20-bytes datagram from 192.168.0.104:63068 (datagram truncated)
+
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudpgongcun@centos6[advudp]# kill %1
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudp[1]+  Terminated              ./adv_udpserv01_centos
+gongcun@centos6[advudp]# 
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudpgongcun@centos6[advudp]# 
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudpgongcun@centos6[advudp]# 
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudpgongcun@centos6[advudp]# exit
+exit
+
+Script done on Mon 23 Nov 2015 08:16:47 PM CST
+Script started on Mon 23 Nov 2015 08:26:49 PM CST
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudp[?1034hgongcun@centos6[advudp]# date
+Mon Nov 23 20:26:53 CST 2015
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudpgongcun@centos6[advudp]# exit
+exit
+
+Script done on Mon 23 Nov 2015 08:26:55 PM CST
+Script started on Mon 23 Nov 2015 08:35:37 PM CST
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudp[?1034hgongcun@centos6[advudp]# date
+Mon Nov 23 20:35:39 CST 2015
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudpgongcun@centos6[advudp]# hostname
+centos6
+]0;gongcun@centos6:~/Develop/unp/Volume1/advudpgongcun@centos6[advudp]# exit
+exit
+
+Script done on Mon 23 Nov 2015 08:35:41 PM CST

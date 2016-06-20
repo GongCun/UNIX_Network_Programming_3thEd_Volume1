@@ -1,0 +1,236 @@
+head	1.6;
+access;
+symbols;
+locks
+	gongcun:1.6; strict;
+comment	@ * @;
+
+
+1.6
+date	2015.12.08.07.57.13;	author gongcun;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2015.12.08.07.15.40;	author gongcun;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2015.12.08.05.34.34;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2015.12.07.00.15.19;	author gongcun;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2015.12.07.00.02.00;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.12.06.13.21.30;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@#include "adv_unpifi.h"
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+
+int main(void)
+{
+    struct ifaddrs *ifp, *ifphead;
+    struct ifreq ifr, ifrcopy;
+    struct ifconf ifc;
+    int sockfd, len;
+    char *buf;
+
+    if (getifaddrs(&ifp) < 0)
+        err_sys("getifaddrs error");
+
+    sockfd = Socket(AF_INET, SOCK_DGRAM, 0);
+
+    for (ifphead = ifp; ifp != NULL; ifp = ifp->ifa_next) {
+        if (ifp->ifa_addr->sa_family == AF_INET) {
+            if (ifp->ifa_flags & IFF_UP)
+                printf("UP ");
+            printf("%s\n", ifp->ifa_name);
+            printf("inet: %s; ", Sock_ntop(ifp->ifa_addr, sizeof(*ifp->ifa_addr)));
+            printf("netmask: %s\n", adv_inet_masktop(ifp->ifa_netmask, sizeof(*ifp->ifa_netmask)));
+
+            /* Get broadcast address */
+#ifdef SIOCGIFBRDADDR
+            if (ifp->ifa_flags & IFF_BROADCAST) {
+                bzero(&ifr, sizeof(struct ifreq));
+                strncpy(ifr.ifr_name, ifp->ifa_name, IFNAMSIZ);
+                if (ioctl(sockfd, SIOCGIFBRDADDR, &ifr) < 0)
+                    err_sys("ioctl error");
+                printf("broadcast: %s\n", Sock_ntop(&ifr.ifr_ifru.ifru_broadaddr, sizeof(struct sockaddr)));
+            }
+#endif
+        }
+    }
+
+    freeifaddrs(ifphead);
+
+    return (0);
+}
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a3 1
+#include <net/if.h>
+d9 1
+a9 1
+    struct ifreq ifr, *ifrp;
+d14 2
+a17 2
+    int lastlen = 0;
+    len = 100 * sizeof(struct ifreq);
+d19 18
+a36 12
+
+    for (;;) {
+        buf = Malloc(len);
+        ifc.ifc_len = len;
+        ifc.ifc_buf = buf;
+        if (ioctl(sockfd, SIOCGIFCONF, &ifc) < 0) {
+            if (errno != EINVAL || lastlen != 0)
+                err_sys("ioctl SIOCGIFCONF error");
+        } else {
+            if (ifc.ifc_len == lastlen)
+                break; /* success, len has not changed */
+            lastlen = ifc.ifc_len;
+a37 3
+
+        len += 10 * sizeof(struct ifreq); /* increment */
+        free(buf);
+d40 1
+a40 1
+    printf("%d\n", lastlen);
+a41 8
+    ifrp = (struct ifreq *)buf;
+    printf("%s\n", ifrp->ifr_name);
+    ifr = *ifrp;
+    if (ioctl(sockfd, SIOCGIFFLAGS, &ifr) < 0)
+        err_sys("ioctl error");
+    if (ifr.ifr_ifru.ifru_flags & IFF_UP)
+        printf("UP\n");
+    
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a3 1
+#include <sys/ioctl.h>
+a13 2
+    if (getifaddrs(&ifp) < 0)
+        err_sys("getifaddrs error");
+d15 16
+a30 41
+    for (ifphead = ifp; ifp != NULL; ifp = ifp->ifa_next) {
+        if (ifp->ifa_addr->sa_family == AF_INET) {
+            if (ifp->ifa_flags & IFF_UP)
+                printf("UP ");
+            printf("%s\n", ifp->ifa_name);
+            printf("inet: %s; ", Sock_ntop(ifp->ifa_addr, sizeof(*ifp->ifa_addr)));
+            printf("netmask: %s\n", adv_inet_masktop(ifp->ifa_netmask, sizeof(*ifp->ifa_netmask)));
+
+            /* Get broadcast address */
+#ifdef SIOCGIFBRDADDR
+            if (ifp->ifa_flags & IFF_BROADCAST) {
+                /*
+                len = 1000 * sizeof(struct ifreq);
+                buf = Calloc(1, len);
+                ifc.ifc_len = len;
+                ifc.ifc_buf = buf;
+                sockfd = Socket(AF_INET, SOCK_DGRAM, 0);
+                if (ioctl(sockfd, SIOCGIFCONF, &ifc) < 0)
+                    if (errno != EINVAL) {
+                        err_sys("ioctl error");
+                    } else {printf("error\n");}
+                ifrp = (struct ifreq *)buf;
+                printf("%s\n", ifrp->ifr_name);
+                */
+                snprintf(ifr.ifr_name, IFNAMSIZ, ifp->ifa_name); 
+                ifr.ifr_name[IFNAMSIZ-1] = '\0';
+                memcpy((struct sockaddr_in *)&(ifr.ifr_ifru.ifru_addr), (struct sockaddr_in *)ifp->ifa_addr, sizeof(struct sockaddr_in));
+                if (ifr.ifr_ifru.ifru_addr.sa_family == AF_INET)
+                    printf("AF_INET\n");
+
+                printf("\n%s\n", Sock_ntop(&ifr.ifr_ifru.ifru_addr, sizeof(struct sockaddr_in)));
+
+                sockfd = Socket(AF_INET, SOCK_DGRAM, 0);
+                Ioctl(sockfd, SIOCGIFFLAGS, &ifr);
+                if (ifr.ifr_ifru.ifru_flags & IFF_BROADCAST)
+                    printf("broadcast\n");
+                /*
+                printf("broadcast: %s\n", Sock_ntop(&ifr.ifr_ifru.ifru_broadaddr, sizeof(struct sockaddr)));
+                */
+#endif
+            }
+d32 3
+d37 1
+a37 1
+    freeifaddrs(ifphead);
+d39 8
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d3 2
+d9 4
+d24 34
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d2 1
+d13 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a6 4
+    ifp = calloc(1, sizeof(struct ifaddrs));
+    if (ifp == NULL)
+        err_sys("calloc error");
+
+@
