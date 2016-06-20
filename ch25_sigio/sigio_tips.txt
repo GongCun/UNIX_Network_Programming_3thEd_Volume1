@@ -1,0 +1,54 @@
+# Client
+$ i=0; while [ $i -lt 6 ]; do ./sigio_udpcli 127.0.0.1 8888 </etc/services >/dev/null & ((i+=1)); done
+[1] 78972
+[2] 78973
+[3] 78974
+[4] 78975
+[5] 78976
+[6] 78977
+
+$ 
+[1]   Done                    ./sigio_udpcli 127.0.0.1 8888 < /etc/services > /dev/null
+[2]   Done                    ./sigio_udpcli 127.0.0.1 8888 < /etc/services > /dev/null
+[3]   Done                    ./sigio_udpcli 127.0.0.1 8888 < /etc/services > /dev/null
+[4]   Done                    ./sigio_udpcli 127.0.0.1 8888 < /etc/services > /dev/null
+[5]-  Done                    ./sigio_udpcli 127.0.0.1 8888 < /etc/services > /dev/null
+[6]+  Done                    ./sigio_udpcli 127.0.0.1 8888 < /etc/services > /dev/null
+
+
+# Server
+$ ./sigio_udpserv 8888 &
+[1] 78961
+$ 
+$ 
+$ kill -HUP 78961
+$ cntread[0] = 0
+cntread[1] = 0
+cntread[2] = 0
+cntread[3] = 0
+cntread[4] = 0
+cntread[5] = 0
+cntread[6] = 0
+cntread[7] = 0
+cntread[8] = 0
+
+$ kill -HUP 78961
+cntread[0] = 18009
+cntread[1] = 24507
+cntread[2] = 15931
+cntread[3] = 5093
+cntread[4] = 2082
+cntread[5] = 506
+cntread[6] = 186
+cntread[7] = 0
+cntread[8] = 0
+
+# Send
+$ wc -l /etc/services
+   13937 /etc/services
+$ echo "13937 * 6" | bc -l
+83622
+
+# Handle
+$ echo "24507 + 15931*2 + 5093*3 + 2082*4 + 506*5 + 186" | bc -l
+82692
