@@ -1,0 +1,22 @@
+Moob_cli01	oob_cli01.c	/^int main(int argc, char **argv)$/
+Moob_cli02	oob_cli02.c	/^int main(int argc, char **argv)$/
+Moob_cli02_no_oob	oob_cli02_no_oob.c	/^int main(int argc, char **argv)$/
+Moob_cli03	oob_cli03.c	/^int main(int argc, char **argv)$/
+Moob_cli04	oob_cli04.c	/^int main(int argc, char **argv)$/
+Moob_hb_cli01	oob_hb_cli01.c	/^int main(int argc, char *argv[])$/
+Moob_hb_serv01	oob_hb_serv01.c	/^int main(int argc, char *argv[])$/
+Moob_serv01	oob_serv01.c	/^int main(int argc, char **argv)$/
+Moob_serv02	oob_serv02.c	/^int main(int argc, char **argv)$/
+Moob_serv02_err	oob_serv02_err.c	/^int main(int argc, char **argv)$/
+Moob_serv03	oob_serv03.c	/^int main(int argc, char **argv)$/
+Moob_serv04	oob_serv04.c	/^int main(int argc, char **argv)$/
+Moob_serv04_v2	oob_serv04_v2.c	/^int main(int argc, char **argv)$/
+Moob_serv05	oob_serv05.c	/^int main(int argc, char **argv)$/
+Moob_serv_poll	oob_serv_poll.c	/^int main(int argc, char **argv)$/
+oob_heartbeat_cli	oob_heartbeat_cli.c	/^void oob_heartbeat_cli(int servfd_arg, int nsec_ar/
+oob_heartbeat_serv	oob_heartbeat_serv.c	/^void oob_heartbeat_serv(int servfd_arg, int nsec_a/
+oob_str_cli	oob_str_cli.c	/^void oob_str_cli(FILE *fp, int sockfd)$/
+oob_str_echo	oob_str_echo.c	/^void oob_str_echo(int sockfd)$/
+sig_alrm	oob_heartbeat_cli.c	/^static void sig_alrm(int signo)$/
+sig_chld	oob_hb_serv01.c	/^static void sig_chld(int signo)$/
+sig_urg	oob_heartbeat_cli.c	/^static void sig_urg(int signo)$/

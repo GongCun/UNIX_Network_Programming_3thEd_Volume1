@@ -1,0 +1,173 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcun:1.3.1.1; strict;
+comment	@ * @;
+
+
+1.3
+date	2016.02.28.11.44.51;	author gongcun;	state Exp;
+branches
+	1.3.1.1;
+next	1.2;
+
+1.2
+date	2016.02.28.06.50.20;	author gongcun;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.02.28.06.20.12;	author gongcun;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2016.02.28.12.50.28;	author gongcun;	state Exp;
+branches;
+next	;
+
+1.3.1.1
+date	2016.02.28.12.56.55;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@#include "oobex.h"
+
+void oob_str_cli(FILE *fp, int sockfd)
+{
+    char buf[MAXLINE];
+    int n;
+
+    oob_heartbeat_cli(sockfd, 1, 5);
+
+start:
+    while ( (n = read(fileno(fp), buf, MAXLINE)) >= 0 ) {
+        Writen(sockfd, buf, n);
+again:
+        if ((n = read(sockfd, buf, MAXLINE)) <= 0) {
+            if (errno == EINTR)
+                goto again;
+            err_quit("server terminated");
+        }
+        Writen(fileno(stdout), buf, n);
+    }
+    if (n < 0 && errno == EINTR) {
+        goto start;
+    } else if (n < 0)
+        err_sys("read fp error");
+}
+
+@
+
+
+1.3.1.1
+log
+@*** empty log message ***
+@
+text
+@d8 1
+a8 1
+    /* oob_heartbeat_cli(sockfd, 1, 5); */
+d11 1
+a11 1
+    while ( (n = read(fileno(fp), buf, MAXLINE)) > 0 ) {
+@
+
+
+1.2
+log
+@For test heartbeat version.
+@
+text
+@d11 2
+a12 2
+    while (fgets(buf, MAXLINE, fp) != NULL) {
+        Writen(sockfd, buf, strlen(buf));
+d14 1
+a14 1
+        if ((n = read(sockfd, buf, MAXLINE-1)) <= 0) {
+d19 1
+a19 3
+        buf[n] = 0;
+        if (fputs(buf, stdout) == EOF)
+            err_sys("fputs error");
+d21 1
+a21 1
+    if (ferror(fp) && errno == EINTR)
+d23 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a4 2
+    int maxfd, stdineof;
+    fd_set rset;
+a7 3
+    stdineof = 0;
+    FD_ZERO(&rset);
+
+d10 8
+a17 28
+    for (;;) {
+        if (stdineof == 0)
+            FD_SET(fileno(fp), &rset);
+        FD_SET(sockfd, &rset);
+        maxfd = max(fileno(fp), sockfd) + 1;
+        if (select(maxfd, &rset, NULL, NULL, NULL) < 0) {
+            if (errno == EINTR) continue;
+            err_sys("select error");
+        }
+        if (FD_ISSET(sockfd, &rset)) { /* socket is readable */
+            if ( (n = read(sockfd, buf, MAXLINE)) <= 0 ) {
+                if (n == 0 && stdineof == 1)
+                    return;
+                else
+                    err_quit("oob_str_cli: server terminated permaturely");
+            }
+
+            Writen(fileno(fp), buf, n);
+        }
+        if (FD_ISSET(fileno(fp), &rset)) { /* input is readable */
+            if ( (n = read(fileno(fp), buf, MAXLINE)) == 0 ) {
+                stdineof = 1;
+                if (shutdown(sockfd, SHUT_WR) < 0)
+                    err_sys("shutdown SHUT_WR error");
+                FD_CLR(fileno(fp), &rset);
+                continue;
+            }
+            Writen(sockfd, buf, n);
+d19 3
+d23 2
+@
+
+
+1.1.1.1
+log
+@*** empty log message ***
+@
+text
+@d35 1
+a35 2
+            n = read(fileno(fp), buf, MAXLINE);
+            if (n == 0) {
+d41 1
+a41 2
+            } else if (n < 0)
+                err_sys("read error");
+@

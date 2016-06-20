@@ -1,0 +1,42 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcun:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.02.28.06.48.22;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "oobex.h"
+
+void oob_str_echo(int sockfd)
+{
+    ssize_t n;
+    char buf[MAXLINE];
+
+    oob_heartbeat_serv(sockfd, 1, 5);
+
+again:
+    while ((n = read(sockfd, buf, MAXLINE)) > 0)
+        Writen(sockfd, buf, n);
+
+    if (n < 0 && errno == EINTR)
+        goto again;
+    else if (n < 0)
+        err_sys("oob_str_echo error");
+}
+@

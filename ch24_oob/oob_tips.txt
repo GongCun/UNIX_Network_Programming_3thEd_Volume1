@@ -1,0 +1,110 @@
+#-----------------------------
+# Exercises
+#-----------------------------
+Q2: See oob_serv_poll.c
+
+
+# ./oob_serv02_err 9898 &
+[1] 26961
+# ./oob_cli01_macos 127.0.0.1 9898
+wrote 3 bytes of normal data
+read 3 bytes: 123
+wrote 1 bytes of OOB data
+received 1 OOB bytes: 4
+recv error: Invalid argument
+wrote 2 bytes of normal data
+[1]+  Exit 1                  ./oob_serv02_err 9898
+
+# ./oob_cli01_macos 127.0.0.1 9898
+wrote 3 bytes of normal data
+read 3 bytes: 123
+wrote 1 bytes of OOB data
+received 1 OOB bytes: 4
+wrote 2 bytes of normal data
+read 2 bytes: 56
+wrote 1 bytes of OOB data
+received 1 OOB bytes: 7
+wrote 2 bytes of normal data
+read 2 bytes: 89
+received EOF
+# 
+[1]+  Done                    ./oob_serv02 9898
+
+# ./oob_cli02_no_oob 127.0.0.1 8888
+wrote 3 bytes of normal data
+wrote 1 bytes of normal data
+wrote 2 bytes of normal data
+# ./oob_serv03 8888
+read 6 bytes: 123456
+received EOF
+
+# ./oob_cli02 127.0.0.1 8888
+wrote 3 bytes of normal data
+wrote 1 bytes of OOB data
+wrote 2 bytes of normal data
+# ./oob_serv03 8888
+read 3 bytes: 123
+at OOB mark
+read 3 bytes: 456
+received EOF
+
+# ./oob_cli03_macos 127.0.0.1 8888
+wrote 16384 bytes of normal data
+wrote 1 bytes of OOB data
+wrote 1024 bytes of normal data
+
+# ./oob_serv04_macos 8888
+SIGURG received
+read 1 OOB bytes: a
+
+# ./oob_cli03 127.0.0.1 8888
+wrote 16384 bytes of normal data
+wrote 1 bytes of OOB data
+wrote 1024 bytes of normal data
+
+# ./oob_serv04 8888
+SIGURG received
+recv error: Resource temporarily unavailable
+
+=====
+# ./oob_cli03 127.0.0.1 8888
+wrote 16384 bytes of normal data
+wrote 1 bytes of OOB data
+wrote 1024 bytes of normal data
+
+# ./oob_serv04_v2 8888
+SIGURG received
+read 1 OOB bytes: a
+#
+
+
+=======
+# ./oob_cli04 127.0.0.1 8888
+wrote 3 bytes of normal data
+wrote 1 bytes of OOB data
+wrote 1 bytes of normal data
+wrote 1 bytes of OOB data
+wrote 1 bytes of normal data
+
+# ./oob_serv05 8888
+Waked up
+SIGURG received
+read 1 OOB byte: 6
+read 4 bytes: 1235
+read 1 bytes: 7
+received EOF
+
+
+=======
+# ./oob_cli04 127.0.0.1 8888
+wrote 3 bytes of normal data
+wrote 1 bytes of OOB data
+wrote 1 bytes of normal data
+wrote 1 bytes of OOB data
+wrote 1 bytes of normal data
+
+# ./oob_serv03 8888
+read 5 bytes: 12345
+at OOB mark
+read 2 bytes: 67
+received EOF
