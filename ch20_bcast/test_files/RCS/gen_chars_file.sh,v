@@ -1,0 +1,42 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcunjust:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2015.06.07.13.05.58;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#!/bin/bash
+
+START=$1
+END=$2
+[ -z "$START" -o -z "$END" ] && {
+echo "Usage: $0 <record-start> <record-end>" >&2
+exit 1
+}
+
+count=1
+>${END}line
+while [ $count -le $END ]; do
+    echo -n a >> ${END}line
+    if [ $count -ge $START -a $count -ne $END ]; then
+        cp -p ${END}line ${count}line
+    fi
+    count=`expr $count + 1`
+done
+@

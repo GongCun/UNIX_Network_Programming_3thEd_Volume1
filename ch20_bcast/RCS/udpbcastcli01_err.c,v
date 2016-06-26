@@ -1,0 +1,48 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcunjust:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2015.06.07.13.36.07;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "mybcast.h"
+
+int main(int argc, char **argv)
+{
+    int sockfd;
+    struct sockaddr_in servaddr;
+
+    if (argc != 2)
+        err_quit("Usage: %s <IPaddress>", *argv);
+
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(13);
+    if (!inet_aton(argv[1], &servaddr.sin_addr))
+        err_sys("inet_aton error");
+
+    sockfd = Socket(AF_INET, SOCK_DGRAM, 0);
+
+    dg_cli_bcast_err(stdin, sockfd, (SA *)&servaddr, sizeof(servaddr));
+
+    exit(0);
+}
+
+
+@

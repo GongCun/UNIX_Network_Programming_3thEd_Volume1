@@ -1,0 +1,140 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcunjust:1.2.1.1; strict;
+comment	@ * @;
+
+
+1.3
+date	2015.06.08.12.43.31;	author gongcunjust;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2015.06.08.12.26.37;	author gongcunjust;	state Exp;
+branches
+	1.2.1.1;
+next	1.1;
+
+1.1
+date	2015.06.08.00.17.18;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+1.2.1.1
+date	2015.06.08.12.45.35;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@nanosleep
+@
+text
+@#include "mybcast.h"
+
+static void sig_alrm(int signo)
+{
+    printf("timed out\n");
+}
+
+void dg_cli_bcast_sel(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
+{
+    int n, ret;
+    char sendline[MAXLINE], recvline[MAXLINE+1];
+    socklen_t len;
+    struct sockaddr reply_addr;
+    const int on = 1;
+
+    sigset_t sigset_alrm, sigset_empty, sigset_save;
+    fd_set rset;
+    struct timespec req = { .tv_sec = 5,
+                            .tv_nsec = 0 };
+
+    sigemptyset(&sigset_empty);
+    sigemptyset(&sigset_alrm);
+    sigaddset(&sigset_alrm, SIGALRM);
+
+    Setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
+    if (signal(SIGALRM, sig_alrm) == SIG_ERR)
+        err_sys("signal error");
+
+    while (Fgets(sendline, MAXLINE, fp) != NULL) {
+        Sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
+        Sigprocmask(SIG_BLOCK, &sigset_alrm, NULL);
+        alarm(2);
+        for (;;) {
+            FD_ZERO(&rset);
+            FD_SET(sockfd, &rset);
+            Sigprocmask(SIG_SETMASK, &sigset_empty, &sigset_save);
+            ret = select(sockfd+1, &rset, NULL, NULL, NULL);
+            Sigprocmask(SIG_SETMASK, &sigset_save, NULL);
+            if (ret == -1) {
+                if (errno == EINTR)
+                    break;
+                err_sys("pselect error");
+            } else if (ret != 1) {
+                err_sys("pelect error: returned %d", ret);
+            }
+
+            /* the original signal mask is restored */
+            len = servlen;
+            /* sleep(5); */
+            nanosleep(&req, NULL);
+            n = Recvfrom(sockfd, recvline, MAXLINE, 0, &reply_addr, &len);
+            recvline[n] = 0;
+            printf("from %s: %s", Sock_ntop(&reply_addr, len), recvline);
+        }
+    }
+
+}
+
+
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d16 1
+a16 1
+    sigset_t sigset_alrm, sigset_empty;
+d18 2
+d36 3
+a38 1
+            ret = pselect(sockfd+1, &rset, NULL, NULL, NULL, &sigset_empty);
+d49 2
+a50 1
+            sleep(5);
+@
+
+
+1.2.1.1
+log
+@*** empty log message ***
+@
+text
+@d45 1
+a45 1
+            /* sleep(5); */
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d45 2
+a46 2
+            pause();
+            n = recvfrom(sockfd, recvline, MAXLINE, 0, &reply_addr, &len);
+@
