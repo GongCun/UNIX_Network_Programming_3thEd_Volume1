@@ -1,0 +1,172 @@
+head	1.4;
+access;
+symbols;
+locks
+	gongcunjust:1.4; strict;
+comment	@ * @;
+
+
+1.4
+date	2015.06.11.13.59.23;	author gongcunjust;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2015.06.11.12.41.29;	author gongcunjust;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2015.06.11.00.18.02;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.06.10.22.53.04;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@#include	"sntp.h"
+
+#define NTP_PORT 123
+
+int
+main(int argc, char **argv)
+{
+	int					sockfd, ret;
+	char				buf[MAXLINE];
+	ssize_t				n;
+	socklen_t			salen, len;
+	struct ifi_info		*ifi;
+	struct sockaddr		*mcastsa, *wild, *from;
+	struct timeval		now;
+
+    struct sockaddr_in servaddr, cliaddr, ownaddr;
+    struct ip_mreq imr;
+
+	if (argc != 2)
+		err_quit("usage: ssntp <IPaddress>");
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0)
+        err_sys("socket error");
+
+    bzero(&servaddr, sizeof(servaddr));
+    if (inet_aton(argv[1], &servaddr.sin_addr) == 0)
+        err_sys("inet_aton error");
+    servaddr.sin_port = htons(NTP_PORT); /* ntp service */
+
+    bzero(&ownaddr, sizeof(ownaddr));
+    ownaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    ownaddr.sin_port = htons(NTP_PORT);
+    
+    if (bind(sockfd, (SA *)&ownaddr, sizeof(ownaddr)) == -1)
+        err_sys("bind error");
+
+    imr.imr_multiaddr = servaddr.sin_addr;
+    imr.imr_interface.s_addr = 0;
+    ret = setsockopt(sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+                &imr, sizeof(imr));
+    if (ret == -1)
+        err_sys("setsockopt error");
+
+	for ( ; ; ) {
+		len = sizeof(cliaddr);
+		n = Recvfrom(sockfd, buf, sizeof(buf), 0, (SA *)&cliaddr, &len);
+		if (gettimeofday(&now, NULL) == -1)
+            err_sys("gettimeofday error");
+		sntp_proc(buf, n, &now);
+	}
+}
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@a17 1
+    const int on = 1;
+d19 2
+a20 2
+	if (argc != 3)
+		err_quit("usage: ssntp <multicast-address> <bind-address>");
+d32 1
+a32 2
+    if (inet_aton(argv[1], &ownaddr.sin_addr) == 0)
+        err_sys("inet_aton error");
+a33 4
+
+    ret = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+    if (ret == -1)
+        err_sys("setsockopt error");
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d18 1
+d20 2
+a21 2
+	if (argc != 2)
+		err_quit("usage: ssntp <IPaddress>");
+d33 7
+a39 2
+    ownaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    ownaddr.sin_port = htons(12345);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 2
+d8 1
+a8 1
+	int					sockfd;
+d16 3
+d22 8
+a29 1
+	sockfd = Udp_client(argv[1], "ntp", (void **) &mcastsa, &salen);
+d31 13
+a43 16
+	wild = Malloc(salen);
+	memcpy(wild, mcastsa, salen);	/* copy family and port */
+	sock_set_wild(wild, salen);
+	Bind(sockfd, wild, salen);	/* bind wildcard */
+
+#ifdef	MCAST
+		/* 4obtain interface list and process each one */
+	for (ifi = Get_ifi_info(mcastsa->sa_family, 1); ifi != NULL;
+		 ifi = ifi->ifi_next) {
+		if (ifi->ifi_flags & IFF_MULTICAST) {
+			Mcast_join(sockfd, mcastsa, salen, ifi->ifi_name, 0);
+			printf("joined %s on %s\n",
+				   Sock_ntop(mcastsa, salen), ifi->ifi_name);
+		}
+	}
+#endif
+a44 1
+	from = Malloc(salen);
+d46 4
+a49 3
+		len = salen;
+		n = Recvfrom(sockfd, buf, sizeof(buf), 0, from, &len);
+		Gettimeofday(&now, NULL);
+@

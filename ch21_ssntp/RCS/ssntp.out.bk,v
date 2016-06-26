@@ -1,0 +1,69 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.26.01.42.33;	author gongcun;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@recording to file <ssntp.out>
+
+<2015-06-11-21:38:00>
+
+[?1034hbash-3.2$ tput -Txterm setf 6
+[33mbash-3.2$ sudo ./ssntp 224.0.1.1
+
+v4, mode 5, strat 3, clock difference = 81545 usec
+
+v4, mode 5, strat 3, clock difference = 83686 usec
+
+v4, mode 5, strat 3, clock difference = 110184 usec
+
+v4, mode 5, strat 3, clock difference = 112465 usec
+
+v4, mode 5, strat 3, clock difference = 115261 usec
+
+v4, mode 5, strat 3, clock difference = 117127 usec
+
+v4, mode 5, strat 3, clock difference = 119362 usec
+
+v4, mode 5, strat 3, clock difference = 66485 usec
+
+v4, mode 5, strat 3, clock difference = 172083 usec
+
+v4, mode 5, strat 3, clock difference = 96022 usec
+
+v4, mode 5, strat 3, clock difference = 146407 usec
+
+v4, mode 5, strat 3, clock difference = 150472 usec
+
+v4, mode 5, strat 3, clock difference = 97059 usec
+
+v4, mode 5, strat 3, clock difference = 149800 usec
+
+v4, mode 5, strat 3, clock difference = 119212 usec
+
+v4, mode 5, strat 3, clock difference = 91200 usec
+
+v4, mode 5, strat 3, clock difference = 165784 usec
+
+v4, mode 5, strat 3, clock difference = 137722 usec
+^Cbash-3.2$ exit
+exit
+
+recording to file typescript complete
+@
