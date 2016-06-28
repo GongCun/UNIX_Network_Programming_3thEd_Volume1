@@ -1,0 +1,81 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcunjust:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2015.10.19.00.01.54;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.09.02.13.59.48;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@include ../Make.defines
+
+PROGS =	getrt checkudpsum
+
+all:	${PROGS}
+
+$(PROGS):   %: %.o
+	        ${CC} ${CFLAGS} -o $@@ $< ${LIBS}
+
+getrt:	getrt.o get_rtaddrs.o sock_masktop.o
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+
+checkudpsum:	checkudpsum.o
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 1
+a3 2
+PROGS =	checkudpsum getrt mynetstat \
+		prifinfo prifindex prifname prifnameindex
+d7 2
+a8 2
+checkudpsum:	checkudpsum.o
+		${CC} ${CFLAGS} -o $@@ checkudpsum.o ${LIBS}
+d10 2
+a11 17
+getrt:	getrt.o
+		${CC} ${CFLAGS} -o $@@ getrt.o ${LIBS}
+
+prifinfo:	prifinfo.o get_ifi_info.o
+		${CC} ${CFLAGS} -o $@@ prifinfo.o get_ifi_info.o ${LIBS}
+
+prifindex:	prifindex.o
+		${CC} ${CFLAGS} -o $@@ prifindex.o ${LIBS}
+
+prifname:	prifname.o
+		${CC} ${CFLAGS} -o $@@ prifname.o ${LIBS}
+
+prifnameindex:	prifnameindex.o
+		${CC} ${CFLAGS} -o $@@ prifnameindex.o ${LIBS}
+
+mynetstat:	mynetstat.o
+		${CC} ${CFLAGS} -o $@@ mynetstat.o ${LIBS}
+d13 2
+@

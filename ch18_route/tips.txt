@@ -1,0 +1,8 @@
+# find the definition of caddr_t
+find /usr/include -name "*.h" -exec grep -l caddr {} \;
+
+# caddr_t defined in /usr/include/sys/types.h
+typedef	char *			caddr_t;	/* core address */
+
+# u_long defined in /usr/include/sys/types.h
+typedef	unsigned long		u_long;
