@@ -1,11 +1,13 @@
 include ../Make.defines
 
-LIBNETROOT := /Users/gongcunjust/Develop/libnet
+# Must specify the libnet path
+# LIBNETROOT := /Users/gongcunjust/Develop/libnet
 LIBNETINC := ${LIBNETROOT}/include
 LIBNETLIB := ${LIBNETROOT}/src
 LIBNETLIBS := ${LIBNETROOT}/src/libnet.a
 
-LIBPCAPROOT := /Users/gongcunjust/Develop/libpcap-1.1.1
+# Must specify the libpcap path
+# LIBPCAPROOT := /Users/gongcunjust/Develop/libpcap-1.1.1
 LIBPCAPINC := ${LIBPCAPROOT}
 LIBPCAPLIB := ${LIBPCAPROOT}
 LIBPCAPLIBS := ${LIBPCAPROOT}/libpcap.a

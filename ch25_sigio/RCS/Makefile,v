@@ -1,10 +1,15 @@
-head	1.3;
+head	1.4;
 access;
 symbols;
 locks
-	gongcun:1.3; strict;
+	gongcun:1.4; strict;
 comment	@# @;
 
+
+1.4
+date	2016.06.28.14.00.41;	author gongcun;	state Exp;
+branches;
+next	1.3;
 
 1.3
 date	2016.06.20.00.02.15;	author gongcun;	state Exp;
@@ -26,16 +31,19 @@ desc
 @@
 
 
-1.3
+1.4
 log
 @*** empty log message ***
 @
 text
 @include ../Make.defines
 
-PROGS =	sigio_udpcli sigio_udpserv
+PROGS =	
 
-all:	${PROGS}
+all:	sigio_udpcli sigio_udpserv
+
+$(PROGS):   %: %.o
+	        ${CC} ${CFLAGS} -o $@@ $< ${LIBS}
 
 sigio_udpcli: sigio_udpcli.o sigio_dg_cli.o
 		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
@@ -43,6 +51,23 @@ sigio_udpcli: sigio_udpcli.o sigio_dg_cli.o
 sigio_udpserv: sigio_udpserv.o sigio_dg_echo.o
 		${CC} ${CFLAGS} -o $@@ $^  ${LIBS}
 clean:
+		rm -f ${PROGS} ${CLEANFILES} sigio_udpcli sigio_udpserv
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d3 1
+a3 1
+PROGS =	sigio_udpcli sigio_udpserv
+d5 4
+a8 1
+all:	${PROGS}
+d16 1
+a16 1
 		rm -f ${PROGS} ${CLEANFILES}
 @
 

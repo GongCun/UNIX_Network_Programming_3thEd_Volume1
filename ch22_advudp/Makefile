@@ -1,8 +1,11 @@
 include ../Make.defines
 
-PROGS = adv_udpserv01 adv_udpcli01 test_getifaddrs adv_udpserv02
+PROGS = 
 
-all:	${PROGS}
+all:	${PROGS} adv_udpserv01 adv_udpcli01 test_getifaddrs adv_udpserv02
+
+$(PROGS):	%: %.o	
+		${CC} ${CFLAGS} -o $@ $< ${LIBS}
 
 adv_udpserv01:	adv_udpserv01.o adv_dg_echo.o adv_recvfrom_flags.o
 		${CC} ${CFLAGS} -o $@ $^ ${LIBS}
@@ -17,4 +20,4 @@ adv_udpserv02: adv_udpserv02.o adv_mydg_echo.o
 		${CC} ${CFLAGS} -o $@ $^ ${LIBS}
 
 clean:
-		rm -f ${PROGS} ${CLEANFILES}
+		rm -f ${PROGS} ${CLEANFILES} adv_udpserv01 adv_udpcli01 test_getifaddrs adv_udpserv02

@@ -1,10 +1,15 @@
-head	1.7;
+head	1.8;
 access;
 symbols;
 locks
-	gongcun:1.7; strict;
+	gongcun:1.8; strict;
 comment	@# @;
 
+
+1.8
+date	2016.06.28.14.06.36;	author gongcun;	state Exp;
+branches;
+next	1.7;
 
 1.7
 date	2016.05.23.23.45.23;	author gongcun;	state Exp;
@@ -46,27 +51,65 @@ desc
 @@
 
 
-1.7
+1.8
 log
 @*** empty log message ***
 @
 text
 @include ../Make.defines
 
-LIBNETROOT := /Users/gongcunjust/Develop/libnet
+# Must specify the libnet path
+# LIBNETROOT := /Users/gongcunjust/Develop/libnet
 LIBNETINC := ${LIBNETROOT}/include
 LIBNETLIB := ${LIBNETROOT}/src
 LIBNETLIBS := ${LIBNETROOT}/src/libnet.a
 
-LIBPCAPROOT := /Users/gongcunjust/Develop/libpcap-1.1.1
+# Must specify the libpcap path
+# LIBPCAPROOT := /Users/gongcunjust/Develop/libpcap-1.1.1
 LIBPCAPINC := ${LIBPCAPROOT}
 LIBPCAPLIB := ${LIBPCAPROOT}
 LIBPCAPLIBS := ${LIBPCAPROOT}/libpcap.a
 
-PROGS =	synfloodtest filtertest a.out
+PROGS =	dlt_sniff dlt_test_dns dlt_udpcksum dlt_test_tcp dlt_tcp_dns 
 
 all:	${PROGS}
 
+dlt_sniff:	./dlt_sniff.c
+		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $< ${LIBPCAPLIBS} ${LIBS}
+
+dlt_test_dns:	./dlt_test_dns.c ./dlt_udp_write.c ./dlt_send_dnsquery.c ./dlt_cksum.c ./dlt_open.c
+		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -D_DEBUG -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $^ ${LIBPCAPLIBS} ${LIBS}
+
+dlt_udpcksum:	./dlt_udpcksum.c ./dlt_udp_write.c ./dlt_send_dnsquery.c ./dlt_cksum.c ./dlt_open.c ./dlt_open_pcap.c ./dlt_test_udp.c ./dlt_udp_read.c
+		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -D_DEBUG -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $^ ${LIBPCAPLIBS} ${LIBS}
+
+dlt_test_tcp: dlt_test_tcp.c dlt_cksum.c
+		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -D_DEBUG -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $^ ${LIBPCAPLIBS} ${LIBS}
+
+dlt_tcp_dns: dlt_tcp_dns.c dlt_cksum.c
+		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -D_DEBUG -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $^ ${LIBPCAPLIBS} ${LIBS}
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+		rm -r -f *.dSYM
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d3 2
+a4 1
+LIBNETROOT := /Users/gongcunjust/Develop/libnet
+d9 2
+a10 1
+LIBPCAPROOT := /Users/gongcunjust/Develop/libpcap-1.1.1
+d15 1
+a15 1
+PROGS =	synfloodtest filtertest a.out
+a18 15
 # Include special linking flags from libnet-config program
 synfloodtest:	./synfloodtest.o
 		${CC} ${CFLAGS} -o $@@ $< ${LIBNETLIBS} ${LIBS}
@@ -82,20 +125,10 @@ filtertest:	./filtertest.c
 a.out:	./x.c
 		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $< ${LIBPCAPLIBS} ${LIBS}
 
-dlt_sniff:	./dlt_sniff.c
-		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $< ${LIBPCAPLIBS} ${LIBS}
-
-dlt_test_dns:	./dlt_test_dns.c ./dlt_udp_write.c ./dlt_send_dnsquery.c ./dlt_cksum.c ./dlt_open.c
-		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -D_DEBUG -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $^ ${LIBPCAPLIBS} ${LIBS}
-
-dlt_udpcksum:	./dlt_udpcksum.c ./dlt_udp_write.c ./dlt_send_dnsquery.c ./dlt_cksum.c ./dlt_open.c ./dlt_open_pcap.c ./dlt_test_udp.c ./dlt_udp_read.c
-		${CC} ${CFLAGS} -O -DHAVE_CONFIG_H -D_U_="__attribute__((unused))" -D_DEBUG -I. -I${LIBPCAPINC} -L${LIBPCAPLIB} -o $@@ $^ ${LIBPCAPLIBS} ${LIBS}
-
-dlt_test_tcp: dlt_test_tcp.c dlt_cksum.c
+d29 4
+a32 1
 		${CC} ${CFLAGS} -D_DEBUG -o $@@ $^ ${LIBS}
-
-clean:
-		rm -f ${PROGS} ${CLEANFILES}
+d36 1
 @
 
 
