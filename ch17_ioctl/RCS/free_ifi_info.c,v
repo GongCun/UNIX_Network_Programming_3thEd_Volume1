@@ -1,0 +1,41 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcunjust:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2015.08.25.13.30.31;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "unpifi_ex.h"
+
+void free_ifi_info(struct ifi_info *ifihead)
+{
+    struct ifi_info *ifi, *ifinext;
+
+    for (ifi = ifihead; ifi != NULL; ifi = ifinext) {
+        if (ifi->ifi_addr != NULL)
+            free(ifi->ifi_addr);
+        if (ifi->ifi_brdaddr != NULL)
+            free(ifi->ifi_brdaddr);
+        if (ifi->ifi_dstaddr != NULL)
+            free(ifi->ifi_dstaddr);
+        ifinext = ifi->ifi_next;
+        free(ifi);
+    }
+}
+@

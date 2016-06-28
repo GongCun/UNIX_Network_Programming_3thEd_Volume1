@@ -1,0 +1,57 @@
+sudo ifconfig en0 inet 192.168.0.200/24 add
+
+# alias
+lo0: (1) <UP MCAST LOOP >
+  MTU: 16384
+  IP addr: 127.0.0.1
+en0: (4) <UP BCAST MCAST >
+ 10:40:f3:86:19:82
+  MTU: 1500
+  IP addr: 192.168.0.110
+  broadcast addr: 192.168.0.255
+en0: (4) <UP BCAST MCAST >
+ 10:40:f3:86:19:82
+  MTU: 1500
+  IP addr: 192.168.0.200
+  broadcast addr: 192.168.0.255
+
+# no alias
+lo0: (1) <UP MCAST LOOP >
+  MTU: 16384
+  IP addr: 127.0.0.1
+en0: (4) <UP BCAST MCAST >
+ 10:40:f3:86:19:82
+  MTU: 1500
+  IP addr: 192.168.0.110
+  broadcast addr: 192.168.0.255
+
+#define SIOCGIFPSRCADDR _IOWR('i', 63, struct ifreq)    /* get gif psrc addr */
+#define SIOCGIFPDSTADDR _IOWR('i', 64, struct ifreq)    /* get gif pdst addr */
+
+# netmask
+lo0: (1) <UP MCAST LOOP >
+  MTU: 16384
+  IP addr: 127.0.0.1
+    (Netmask: 255.0.0.0)
+en0: (4) <UP BCAST MCAST >
+ 10:40:f3:86:19:82
+  MTU: 1500
+  IP addr: 192.168.0.110
+    (Netmask: 255.255.255.0)
+  broadcast addr: 192.168.0.255
+en0: (4) <UP BCAST MCAST >
+ 10:40:f3:86:19:82
+  MTU: 1500
+  IP addr: 192.168.0.200
+    (Netmask: 255.255.255.0)
+  broadcast addr: 192.168.0.255
+
+##
+ubuntu:ioctl-ex gongcunjust$ make
+gcc -I../lib -g -O2 -D_REENTRANT -DHAVE_PSELECT_PROTO -Wall   -c -o prmac.o prmac.c
+prmac.c: In function 'main':
+prmac.c:19:27: error: 'SIOCGARP' undeclared (first use in this function)
+prmac.c:19:27: note: each undeclared identifier is reported only once for each function it appears in
+prmac.c:24:13: warning: pointer targets in assignment differ in signedness [-Wpointer-sign]
+make: *** [prmac.o] Error 1
+
