@@ -1,0 +1,6 @@
+1        8.37 real         0.00 user         0.02 sys
+2        4.86 real         0.00 user         0.02 sys
+3        5.74 real         0.00 user         0.01 sys
+4        3.55 real         0.00 user         0.01 sys
+5        4.59 real         0.00 user         0.02 sys
+6        3.93 real         0.00 user         0.02 sys

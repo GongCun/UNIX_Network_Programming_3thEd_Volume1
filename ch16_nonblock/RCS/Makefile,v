@@ -1,0 +1,82 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcunjust:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2015.06.23.22.26.07;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.06.23.22.21.11;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@include ../Make.defines
+
+PROGS =	
+
+all:	${PROGS}
+
+$(PROGS):   %: %.o
+        ${CC} ${CFLAGS} -o $@@ $< ${LIBS}
+
+tcpclifork:	tcpclifork.o strclifork.o
+		${CC} ${CFLAGS} -o $@@ tcpclifork.o strclifork.o ${LIBS}
+
+tcpclinonb:	tcpclinonb.o strclinonb.o
+		${CC} ${CFLAGS} -o $@@ tcpclinonb.o strclinonb.o ${LIBS}
+
+web:	web.o home_page.o start_connect.o write_get_cmd.o
+		${CC} ${CFLAGS} -o $@@ web.o home_page.o start_connect.o \
+			write_get_cmd.o ${LIBS}
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 1
+a3 1
+PROGS =	daytimetcpcli tcpcli01 tcpcli02 tcpcli03 tcpcli04 tcpservselect02 web
+d7 2
+a8 2
+daytimetcpcli:	daytimetcpcli.o
+		${CC} ${CFLAGS} -o $@@ daytimetcpcli.o ${LIBS}
+d10 2
+a11 2
+tcpcli01:	tcpcli01.o strclifork.o
+		${CC} ${CFLAGS} -o $@@ tcpcli01.o strclifork.o ${LIBS}
+d13 2
+a14 11
+tcpcli02:	tcpcli02.o strclinonb.o
+		${CC} ${CFLAGS} -o $@@ tcpcli02.o strclinonb.o ${LIBS}
+
+tcpcli03:	tcpcli03.o
+		${CC} ${CFLAGS} -o $@@ tcpcli03.o ${LIBS}
+
+tcpcli04:	tcpcli04.o
+		${CC} ${CFLAGS} -o $@@ tcpcli04.o ${LIBS}
+
+tcpservselect03:	tcpservselect03.o
+		${CC} ${CFLAGS} -o $@@ tcpservselect03.o ${LIBS}
+@

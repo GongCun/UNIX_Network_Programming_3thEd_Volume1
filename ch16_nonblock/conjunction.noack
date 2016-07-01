@@ -1,0 +1,397 @@
+
+
+
+07:34:06.714784: read 4096 bytes from stdin
+07:34:06.716334: wrote 4096 bytes to sockfd
+07:34:06.716351 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 1:1449, ack 1, win 8235, options [nop,nop,TS val 1108575150 ecr 27533941], length 1448
+07:34:06.716353 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 1449:2897, ack 1, win 8235, options [nop,nop,TS val 1108575150 ecr 27533941], length 1448
+07:34:06.716354 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [P.], seq 2897:4097, ack 1, win 8235, options [nop,nop,TS val 1108575150 ecr 27533941], length 1200
+07:34:06.716376: read 4096 bytes from stdin
+07:34:06.716418: wrote 4096 bytes to sockfd
+07:34:06.716426 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 4097:5545, ack 1, win 8235, options [nop,nop,TS val 1108575150 ecr 27533941], length 1448
+07:34:06.716427 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 5545:6993, ack 1, win 8235, options [nop,nop,TS val 1108575150 ecr 27533941], length 1448
+07:34:06.716428 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [P.], seq 6993:8193, ack 1, win 8235, options [nop,nop,TS val 1108575150 ecr 27533941], length 1200
+07:34:06.716444: read 4096 bytes from stdin
+07:34:06.716478: wrote 4096 bytes to sockfd
+07:34:06.716486 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 8193:9641, ack 1, win 8235, options [nop,nop,TS val 1108575150 ecr 27533941], length 1448
+07:34:06.716488 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 9641:11089, ack 1, win 8235, options [nop,nop,TS val 1108575150 ecr 27533941], length 1448
+07:34:06.716502: read 4096 bytes from stdin
+07:34:06.716521: wrote 4096 bytes to sockfd
+07:34:06.716542: read 4096 bytes from stdin
+07:34:06.716560: wrote 4096 bytes to sockfd
+07:34:06.716582: read 4096 bytes from stdin
+07:34:06.716600: wrote 4096 bytes to sockfd
+07:34:06.716622: read 4096 bytes from stdin
+07:34:06.716639: wrote 4096 bytes to sockfd
+07:34:06.716661: read 4096 bytes from stdin
+07:34:06.716679: wrote 4096 bytes to sockfd
+07:34:06.716700: read 4096 bytes from stdin
+07:34:06.716718: wrote 4096 bytes to sockfd
+07:34:06.716739: read 4096 bytes from stdin
+07:34:06.716757: wrote 4096 bytes to sockfd
+07:34:06.716778: read 4096 bytes from stdin
+07:34:06.716796: wrote 4096 bytes to sockfd
+07:34:06.716817: read 4096 bytes from stdin
+07:34:06.716835: wrote 4096 bytes to sockfd
+07:34:06.716856: read 4096 bytes from stdin
+07:34:06.716882: wrote 4096 bytes to sockfd
+07:34:06.716904: read 4096 bytes from stdin
+07:34:06.716922: wrote 4096 bytes to sockfd
+07:34:06.716944: read 4096 bytes from stdin
+07:34:06.716961: wrote 4096 bytes to sockfd
+07:34:06.716983: read 4096 bytes from stdin
+07:34:06.717001: wrote 4096 bytes to sockfd
+07:34:06.717022: read 4096 bytes from stdin
+07:34:06.717039: wrote 4096 bytes to sockfd
+07:34:06.717061: read 4096 bytes from stdin
+07:34:06.717078: wrote 4096 bytes to sockfd
+07:34:06.717100: read 4096 bytes from stdin
+07:34:06.717117: wrote 4096 bytes to sockfd
+07:34:06.717138: read 4096 bytes from stdin
+07:34:06.717156: wrote 4096 bytes to sockfd
+07:34:06.717177: read 4096 bytes from stdin
+07:34:06.717195: wrote 4096 bytes to sockfd
+07:34:06.717216: read 4096 bytes from stdin
+07:34:06.717234: wrote 4096 bytes to sockfd
+07:34:06.717255: read 4096 bytes from stdin
+07:34:06.717273: wrote 4096 bytes to sockfd
+07:34:06.717294: read 3297 bytes from stdin
+07:34:06.717312: wrote 3297 bytes to sockfd
+07:34:06.717331: EOF on fp
+
+
+07:34:06.724443 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 11089:12537, ack 1, win 8235, options [nop,nop,TS val 1108575157 ecr 27533942], length 1448
+07:34:06.724447 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 12537:13985, ack 1, win 8235, options [nop,nop,TS val 1108575157 ecr 27533942], length 1448
+07:34:06.724449 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 13985:15433, ack 1, win 8235, options [nop,nop,TS val 1108575157 ecr 27533942], length 1448
+07:34:06.724452 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 15433:16881, ack 1, win 8235, options [nop,nop,TS val 1108575157 ecr 27533942], length 1448
+
+07:34:06.725446 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 16881:18329, ack 1, win 8235, options [nop,nop,TS val 1108575158 ecr 27533943], length 1448
+07:34:06.725450 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 18329:19777, ack 1, win 8235, options [nop,nop,TS val 1108575158 ecr 27533943], length 1448
+
+07:34:06.725873 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 19777:21225, ack 1, win 8235, options [nop,nop,TS val 1108575158 ecr 27533943], length 1448
+07:34:06.725876 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 21225:22673, ack 1, win 8235, options [nop,nop,TS val 1108575158 ecr 27533943], length 1448
+
+07:34:06.727727 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 22673:24121, ack 1, win 8235, options [nop,nop,TS val 1108575160 ecr 27533943], length 1448
+07:34:06.727730 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 24121:25569, ack 1, win 8235, options [nop,nop,TS val 1108575160 ecr 27533943], length 1448
+
+
+
+07:34:06.736798 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 25569:27017, ack 1, win 8235, options [nop,nop,TS val 1108575169 ecr 27533943], length 1448
+07:34:06.736802 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 27017:28465, ack 1, win 8235, options [nop,nop,TS val 1108575169 ecr 27533943], length 1448
+07:34:06.736804 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 28465:29913, ack 1, win 8235, options [nop,nop,TS val 1108575169 ecr 27533943], length 1448
+07:34:06.736806 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 29913:31361, ack 1, win 8235, options [nop,nop,TS val 1108575169 ecr 27533944], length 1448
+07:34:06.736809 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 31361:32809, ack 1, win 8235, options [nop,nop,TS val 1108575169 ecr 27533944], length 1448
+
+
+
+07:34:06.737868 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 32809:34257, ack 1, win 8235, options [nop,nop,TS val 1108575170 ecr 27533944], length 1448
+07:34:06.737870 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 34257:35705, ack 1, win 8235, options [nop,nop,TS val 1108575170 ecr 27533944], length 1448
+07:34:06.737871 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 35705:37153, ack 1, win 8235, options [nop,nop,TS val 1108575170 ecr 27533945], length 1448
+07:34:06.737872 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 37153:38601, ack 1, win 8235, options [nop,nop,TS val 1108575170 ecr 27533945], length 1448
+07:34:06.737901 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 38601:40049, ack 1, win 8235, options [nop,nop,TS val 1108575170 ecr 27533945], length 1448
+07:34:06.737909 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 40049:41497, ack 1, win 8235, options [nop,nop,TS val 1108575170 ecr 27533945], length 1448
+
+07:34:06.740987 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 41497:42945, ack 1, win 8235, options [nop,nop,TS val 1108575173 ecr 27533945], length 1448
+07:34:06.740989 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 42945:44393, ack 1, win 8235, options [nop,nop,TS val 1108575173 ecr 27533945], length 1448
+
+
+07:34:06.748687 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 44393:45841, ack 1, win 8235, options [nop,nop,TS val 1108575180 ecr 27533946], length 1448
+07:34:06.748691 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 45841:47289, ack 1, win 8235, options [nop,nop,TS val 1108575180 ecr 27533946], length 1448
+07:34:06.748693 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 47289:48737, ack 1, win 8235, options [nop,nop,TS val 1108575180 ecr 27533946], length 1448
+07:34:06.748695 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 48737:50185, ack 1, win 8235, options [nop,nop,TS val 1108575180 ecr 27533946], length 1448
+
+
+07:34:06.751820 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 50185:51633, ack 1, win 8235, options [nop,nop,TS val 1108575183 ecr 27533946], length 1448
+07:34:06.751823 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 51633:53081, ack 1, win 8235, options [nop,nop,TS val 1108575183 ecr 27533946], length 1448
+07:34:06.751826 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 53081:54529, ack 1, win 8235, options [nop,nop,TS val 1108575183 ecr 27533946], length 1448
+07:34:06.751828 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 54529:55977, ack 1, win 8235, options [nop,nop,TS val 1108575183 ecr 27533946], length 1448
+
+07:34:06.754249 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 55977:57425, ack 1, win 8235, options [nop,nop,TS val 1108575185 ecr 27533946], length 1448
+07:34:06.754253 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 57425:58873, ack 1, win 8235, options [nop,nop,TS val 1108575185 ecr 27533946], length 1448
+
+07:34:06.759820 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 1:1025, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1024
+07:34:06.760091 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 58873:60321, ack 1, win 8235, options [nop,nop,TS val 1108575190 ecr 27533947], length 1448
+07:34:06.760096 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 60321:61769, ack 1, win 8235, options [nop,nop,TS val 1108575190 ecr 27533947], length 1448
+07:34:06.760098 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 61769:62721, ack 1025, win 8171, options [nop,nop,TS val 1108575190 ecr 27533947], length 952
+07:34:06.760110: read 1024 bytes from sockfd
+07:34:06.760299: wrote 1024 bytes to stdout
+07:34:06.770525 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 1025:2473, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1448
+07:34:06.770583 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 2473:3921, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1448
+
+07:34:06.770708: read 2896 bytes from sockfd
+07:34:06.770835: wrote 2896 bytes to stdout
+07:34:06.770865 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 3921:5369, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1448
+07:34:06.771026 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 5369:6817, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1448
+
+07:34:06.771090: read 2896 bytes from sockfd
+
+07:34:06.771218: wrote 2896 bytes to stdout
+07:34:06.775192 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 6817:8265, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1448
+07:34:06.775201 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 8265:9713, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1448
+07:34:06.775349 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 9713:11161, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1448
+
+07:34:06.775479: read 4096 bytes from sockfd
+
+07:34:06.775580 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 11161:12609, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1448
+07:34:06.775683: wrote 4096 bytes to stdout
+07:34:06.775753: read 1696 bytes from sockfd
+07:34:06.775756 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 12609:14057, ack 25569, win 634, options [nop,nop,TS val 27533947 ecr 1108575160], length 1448
+
+
+07:34:06.775809: wrote 1696 bytes to stdout
+
+07:34:06.775827 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 62721:64169, ack 14057, win 8101, options [nop,nop,TS val 1108575204 ecr 27533949], length 1448
+07:34:06.775854 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 64169:65617, ack 14057, win 8101, options [nop,nop,TS val 1108575204 ecr 27533949], length 1448
+07:34:06.775857 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 65617:67065, ack 14057, win 8101, options [nop,nop,TS val 1108575204 ecr 27533949], length 1448
+07:34:06.775858 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 67065:68513, ack 14057, win 8101, options [nop,nop,TS val 1108575204 ecr 27533949], length 1448
+07:34:06.775885 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 68513:69961, ack 14057, win 8101, options [nop,nop,TS val 1108575204 ecr 27533949], length 1448
+07:34:06.775899 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 69961:71409, ack 14057, win 8101, options [nop,nop,TS val 1108575204 ecr 27533949], length 1448
+07:34:06.775912: read 1448 bytes from sockfd
+07:34:06.775945: wrote 1448 bytes to stdout
+07:34:06.775980 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 14057:15505, ack 31361, win 724, options [nop,nop,TS val 27533950 ecr 1108575169], length 1448
+
+
+07:34:06.776129: read 1448 bytes from sockfd
+
+07:34:06.776161 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 71409:72857, ack 15505, win 8101, options [nop,nop,TS val 1108575204 ecr 27533950], length 1448
+07:34:06.776163 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 72857:74305, ack 15505, win 8101, options [nop,nop,TS val 1108575204 ecr 27533950], length 1448
+07:34:06.776164 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 74305:75753, ack 15505, win 8101, options [nop,nop,TS val 1108575204 ecr 27533950], length 1448
+07:34:06.776165 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 75753:77201, ack 15505, win 8101, options [nop,nop,TS val 1108575204 ecr 27533950], length 1448
+07:34:06.776193 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 77201:78649, ack 15505, win 8192, options [nop,nop,TS val 1108575204 ecr 27533951], length 1448
+07:34:06.776194: wrote 1448 bytes to stdout
+07:34:06.776204 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 78649:80097, ack 15505, win 8192, options [nop,nop,TS val 1108575204 ecr 27533951], length 1448
+
+
+07:34:06.781254 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 80097:81545, ack 15505, win 8192, options [nop,nop,TS val 1108575209 ecr 27533952], length 1448
+07:34:06.781256 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 81545:82993, ack 15505, win 8192, options [nop,nop,TS val 1108575209 ecr 27533952], length 1448
+07:34:06.781258 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 82993:84441, ack 15505, win 8192, options [nop,nop,TS val 1108575209 ecr 27533953], length 1448
+07:34:06.781259 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 84441:85889, ack 15505, win 8192, options [nop,nop,TS val 1108575209 ecr 27533953], length 1448
+
+07:34:06.782096 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 85889:87337, ack 15505, win 8192, options [nop,nop,TS val 1108575209 ecr 27533955], length 1448
+07:34:06.782099 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 87337:88785, ack 15505, win 8192, options [nop,nop,TS val 1108575209 ecr 27533955], length 1448
+
+07:34:06.789374 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 88785:90233, ack 15505, win 8192, options [nop,nop,TS val 1108575217 ecr 27533957], length 1448
+07:34:06.789378 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 90233:91681, ack 15505, win 8192, options [nop,nop,TS val 1108575217 ecr 27533957], length 1448
+07:34:06.789379 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 91681:93129, ack 15505, win 8192, options [nop,nop,TS val 1108575217 ecr 27533957], length 1448
+07:34:06.789381 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 93129:94577, ack 15505, win 8192, options [nop,nop,TS val 1108575217 ecr 27533957], length 1448
+
+07:34:06.793608 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 94577:96025, ack 15505, win 8192, options [nop,nop,TS val 1108575221 ecr 27533958], length 1448
+07:34:06.793611 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [.], seq 96025:97473, ack 15505, win 8192, options [nop,nop,TS val 1108575221 ecr 27533958], length 1448
+
+07:34:06.794309 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 15505:16953, ack 62721, win 1095, options [nop,nop,TS val 27533959 ecr 1108575200], length 1448
+07:34:06.794519 IP 192.168.0.103.53388 > 192.168.0.111.echo: Flags [FP.], seq 97473:97506, ack 15505, win 8192, options [nop,nop,TS val 1108575221 ecr 27533959], length 33
+07:34:06.794544: read 1448 bytes from sockfd
+07:34:06.794704: wrote 1448 bytes to stdout
+07:34:06.798406 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 16953:18401, ack 62721, win 1095, options [nop,nop,TS val 27533959 ecr 1108575200], length 1448
+07:34:06.798466 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 18401:19849, ack 62721, win 1095, options [nop,nop,TS val 27533959 ecr 1108575200], length 1448
+07:34:06.798665: read 2896 bytes from sockfd
+07:34:06.798678 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 19849:21297, ack 62721, win 1095, options [nop,nop,TS val 27533960 ecr 1108575200], length 1448
+07:34:06.798796: wrote 2896 bytes to stdout
+
+
+07:34:06.798841: read 1448 bytes from sockfd
+07:34:06.798894: wrote 1448 bytes to stdout
+07:34:06.800808 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 21297:22745, ack 62721, win 1095, options [nop,nop,TS val 27533960 ecr 1108575204], length 1448
+
+07:34:06.801061: read 1448 bytes from sockfd
+07:34:06.801149: wrote 1448 bytes to stdout
+07:34:06.804620 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 22745:24193, ack 62721, win 1095, options [nop,nop,TS val 27533960 ecr 1108575204], length 1448
+07:34:06.804894: read 1448 bytes from sockfd
+
+07:34:06.804969: wrote 1448 bytes to stdout
+07:34:06.808541 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 24193:25641, ack 62721, win 1095, options [nop,nop,TS val 27533961 ecr 1108575204], length 1448
+07:34:06.808550 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 25641:27089, ack 62721, win 1095, options [nop,nop,TS val 27533961 ecr 1108575204], length 1448
+
+07:34:06.808711: read 2896 bytes from sockfd
+07:34:06.808811 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 27089:28537, ack 62721, win 1095, options [nop,nop,TS val 27533961 ecr 1108575204], length 1448
+07:34:06.808852: wrote 2896 bytes to stdout
+
+07:34:06.808953: read 1448 bytes from sockfd
+07:34:06.809000: wrote 1448 bytes to stdout
+07:34:06.816159 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 28537:29985, ack 72857, win 1024, options [nop,nop,TS val 27533963 ecr 1108575204], length 1448
+
+07:34:06.816428: read 1448 bytes from sockfd
+07:34:06.816552: wrote 1448 bytes to stdout
+
+
+07:34:06.839975 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 29985:31421, ack 97507, win 848, options [nop,nop,TS val 27533971 ecr 1108575221,nop,nop,sack 1 {97506:97507}], length 1436
+07:34:06.839985 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 31421:31433, ack 97507, win 848, options [nop,nop,TS val 27533971 ecr 1108575221], length 12
+
+07:34:06.840235: read 1448 bytes from sockfd
+07:34:06.840362: wrote 1448 bytes to stdout
+07:34:06.840404 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 31433:32869, ack 97507, win 848, options [nop,nop,TS val 27533971 ecr 1108575225,nop,nop,sack 1 {97506:97507}], length 1436
+
+07:34:06.840646: read 1436 bytes from sockfd
+07:34:06.840772: wrote 1436 bytes to stdout
+07:34:06.845111 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 32869:32881, ack 97507, win 848, options [nop,nop,TS val 27533972 ecr 1108575227,nop,nop,sack 1 {97506:97507}], length 12
+07:34:06.845181 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 32881:34317, ack 97507, win 848, options [nop,nop,TS val 27533972 ecr 1108575227], length 1436
+07:34:06.845186 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 34317:34329, ack 97507, win 848, options [nop,nop,TS val 27533972 ecr 1108575227], length 12
+07:34:06.845348: read 1460 bytes from sockfd
+07:34:06.845405 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 34329:35765, ack 97507, win 848, options [nop,nop,TS val 27533972 ecr 1108575230,nop,nop,sack 1 {97506:97507}], length 1436
+07:34:06.845415 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 35765:35777, ack 97507, win 848, options [nop,nop,TS val 27533972 ecr 1108575233,nop,nop,sack 1 {97506:97507}], length 12
+07:34:06.845475: wrote 1460 bytes to stdout
+
+07:34:06.845591: read 1448 bytes from sockfd
+
+07:34:06.845625: wrote 1448 bytes to stdout
+07:34:06.849298 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 35777:37213, ack 97507, win 848, options [nop,nop,TS val 27533972 ecr 1108575233], length 1436
+07:34:06.849306 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 37213:37225, ack 97507, win 848, options [nop,nop,TS val 27533972 ecr 1108575233,nop,nop,sack 1 {97506:97507}], length 12
+07:34:06.849395 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 37225:38661, ack 97507, win 1023, options [nop,nop,TS val 27533972 ecr 1108575240,nop,nop,sack 1 {97506:97507}], length 1436
+
+
+07:34:06.849542: read 2884 bytes from sockfd
+
+07:34:06.849653 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 38661:38673, ack 97507, win 1023, options [nop,nop,TS val 27533974 ecr 1108575263], length 12
+07:34:06.849721: wrote 2884 bytes to stdout
+07:34:06.849832: read 12 bytes from sockfd
+
+07:34:06.849871: wrote 12 bytes to stdout
+07:34:06.851320 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 38673:40121, ack 97507, win 1023, options [nop,nop,TS val 27533974 ecr 1108575263], length 1448
+
+07:34:06.851459: read 1448 bytes from sockfd
+07:34:06.851541: wrote 1448 bytes to stdout
+07:34:06.852855 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 40121:41569, ack 97507, win 1023, options [nop,nop,TS val 27533974 ecr 1108575263], length 1448
+07:34:06.853012: read 1448 bytes from sockfd
+
+07:34:06.853101: wrote 1448 bytes to stdout
+07:34:06.855670 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 41569:43017, ack 97507, win 1023, options [nop,nop,TS val 27533974 ecr 1108575268], length 1448
+07:34:06.855679 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 43017:44465, ack 97507, win 1023, options [nop,nop,TS val 27533974 ecr 1108575268], length 1448
+07:34:06.855829: read 2896 bytes from sockfd
+
+
+07:34:06.855924: wrote 2896 bytes to stdout
+07:34:06.856020 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 44465:45913, ack 97507, win 1023, options [nop,nop,TS val 27533975 ecr 1108575268], length 1448
+
+07:34:06.856268: read 1448 bytes from sockfd
+07:34:06.856356: wrote 1448 bytes to stdout
+07:34:06.859401 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 45913:47361, ack 97507, win 1023, options [nop,nop,TS val 27533975 ecr 1108575268], length 1448
+07:34:06.859682: read 1448 bytes from sockfd
+
+07:34:06.859756: wrote 1448 bytes to stdout
+07:34:06.862134 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 47361:48809, ack 97507, win 1023, options [nop,nop,TS val 27533975 ecr 1108575272], length 1448
+07:34:06.862381: read 1448 bytes from sockfd
+07:34:06.862455: wrote 1448 bytes to stdout
+07:34:06.862751 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 48809:50257, ack 97507, win 1023, options [nop,nop,TS val 27533975 ecr 1108575272], length 1448
+07:34:06.862869 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 50257:51705, ack 97507, win 1023, options [nop,nop,TS val 27533975 ecr 1108575272], length 1448
+
+07:34:06.862941: read 2896 bytes from sockfd
+
+07:34:06.863113: wrote 2896 bytes to stdout
+07:34:06.863135 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 51705:53153, ack 97507, win 1023, options [nop,nop,TS val 27533975 ecr 1108575272], length 1448
+07:34:06.863205: read 1448 bytes from sockfd
+07:34:06.863252: wrote 1448 bytes to stdout
+07:34:06.867074 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 53153:54601, ack 97507, win 1023, options [nop,nop,TS val 27533976 ecr 1108575272], length 1448
+
+07:34:06.867301: read 1448 bytes from sockfd
+07:34:06.867395: wrote 1448 bytes to stdout
+07:34:06.870962 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 54601:56049, ack 97507, win 1023, options [nop,nop,TS val 27533976 ecr 1108575272], length 1448
+07:34:06.871005 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 56049:57497, ack 97507, win 1023, options [nop,nop,TS val 27533976 ecr 1108575273], length 1448
+
+07:34:06.871112: read 2896 bytes from sockfd
+
+07:34:06.871192 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 57497:58945, ack 97507, win 1023, options [nop,nop,TS val 27533976 ecr 1108575274], length 1448
+07:34:06.871226: wrote 2896 bytes to stdout
+07:34:06.871260: read 1448 bytes from sockfd
+07:34:06.871277: wrote 1448 bytes to stdout
+07:34:06.871351 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 58945:60393, ack 97507, win 1023, options [nop,nop,TS val 27533977 ecr 1108575276], length 1448
+
+07:34:06.871548: read 1448 bytes from sockfd
+07:34:06.871592: wrote 1448 bytes to stdout
+07:34:06.871613 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 60393:61841, ack 97507, win 1023, options [nop,nop,TS val 27533977 ecr 1108575276], length 1448
+07:34:06.871675: read 1448 bytes from sockfd
+
+07:34:06.871731: wrote 1448 bytes to stdout
+07:34:06.871754 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 61841:63289, ack 97507, win 1023, options [nop,nop,TS val 27533977 ecr 1108575276], length 1448
+07:34:06.871791: read 1448 bytes from sockfd
+07:34:06.871810: wrote 1448 bytes to stdout
+07:34:06.871955 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 63289:64737, ack 97507, win 1023, options [nop,nop,TS val 27533978 ecr 1108575279], length 1448
+07:34:06.872007: read 1448 bytes from sockfd
+
+07:34:06.872044: wrote 1448 bytes to stdout
+07:34:06.872120 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 64737:66185, ack 97507, win 1023, options [nop,nop,TS val 27533979 ecr 1108575281], length 1448
+07:34:06.872167: read 1448 bytes from sockfd
+
+07:34:06.872208: wrote 1448 bytes to stdout
+07:34:06.872340 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 66185:67633, ack 97507, win 1023, options [nop,nop,TS val 27533979 ecr 1108575281], length 1448
+07:34:06.872380: read 1448 bytes from sockfd
+
+07:34:06.872414: wrote 1448 bytes to stdout
+07:34:06.876597 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 67633:69081, ack 97507, win 1023, options [nop,nop,TS val 27533980 ecr 1108575281], length 1448
+07:34:06.876641 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 69081:70529, ack 97507, win 1023, options [nop,nop,TS val 27533981 ecr 1108575285], length 1448
+
+07:34:06.876753: read 2896 bytes from sockfd
+07:34:06.876827 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 70529:71977, ack 97507, win 1023, options [nop,nop,TS val 27533981 ecr 1108575285], length 1448
+07:34:06.876850: wrote 2896 bytes to stdout
+07:34:06.876889: read 1448 bytes from sockfd
+07:34:06.876912: wrote 1448 bytes to stdout
+
+07:34:06.885715 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 71977:73425, ack 97507, win 1023, options [nop,nop,TS val 27533982 ecr 1108575288], length 1448
+07:34:06.885964: read 1448 bytes from sockfd
+
+07:34:06.886019: wrote 1448 bytes to stdout
+07:34:06.886916 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 73425:74873, ack 97507, win 1023, options [nop,nop,TS val 27533982 ecr 1108575288], length 1448
+07:34:06.887049: read 1448 bytes from sockfd
+07:34:06.887104: wrote 1448 bytes to stdout
+07:34:06.891360 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 74873:76321, ack 97507, win 1023, options [nop,nop,TS val 27533982 ecr 1108575288], length 1448
+
+07:34:06.891614: read 1448 bytes from sockfd
+07:34:06.891676: wrote 1448 bytes to stdout
+07:34:06.891702 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 76321:77769, ack 97507, win 1023, options [nop,nop,TS val 27533982 ecr 1108575288], length 1448
+07:34:06.891788: read 1448 bytes from sockfd
+
+07:34:06.891869: wrote 1448 bytes to stdout
+07:34:06.892258 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 77769:79217, ack 97507, win 1023, options [nop,nop,TS val 27533982 ecr 1108575288], length 1448
+
+07:34:06.892427: read 1448 bytes from sockfd
+07:34:06.892482: wrote 1448 bytes to stdout
+07:34:06.895316 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 79217:79665, ack 97507, win 1132, options [nop,nop,TS val 27533982 ecr 1108575288], length 448
+07:34:06.895357 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 79665:81113, ack 97507, win 1132, options [nop,nop,TS val 27533982 ecr 1108575288], length 1448
+07:34:06.895435: read 1896 bytes from sockfd
+
+07:34:06.895502: wrote 1896 bytes to stdout
+07:34:06.895556 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 81113:82561, ack 97507, win 1132, options [nop,nop,TS val 27533983 ecr 1108575288], length 1448
+
+07:34:06.895717: read 1448 bytes from sockfd
+07:34:06.895781 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 82561:84009, ack 97507, win 1132, options [nop,nop,TS val 27533983 ecr 1108575289], length 1448
+07:34:06.895782: wrote 1448 bytes to stdout
+07:34:06.895839: read 1448 bytes from sockfd
+
+07:34:06.895860: wrote 1448 bytes to stdout
+07:34:06.895914 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 84009:85457, ack 97507, win 1132, options [nop,nop,TS val 27533983 ecr 1108575289], length 1448
+07:34:06.895969: read 1448 bytes from sockfd
+07:34:06.896001: wrote 1448 bytes to stdout
+07:34:06.896127 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 85457:86905, ack 97507, win 1132, options [nop,nop,TS val 27533983 ecr 1108575293], length 1448
+07:34:06.896165: read 1448 bytes from sockfd
+
+07:34:06.896213: wrote 1448 bytes to stdout
+07:34:06.896278 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 86905:88353, ack 97507, win 1132, options [nop,nop,TS val 27533983 ecr 1108575293], length 1448
+07:34:06.896323: read 1448 bytes from sockfd
+
+07:34:06.896346: wrote 1448 bytes to stdout
+07:34:06.896501 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 88353:89801, ack 97507, win 1132, options [nop,nop,TS val 27533983 ecr 1108575293], length 1448
+07:34:06.896535: read 1448 bytes from sockfd
+07:34:06.896557: wrote 1448 bytes to stdout
+07:34:06.899986 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 89801:91249, ack 97507, win 1132, options [nop,nop,TS val 27533986 ecr 1108575302], length 1448
+
+07:34:06.900239: read 1448 bytes from sockfd
+07:34:06.900311 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [P.], seq 91249:92697, ack 97507, win 1132, options [nop,nop,TS val 27533987 ecr 1108575306], length 1448
+07:34:06.900326: wrote 1448 bytes to stdout
+07:34:06.900374: read 1448 bytes from sockfd
+07:34:06.900398: wrote 1448 bytes to stdout
+
+07:34:06.904047 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 92697:94145, ack 97507, win 1132, options [nop,nop,TS val 27533987 ecr 1108575306], length 1448
+07:34:06.904202: read 1448 bytes from sockfd
+
+07:34:06.904256: wrote 1448 bytes to stdout
+07:34:06.905139 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 94145:95593, ack 97507, win 1132, options [nop,nop,TS val 27533987 ecr 1108575306], length 1448
+07:34:06.905284: read 1448 bytes from sockfd
+07:34:06.905328: wrote 1448 bytes to stdout
+07:34:06.907354 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [.], seq 95593:97041, ack 97507, win 1132, options [nop,nop,TS val 27533987 ecr 1108575306], length 1448
+
+07:34:06.907546: read 1448 bytes from sockfd
+07:34:06.907588: wrote 1448 bytes to stdout
+07:34:06.908123 IP 192.168.0.111.echo > 192.168.0.103.53388: Flags [FP.], seq 97041:97506, ack 97507, win 1132, options [nop,nop,TS val 27533987 ecr 1108575306], length 465
+07:34:06.908203: read 465 bytes from sockfd
+
+07:34:06.908236: wrote 465 bytes to stdout
+07:34:06.908252: EOF on sockfd

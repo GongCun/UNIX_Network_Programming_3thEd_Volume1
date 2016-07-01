@@ -1,0 +1,154 @@
+head	1.5;
+access;
+symbols;
+locks
+	gongcunjust:1.4
+	gongcunjust:1.5; strict;
+comment	@ * @;
+
+
+1.5
+date	2015.07.02.13.25.07;	author gongcunjust;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2015.06.26.14.08.05;	author gongcunjust;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2015.06.26.14.01.08;	author gongcunjust;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2015.06.25.23.19.42;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.06.25.23.13.03;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@use SIGTERM to notify parent process.
+@
+
+
+1.5
+log
+@use signal instead of wait.
+@
+text
+@#include "mynonb.h"
+#include <sys/wait.h>
+
+static void sig_chld(int);
+
+void strclinonb(FILE *fp, int sockfd)
+{
+    pid_t pid;
+    char buf[MAXLINE];
+    int status;
+
+    if ((pid = fork()) < 0) {
+        err_sys("fork error");
+    } else if (pid == 0) { /* child */
+        while (Readline(sockfd, buf, MAXLINE) > 0)
+            Fputs(buf, stdout);
+        exit(0);
+    }
+
+    /* parent continue */
+    Signal(SIGCHLD, sig_chld);
+    while (Fgets(buf, MAXLINE, fp) != NULL)
+        Writen(sockfd, buf, strlen(buf));
+    Shutdown(sockfd, SHUT_WR); /* EOF on stdin, send FIN */
+
+    return;
+}
+
+static void sig_chld(int signo)
+{
+    int status;
+
+    if (wait(&status) < 0)
+        err_ret("wait error");
+    if (WIFEXITED(status)) {
+        fprintf(stderr, "child normal exit %d\n", WEXITSTATUS(status));
+    } else {
+        fprintf(stderr, "child abnormal exit\n");
+    }
+
+    return;
+
+}
+
+@
+
+
+1.4
+log
+@wait and get status.
+@
+text
+@d4 2
+d21 1
+d26 7
+d34 1
+a34 1
+        err_sys("wait error");
+d42 1
+d44 1
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d2 1
+d8 1
+d23 1
+a23 1
+    if (wait(NULL) < 0)
+d25 5
+@
+
+
+1.2
+log
+@use signal(CHLD) to wait child process.
+@
+text
+@a2 6
+static void sig_chld(int signo)
+{
+    fprintf(stderr, "caught SIGCHLD\n");
+    exit(0);
+}
+
+a16 3
+    if (signal(SIGCHLD, sig_chld) == SIG_ERR)
+        err_sys("signal error");
+
+d20 4
+a23 1
+    pause(); /* to wait child */
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 6
+a18 1
+        kill(getppid(), SIGTERM);
+d23 3
+@

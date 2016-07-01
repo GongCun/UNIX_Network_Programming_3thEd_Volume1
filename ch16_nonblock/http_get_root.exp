@@ -1,0 +1,13 @@
+#!/usr/bin/expect --
+
+if {[llength $argv] != 1} {
+  puts stderr "Usage: $argv0 <webPage>"
+  exit 1
+}
+
+set WEB [lindex $argv 0]
+set timeout 10
+
+catch {spawn -noecho telnet $WEB 80}
+expect -ex "Escape character is '^]'." {send "GET /\r\r"}
+catch {expect eof}

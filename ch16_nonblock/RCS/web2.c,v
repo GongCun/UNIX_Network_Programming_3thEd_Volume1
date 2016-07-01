@@ -1,0 +1,112 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcunjust:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2015.07.01.07.09.57;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.07.01.05.36.05;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@use fork() to divide to multi-processes.
+@
+text
+@#include "myweb.h"
+
+static void sig_chld(int signo)
+{
+    int i;
+    pid_t pid;
+    while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+        nlefttoread--;
+        printf("child %d terminated\n", pid);
+        for (i = 0; i < nfiles; i++) 
+            if (file[i].f_flags == 0)
+                break;
+        if (i != nfiles) {
+            if (Fork() ==0) {
+                printf("child %d started\n", getpid());
+                home_page(file[i].f_host, file[i].f_name);
+                exit(0);
+            }
+            file[i].f_flags = F_DONE;
+        }
+    }
+    return;
+}
+
+
+int main(int argc, char *argv[])
+{
+    int i, fd, n, maxnconn, flags, error;
+    char buf[MAXLINE];
+    fd_set rs, ws;
+    if (argc < 5)
+        err_quit("usage: web <#conn> <hostname> <homepage> <file1> ...");
+    maxnconn = atoi(argv[1]);
+    nfiles = min(argc - 4, MAXFILES);
+    for (i = 0; i < nfiles; i++) {
+        file[i].f_name = argv[i+4];
+        file[i].f_host = argv[2];
+        file[i].f_flags = 0;
+    }
+    printf("nfiles = %d\n", nfiles);
+
+    home_page(argv[2], argv[3]);
+
+    nlefttoread = nlefttoconn = nfiles;
+    nconn = 0;
+
+    Signal(SIGCHLD, sig_chld);
+
+    for (i = 0; i < maxnconn; i++) {
+        if (Fork() == 0) {
+            /*child */
+            printf("child %d started\n", getpid());
+            home_page(file[i].f_host, file[i].f_name);
+            exit(0);
+        }
+        file[i].f_flags = F_DONE;
+    }
+
+    while (nlefttoread > 0) {
+        pause();
+    }
+    printf("all finished\n");
+    return(0);
+}
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d8 1
+d15 1
+a15 1
+                printf("child %d startd\n", getpid());
+a19 1
+            nlefttoread--;
+a56 1
+        nlefttoread--;
+a61 1
+    pause();
+@

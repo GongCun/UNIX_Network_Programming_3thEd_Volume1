@@ -1,0 +1,34 @@
+sudo tcpdump -n -w tcpd tcp and port 7
+./tcpclinonb 192.168.0.111 7 <2000.lines >out 2>diag
+diff diag 2000.lines
+sudo tcpdump -r tcpd | sort diag - >conjunction
+sed 's/^.*length 0.*$//g' conjunction >conjunction.noack
+
+/usr/bin/time -p ./tcpclinonb 192.168.0.111 7 </etc/services >f1 2>f2
+/usr/bin/time -p ../select/tcpcli02 192.168.0.111 </etc/services >f3 2>f4
+
+/usr/bin/time -p ./tcpclinonb02 192.168.0.111 7 <./file.test2 >/dev/null 2>f2
+/usr/bin/time -p ../select/tcpcli02 192.168.0.111 <./file.test2 >/dev/null 2>f4
+
+/usr/bin/time -p ./tcpclinonb02 192.168.0.111 7 <./file.test >/dev/null 2>f1
+/usr/bin/time -p ../select/tcpcli02 192.168.0.111 < ./file.test >/dev/null 2>f2
+/usr/bin/time -p ./tcpclinonb03 192.168.0.111 7 <./file.test >/dev/null 2>f3
+
+./http_get_root.exp www.firstview.com | grep "logo" | tee -a firstview.pic
+cat firstview.pic  | sed 's/http:\/\/firstview.com//g' >firstview.pic2
+http_get_file.exp www.firstview.com firstview.pic2 >get_firstview.out
+vi -b get_firstview.out 
+
+/usr/bin/time ./web.sh 6 2>>web_stat.txt
+./web.sh 4 | tee web.out
+tpty ./web2.sh 3 | tee web2.out
+
+Cunteki-MacBook-Air:nonblock-exercises gongcunjust$ ./tcpserv_rst &
+[1] 90783
+Cunteki-MacBook-Air:nonblock-exercises gongcunjust$ ./tcpcli_rst 127.0.0.1
+listening socket raedable
+Cunteki-MacBook-Air:nonblock-exercises gongcunjust$ returned from accept()
+read error: Connection reset by peer
+
+[1]+  Exit 1                  ./tcpserv_rst
+
