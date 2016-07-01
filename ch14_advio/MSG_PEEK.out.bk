@@ -1,0 +1,17 @@
+recording to file <MSG_PEEK.out>
+
+<2015-06-21-13:03:39>
+
+[?1034hbash-3.2$ tput -Txterm setf 6
+[33mbash-3.2$ 
+recording to file <MSG_PEEK.out> now
+
+bash-3.2$ ./exer02 192.168.0.111 13 2 0
+recv  got readable byes: 26
+ioctl got readable byes: 26
+21 JUN 2015 13:03:31 CST
+bash-3.2$ 
+bash-3.2$ exit
+exit
+
+recording to file typescript complete

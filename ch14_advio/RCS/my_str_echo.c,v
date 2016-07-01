@@ -1,0 +1,96 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcunjust:1.3; strict;
+comment	@ * @;
+
+
+1.3
+date	2015.06.18.13.26.41;	author gongcunjust;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2015.06.18.13.21.41;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.06.18.12.49.46;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@use setvbuf linebuf.
+@
+text
+@#include	"myadvio.h"
+
+void
+my_str_echo(int sockfd)
+{
+	char		buf[MAXLINE];
+    FILE *fpin, *fpout;
+
+    if ((fpin = fdopen(sockfd, "r")) == NULL)
+        err_sys("fdopen error");
+    if ((fpout = fdopen(sockfd, "w")) == NULL)
+        err_sys("fdopen error");
+    if (setvbuf(fpout, (char *)NULL, _IOLBF, 0) == EOF)
+        err_sys("setvbuf error");
+
+again:
+	while ( fgets(buf, MAXLINE, fpin) != NULL)
+        if (fputs(buf, fpout) == EOF)
+            err_sys("fputs error");
+
+	if (ferror(fpin)) {
+       if (errno == EINTR)
+           goto again;
+       err_sys("str_echo: read error");
+    }
+}
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d13 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+#include	"unp.h"
+d4 1
+a4 1
+str_echo(int sockfd)
+a5 1
+	ssize_t		n;
+d7 6
+d15 3
+a17 2
+	while ( (n = read(sockfd, buf, MAXLINE)) > 0)
+		Writen(sockfd, buf, n);
+d19 5
+a23 4
+	if (n < 0 && errno == EINTR)
+		goto again;
+	else if (n < 0)
+		err_sys("str_echo: read error");
+@

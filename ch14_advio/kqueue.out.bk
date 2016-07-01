@@ -1,0 +1,21 @@
+recording to file <kqueue.out>
+
+<2015-06-20-16:05:20>
+
+[?1034hbash-3.2$ tput -Txterm setf 6
+[33mbash-3.2$ 
+recording to file <kqueue.out> now
+
+bash-3.2$ ./tcpclikqueue 192.168.0.111 13
+using kqueue
+20 JUN 2015 16:05:15 CST
+str_cli: server terminated prematurely
+bash-3.2$ 
+bash-3.2$ ./tcpclikqueue 192.168.0.111 13[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C <./x
+using kqueue
+20 JUN 2015 16:05:18 CST
+bash-3.2$ 
+bash-3.2$ exit
+exit
+
+recording to file typescript complete
