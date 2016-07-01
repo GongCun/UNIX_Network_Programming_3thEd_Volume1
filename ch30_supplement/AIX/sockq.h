@@ -1,7 +1,7 @@
 #ifndef _SOCKQ_H
 #define _SOCKQ_H
 
-#include "../config.h"
+/* #include "../config.h" */
 
 #define KMEM "/dev/kmem"
 #if (_AIX64)
