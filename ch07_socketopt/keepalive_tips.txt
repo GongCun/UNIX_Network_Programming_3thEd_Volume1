@@ -1,0 +1,6 @@
+Cunteki-MacBook-Air:socketopt-exercises gongcunjust$ cli_main_keepalive 192.168.0.104
+good
+good
+hello
+hello
+read error: Operation timed out

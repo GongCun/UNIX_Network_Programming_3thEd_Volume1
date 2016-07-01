@@ -1,0 +1,10 @@
+07:37:21.444554 IP 192.168.0.102.53952 > 192.168.0.108.9877: Flags [S], seq 3575319123, win 65535, options [mss 1460,nop,wscale 4,nop,nop,TS val 1301973952 ecr 0,sackOK,eol], length 0
+07:37:21.446593 IP 192.168.0.108.9877 > 192.168.0.102.53952: Flags [S.], seq 3514137660, ack 3575319124, win 28960, options [mss 1460,sackOK,TS val 1250204 ecr 1301973952,nop,wscale 7], length 0
+07:37:21.446754 IP 192.168.0.102.53952 > 192.168.0.108.9877: Flags [.], ack 1, win 8235, options [nop,nop,TS val 1301974052 ecr 1250204], length 0
+07:37:24.880226 IP 192.168.0.102.53952 > 192.168.0.108.9877: Flags [P.], seq 1:6, ack 1, win 8235, options [nop,nop,TS val 1301977478 ecr 1250204], length 5
+07:37:24.884085 IP 192.168.0.108.9877 > 192.168.0.102.53952: Flags [.], ack 6, win 227, options [nop,nop,TS val 1251063 ecr 1301977478], length 0
+07:37:24.884807 IP 192.168.0.108.9877 > 192.168.0.102.53952: Flags [P.], seq 1:6, ack 6, win 227, options [nop,nop,TS val 1251063 ecr 1301977478], length 5
+07:37:24.884903 IP 192.168.0.102.53952 > 192.168.0.108.9877: Flags [.], ack 6, win 8235, options [nop,nop,TS val 1301977482 ecr 1251063], length 0
+07:37:25.776693 IP 192.168.0.102.53952 > 192.168.0.108.9877: Flags [F.], seq 6, ack 6, win 8235, options [nop,nop,TS val 1301978369 ecr 1251063], length 0
+07:37:25.779304 IP 192.168.0.108.9877 > 192.168.0.102.53952: Flags [F.], seq 6, ack 7, win 227, options [nop,nop,TS val 1251288 ecr 1301978369], length 0
+07:37:25.779428 IP 192.168.0.102.53952 > 192.168.0.108.9877: Flags [.], ack 7, win 8235, options [nop,nop,TS val 1301978371 ecr 1251288], length 0

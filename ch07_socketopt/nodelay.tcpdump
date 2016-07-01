@@ -1,0 +1,13 @@
+07:08:24.073639 IP 192.168.0.102.53821 > 192.168.0.108.9877: Flags [S], seq 1137330760, win 65535, options [mss 1460,nop,wscale 4,nop,nop,TS val 1300239128 ecr 0,sackOK,eol], length 0
+07:08:24.080359 IP 192.168.0.108.9877 > 192.168.0.102.53821: Flags [S.], seq 3261646279, ack 1137330761, win 28960, options [mss 1460,sackOK,TS val 815849 ecr 1300239128,nop,wscale 7], length 0
+07:08:24.080617 IP 192.168.0.102.53821 > 192.168.0.108.9877: Flags [.], ack 1, win 8235, options [nop,nop,TS val 1300239180 ecr 815849], length 0
+07:08:26.310382 IP 192.168.0.102.53821 > 192.168.0.108.9877: Flags [P.], seq 1:2, ack 1, win 8235, options [nop,nop,TS val 1300241401 ecr 815849], length 1
+07:08:26.310486 IP 192.168.0.102.53821 > 192.168.0.108.9877: Flags [P.], seq 2:6, ack 1, win 8235, options [nop,nop,TS val 1300241401 ecr 815849], length 4
+07:08:26.325067 IP 192.168.0.108.9877 > 192.168.0.102.53821: Flags [.], ack 2, win 227, options [nop,nop,TS val 816408 ecr 1300241401], length 0
+07:08:26.325072 IP 192.168.0.108.9877 > 192.168.0.102.53821: Flags [P.], seq 1:2, ack 2, win 227, options [nop,nop,TS val 816408 ecr 1300241401], length 1
+07:08:26.325329 IP 192.168.0.102.53821 > 192.168.0.108.9877: Flags [.], ack 2, win 8235, options [nop,nop,TS val 1300241415 ecr 816408], length 0
+07:08:26.326908 IP 192.168.0.108.9877 > 192.168.0.102.53821: Flags [P.], seq 2:6, ack 6, win 227, options [nop,nop,TS val 816411 ecr 1300241401], length 4
+07:08:26.327186 IP 192.168.0.102.53821 > 192.168.0.108.9877: Flags [.], ack 6, win 8235, options [nop,nop,TS val 1300241416 ecr 816411], length 0
+07:08:28.294683 IP 192.168.0.102.53821 > 192.168.0.108.9877: Flags [F.], seq 6, ack 6, win 8235, options [nop,nop,TS val 1300243373 ecr 816411], length 0
+07:08:28.298806 IP 192.168.0.108.9877 > 192.168.0.102.53821: Flags [F.], seq 6, ack 7, win 227, options [nop,nop,TS val 816904 ecr 1300243373], length 0
+07:08:28.299068 IP 192.168.0.102.53821 > 192.168.0.108.9877: Flags [.], ack 7, win 8235, options [nop,nop,TS val 1300243377 ecr 816904], length 0
