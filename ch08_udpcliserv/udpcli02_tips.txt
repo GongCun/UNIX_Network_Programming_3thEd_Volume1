@@ -1,0 +1,19 @@
+Cunteki-MacBook-Air:udpcliserv-exercises gongcunjust$ udpcli02 192.168.0.104
+hello
+<send to 192.168.0.104>
+<send_to 192.168.0.104; reply from 192.168.0.104>
+hello
+
+<send to 192.168.0.104>
+<send_to 192.168.0.101; reply from 192.168.0.101>
+[hello from sock]
+good
+<send to 192.168.0.104>
+<send_to 192.168.0.104; reply from 192.168.0.104>
+
+welcome
+<send to 192.168.0.104>
+<send_to 192.168.0.101; reply from 192.168.0.101>
+[hello from sock]
+
+$ while :;do echo "[hello from sock]"|sock -u 192.168.0.101 51737;sleep 5;done

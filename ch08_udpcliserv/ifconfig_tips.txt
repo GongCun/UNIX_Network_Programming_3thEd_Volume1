@@ -1,0 +1,5 @@
+# macosc add alias
+sudo ifconfig en0 inet 192.168.1.112/24 add
+
+# linux add alias
+sudo ifconfig wlan0:0 192.168.0.111 netmask 255.255.255.0

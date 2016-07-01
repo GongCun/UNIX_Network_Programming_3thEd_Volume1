@@ -1,0 +1,11 @@
+Cunteki-MacBook-Air:udpcliserv-exercises gongcunjust$ sudo tcpdump -i lo0 'udp port 9877'
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on lo0, link-type NULL (BSD loopback), capture size 65535 bytes
+
+07:48:15.397064 IP localhost.63173 > localhost.9877: UDP, length 5
+07:48:15.397168 IP localhost.9877 > localhost.63173: UDP, length 5
+^C
+2 packets captured
+2 packets received by filter
+0 packets dropped by kernel
+

@@ -1,0 +1,43 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcunjust:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2015.05.19.12.39.27;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@use printf every sendto.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "pracudp.h"
+
+#define NDG 2000
+#define DGLEN 1400
+
+void exer07_dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
+{
+    int i;
+    char sendline[DGLEN];
+
+    for (i = 0; i < NDG; i++) {
+        Sendto(sockfd, sendline, DGLEN, 0, pservaddr, servlen);
+        printf("i = %d\n", i);
+    }
+
+}
+
+
+@

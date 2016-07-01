@@ -1,0 +1,61 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcunjust:1.1; strict;
+comment	@ * @;
+
+
+1.2
+date	2015.05.17.02.27.51;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.05.17.02.23.15;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@still use sendto and recvfrom.
+@
+
+
+1.2
+log
+@use write and read.
+@
+text
+@#include "pracudp.h"
+
+void prac_dg_cli03(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
+{
+    int n;
+    char sendline[MAXLINE], recvline[MAXLINE+1];
+
+    Connect(sockfd, pservaddr, servlen);
+
+    while (Fgets(sendline, MAXLINE, fp) != NULL) {
+        Write(sockfd, sendline, strlen(sendline));
+        n = Read(sockfd, recvline, MAXLINE);
+        recvline[n] = 0;
+        Fputs(recvline, stdout);
+    }
+
+}
+
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d11 2
+a12 2
+        Sendto(sockfd, sendline, strlen(sendline), 0, NULL, 0);
+        n = Recvfrom(sockfd, recvline, MAXLINE, 0, NULL, NULL);
+@

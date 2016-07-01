@@ -1,0 +1,96 @@
+head	1.3;
+access;
+symbols;
+locks
+	gongcunjust:1.3; strict;
+comment	@ * @;
+
+
+1.3
+date	2015.05.20.02.58.47;	author gongcunjust;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2015.05.20.02.41.21;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.05.19.14.37.33;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@not change the SO_SNDBUF and SO_RCVBUF.
+@
+
+
+1.3
+log
+@increase the sendbuf and rcvbuf size.
+@
+text
+@#include "pracudp.h"
+
+#undef MAXLINE
+#define MAXLINE 65507
+
+void exer08_dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
+{
+    int n, ret;
+    char *sendline, *recvline;
+
+    sendline = Malloc(MAXLINE);
+    recvline = Malloc(MAXLINE + 1);
+
+    n = 70000;
+    ret = setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &n, sizeof(n));
+    if (ret == -1)
+        err_sys("setsockopt error");
+    n = 70000;
+    ret = setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &n, sizeof(n));
+    if (ret == -1)
+        err_sys("setsockopt error");
+
+    n = sendto(sockfd, sendline, MAXLINE, 0, pservaddr, servlen);
+    if (n != MAXLINE)
+        err_sys("sendto error");
+    printf("sent %d bytes\n", n);
+    
+    sleep(1);
+
+    n = Recvfrom(sockfd, recvline, MAXLINE, 0, NULL, NULL);
+    printf("received %d bytes\n", n);
+
+    free(sendline);
+    free(recvline);
+
+}
+
+
+@
+
+
+1.2
+log
+@set the sendbuf and rcvbuf to the max (70000).
+@
+text
+@d23 7
+a29 1
+    Sendto(sockfd, sendline, MAXLINE, 0, pservaddr, servlen);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d8 1
+a8 1
+    int n;
+d14 9
+@

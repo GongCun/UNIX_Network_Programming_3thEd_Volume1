@@ -1,0 +1,77 @@
+# Before
+udp:
+    468331 datagrams received
+    0 with incomplete header
+    0 with bad data length field
+    0 with bad checksum
+    32722 dropped due to no socket
+    187556 broadcast/multicast datagrams dropped due to no socket
+    15437 dropped due to full socket buffers <<
+    0 not for hashed pcb
+    232616 delivered
+    272057 datagrams output
+
+# After
+udp:
+    470366 datagrams received
+    0 with incomplete header
+    0 with bad data length field
+    0 with bad checksum
+    32722 dropped due to no socket
+    187584 broadcast/multicast datagrams dropped due to no socket
+    15676 dropped due to full socket buffers <<
+    0 not for hashed pcb
+    234384 delivered
+    274064 datagrams output
+
+# Before recv from Linux
+udp:
+	471088 datagrams received
+	0 with incomplete header
+	0 with bad data length field
+	0 with bad checksum
+	32722 dropped due to no socket
+	188103 broadcast/multicast datagrams dropped due to no socket
+	15676 dropped due to full socket buffers
+	0 not for hashed pcb
+	234587 delivered
+	278217 datagrams output
+
+# After recv from Linux
+udp:
+	473120 datagrams received
+	0 with incomplete header
+	0 with bad data length field
+	0 with bad checksum
+	32722 dropped due to no socket
+	188129 broadcast/multicast datagrams dropped due to no socket
+	15676 dropped due to full socket buffers
+	0 not for hashed pcb
+	236593 delivered
+	278223 datagrams output
+
+# Before send to Linux
+udp:
+	473197 datagrams received
+	0 with incomplete header
+	0 with bad data length field
+	0 with bad checksum
+	32739 dropped due to no socket
+	188167 broadcast/multicast datagrams dropped due to no socket
+	15676 dropped due to full socket buffers
+	0 not for hashed pcb
+	236615 delivered
+	278254 datagrams output <<
+
+# After send to Linux
+udp:
+	473208 datagrams received
+	0 with incomplete header
+	0 with bad data length field
+	0 with bad checksum
+	32739 dropped due to no socket
+	188175 broadcast/multicast datagrams dropped due to no socket
+	15676 dropped due to full socket buffers
+	0 not for hashed pcb
+	236618 delivered
+	280257 datagrams output <<

@@ -1,0 +1,151 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcunjust:1.1.1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2015.05.16.03.57.20;	author gongcunjust;	state Exp;
+branches
+	1.2.1.1;
+next	1.1;
+
+1.1
+date	2015.05.16.03.38.18;	author gongcunjust;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2015.05.16.13.26.36;	author gongcunjust;	state Exp;
+branches;
+next	1.1.1.2;
+
+1.1.1.2
+date	2015.05.16.13.29.50;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+1.2.1.1
+date	2015.05.16.13.01.56;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@not use the malloc, but the memcmp seen not work as think.
+@
+
+
+1.2
+log
+@use malloc and inet_ntoa.
+@
+text
+@#include "pracudp.h"
+
+void prac_dg_cli02(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
+{
+    int n;
+    char sendline[MAXLINE], recvline[MAXLINE+1];
+    char *reply_addr_str;
+    struct sockaddr *reply_addr;
+    socklen_t len;
+
+    if ((reply_addr = malloc(servlen)) == NULL)
+        err_sys("malloc error");
+
+    while (Fgets(sendline, MAXLINE, fp) != NULL) {
+        Sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
+
+        len = servlen;
+        n = Recvfrom(sockfd, recvline, MAXLINE, 0, reply_addr, &len);
+        printf("<reply from %s>\n", 
+                ((reply_addr_str = inet_ntoa(((struct sockaddr_in *)reply_addr)->sin_addr)) == NULL) ?
+                "error address" : reply_addr_str);
+        if (len != servlen || memcmp(pservaddr,(struct sockaddr_in *)reply_addr, len) != 0) {
+            printf("replay from %s (ignore)\n", reply_addr_str);
+            continue;
+        }
+
+        recvline[n] = 0;
+        Fputs(recvline, stdout);
+    }
+
+}
+
+
+@
+
+
+1.2.1.1
+log
+@use the malloc, but memcp not work as think.
+@
+text
+@a18 1
+        printf("pservaddr = %s; reply_addr = %s\n", (char *)pservaddr, (char *)reply_addr);
+d20 1
+a20 1
+                ((reply_addr_str = Sock_ntop(reply_addr, len)) == NULL) ?
+d22 1
+a22 1
+        if (len != servlen || memcmp(pservaddr, reply_addr, len) != 0) {
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d8 1
+a8 1
+    struct sockaddr_in reply_addr;
+d11 3
+d18 1
+a18 1
+        n = Recvfrom(sockfd, recvline, MAXLINE, 0, (SA *)&reply_addr, &len);
+d20 1
+a20 1
+                ((reply_addr_str = inet_ntoa(reply_addr.sin_addr)) == NULL) ?
+d22 1
+a22 1
+        if (len != servlen || memcmp(pservaddr,(SA *)&reply_addr, len) != 0) {
+@
+
+
+1.1.1.1
+log
+@use strcmp to replace memcmp.
+@
+text
+@d7 1
+a7 1
+    char *reply_addr_str, *serv_addr_str;
+a8 1
+    struct sockaddr_in *sin;
+a12 4
+        sin = (struct sockaddr_in *)pservaddr;
+        serv_addr_str = inet_ntoa(sin->sin_addr);
+        printf("<send to %s>\n", (serv_addr_str == NULL) ?
+                "error address" : serv_addr_str);
+d19 2
+a20 3
+
+        if (len != servlen || strcmp(serv_addr_str, reply_addr_str) != 0) {
+            printf("reply from %s (ignore)\n", reply_addr_str);
+@
+
+
+1.1.1.2
+log
+@*** empty log message ***
+@
+text
+@d21 1
+a21 1
+        printf("<send_to %s; reply from %s>\n", serv_addr_str,
+@

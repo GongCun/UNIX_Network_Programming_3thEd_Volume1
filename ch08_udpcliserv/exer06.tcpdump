@@ -1,0 +1,117 @@
+
+<2015-05-19-09:29:06>
+
+recording to file typescript
+~s to stop recording, ~r to record
+~n to cleanup and record, ~~ to display record status
+tput -Txterm setf 6
+[?1034hbash-3.2$ tput -Txterm setf 6
+[33mbash-3.2$ ping 192.168.0.110
+PING 192.168.0.110 (192.168.0.110): 56 data bytes
+64 bytes from 192.168.0.110: icmp_seq=0 ttl=64 time=112.589 ms
+64 bytes from 192.168.0.110: icmp_seq=1 ttl=64 time=5.732 ms
+^C
+--- 192.168.0.110 ping statistics ---
+2 packets transmitted, 2 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 5.732/59.160/112.589/53.428 ms
+bash-3.2$ ping 192.168.0.110[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C1
+PING 192.168.0.111 (192.168.0.111): 56 data bytes
+64 bytes from 192.168.0.111: icmp_seq=0 ttl=64 time=42.757 ms
+64 bytes from 192.168.0.111: icmp_seq=1 ttl=64 time=5.840 ms
+64 bytes from 192.168.0.111: icmp_seq=2 ttl=64 time=5.896 ms
+^C
+--- 192.168.0.111 ping statistics ---
+3 packets transmitted, 3 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 5.840/18.164/42.757/17.390 ms
+bash-3.2$ ifconfig | grep 192
+	inet 192.168.0.101 netmask 0xffffff00 broadcast 192.168.0.255
+bash-3.2$ if[K[K/ifconfigifconfig | grep 192[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K[K
+bash-3.2$ i[K
+stopped recording
+
+<2015-05-19-09:31:28>
+
+tput -Txterm setf 6
+[33mbash-3.2$ ifconfig en0 inet 192.168.1.110/24
+ifconfig: ioctl (SIOCDIFADDR): permission denied
+bash-3.2$ ifconfig en0 inet 192.168.1.110/24[C[C[C[C[C[C[C[C[C[C[1@s[1@u[1@d[1@o[1@ 
+Password:
+bash-3.2$ ifconfig | grep 192
+	inet 192.168.1.110 netmask 0xffffff00 broadcast 192.168.1.255
+bash-3.2$ ifconfig -a
+lo0: flags=8049<UP,LOOPBACK,RUNNING,MULTICAST> mtu 16384
+	options=3<RXCSUM,TXCSUM>
+	inet6 fe80::1%lo0 prefixlen 64 scopeid 0x1 
+	inet 127.0.0.1 netmask 0xff000000 
+	inet6 ::1 prefixlen 128 
+gif0: flags=8010<POINTOPOINT,MULTICAST> mtu 1280
+stf0: flags=0<> mtu 1280
+en0: flags=8963<UP,BROADCAST,SMART,RUNNING,PROMISC,SIMPLEX,MULTICAST> mtu 1500
+	ether 10:40:f3:86:19:82 
+	inet6 fe80::1240:f3ff:fe86:1982%en0 prefixlen 64 scopeid 0x4 
+	inet 192.168.1.110 netmask 0xffffff00 broadcast 192.168.1.255
+	media: autoselect
+	status: active
+p2p0: flags=8843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST> mtu 2304
+	ether 02:40:f3:86:19:82 
+	media: autoselect
+	status: inactive
+bash-3.2$ /sudosudo ifconfig en0 inet 192.168.1.110/24[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C0.110/24[C[C[C[C2/24
+bash-3.2$ ping 19.[K2.168.0.110
+PING 192.168.0.110 (192.168.0.110): 56 data bytes
+64 bytes from 192.168.0.110: icmp_seq=0 ttl=64 time=97.364 ms
+^C
+--- 192.168.0.110 ping statistics ---
+1 packets transmitted, 1 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 97.364/97.364/97.364/0.000 ms
+bash-3.2$ ping 192.168.0.110[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C1
+PING 192.168.0.111 (192.168.0.111): 56 data bytes
+64 bytes from 192.168.0.111: icmp_seq=0 ttl=64 time=54.214 ms
+^C
+--- 192.168.0.111 ping statistics ---
+1 packets transmitted, 1 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 54.214/54.214/54.214/0.000 ms
+bash-3.2$ ping 192.168.0.111[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C0[C[C[C[C[C[C[C[C[C[Csudo ifconfig en0 inet 192.168.0.112/24[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C1.112/24[C[C[C[C[C[C[C[C add
+bash-3.2$ ifconfig | grep 192
+	inet 192.168.0.112 netmask 0xffffff00 broadcast 192.168.0.255
+	inet 192.168.1.112 netmask 0xffffff00 broadcast 192.168.1.255
+bash-3.2$ udpcli0[K[K[K[Kexer06_cli 192.168.0.110 192.168.1.112
+good
+hello
+^C
+bash-3.2$ udpexer06_cli 192.168.0.110 192.168.1.112[C[C[C[C[C[C[C[C[C[C[1@#
+bash-3.2$ #udpexer06_cli 192.168.0.110 192.168.1.112[C[C[C[C[C[C[C[C[C[C[1P[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C0.112
+good
+good
+^Dbash-3.2$ 
+bash-3.2$ udpexer06_cli 192.168.0.110 192.168.0.112[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C1.112
+good
+hello
+^C
+bash-3.2$ 
+stopped recording
+
+<2015-05-19-17:14:42>
+
+tput -Txterm setf 6
+[33mbash-3.2$ tcpdump -[K[1@s[1@u[1@d[1@o[1@ [C[C[C[C[C[C[C[C[C-i en0 'udp and host 192.168.0.101'[K [1@s[1@r[1@c[1@ [C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C'
+Password:
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on en0, link-type EN10MB (Ethernet), capture size 65535 bytes
+
+17:16:41.945183 IP 192.168.0.101.60039 > 192.168.0.108.9877: UDP, length 5
+^C
+1 packets captured
+60 packets received by filter
+0 packets dropped by kernel
+bash-3.2$ sudo tcpdump -i en0 'udp and src host 192.168.0.101 '[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[3P[1@d[1@s[1@t[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C8[C[1P'
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on en0, link-type EN10MB (Ethernet), capture size 65535 bytes
+17:17:10.096323 IP 192.168.0.101.59519 > 192.168.0.108.9877: UDP, length 5
+17:17:19.928113 IP 192.168.1.112.52018 > 192.168.0.108.9877: UDP, length 6
+^C
+2 packets captured
+21 packets received by filter
+0 packets dropped by kernel
+bash-3.2$ 
+stopped recording

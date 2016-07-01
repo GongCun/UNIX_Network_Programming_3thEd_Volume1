@@ -1,0 +1,54 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcunjust:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2015.05.13.14.14.11;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.05.13.14.13.51;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@change to use $^
+@
+
+
+1.2
+log
+@use $^
+@
+text
+@include ../Make.defines
+
+PROGS =
+
+all:	${PROGS} udpserv01
+
+$(PROGS):	%: %.o	
+		${CC} ${CFLAGS} -o $@@ $< ${LIBS}
+
+udpserv01:	udpserv01.o prac_dg_echo.o
+		${CC} ${CFLAGS} -o $@@ $^ ${LIBS}
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a10 1
+		# ${CC} ${CFLAGS} -o $@@ udpserv01.o prac_dg_echo.o ${LIBS}
+@
