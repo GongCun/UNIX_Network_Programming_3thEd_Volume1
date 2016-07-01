@@ -1,0 +1,35 @@
+PING 192.168.0.108 (192.168.0.108): 60 data bytes
+68 bytes from 192.168.0.108: icmp_seq=0 ttl=64 time=19.463 ms
+68 bytes from 192.168.0.108: icmp_seq=1 ttl=64 time=4.860 ms
+68 bytes from 192.168.0.108: icmp_seq=2 ttl=64 time=6.356 ms
+68 bytes from 192.168.0.108: icmp_seq=3 ttl=64 time=6.278 ms
+68 bytes from 192.168.0.108: icmp_seq=4 ttl=64 time=8.760 ms
+68 bytes from 192.168.0.108: icmp_seq=5 ttl=64 time=4.734 ms
+68 bytes from 192.168.0.108: icmp_seq=6 ttl=64 time=5.432 ms
+68 bytes from 192.168.0.108: icmp_seq=7 ttl=64 time=6.208 ms
+68 bytes from 192.168.0.108: icmp_seq=8 ttl=64 time=5.896 ms
+68 bytes from 192.168.0.108: icmp_seq=9 ttl=64 time=11.268 ms
+68 bytes from 192.168.0.108: icmp_seq=10 ttl=64 time=5.898 ms
+68 bytes from 192.168.0.108: icmp_seq=11 ttl=64 time=9.358 ms
+68 bytes from 192.168.0.108: icmp_seq=12 ttl=64 time=6.946 ms
+68 bytes from 192.168.0.108: icmp_seq=13 ttl=64 time=5.160 ms
+68 bytes from 192.168.0.108: icmp_seq=14 ttl=64 time=6.866 ms
+68 bytes from 192.168.0.108: icmp_seq=15 ttl=64 time=15.039 ms
+68 bytes from 192.168.0.108: icmp_seq=16 ttl=64 time=6.180 ms
+68 bytes from 192.168.0.108: icmp_seq=17 ttl=64 time=4.873 ms
+68 bytes from 192.168.0.108: icmp_seq=18 ttl=64 time=7.469 ms
+68 bytes from 192.168.0.108: icmp_seq=19 ttl=64 time=5.469 ms
+68 bytes from 192.168.0.108: icmp_seq=20 ttl=64 time=7.072 ms
+68 bytes from 192.168.0.108: icmp_seq=21 ttl=64 time=6.220 ms
+68 bytes from 192.168.0.108: icmp_seq=22 ttl=64 time=6.059 ms
+68 bytes from 192.168.0.108: icmp_seq=23 ttl=64 time=19.829 ms
+68 bytes from 192.168.0.108: icmp_seq=24 ttl=64 time=5.895 ms
+68 bytes from 192.168.0.108: icmp_seq=25 ttl=64 time=6.060 ms
+68 bytes from 192.168.0.108: icmp_seq=26 ttl=64 time=2.771 ms
+68 bytes from 192.168.0.108: icmp_seq=27 ttl=64 time=6.366 ms
+68 bytes from 192.168.0.108: icmp_seq=28 ttl=64 time=5.847 ms
+68 bytes from 192.168.0.108: icmp_seq=29 ttl=64 time=6.149 ms
+
+--- 192.168.0.108 ping statistics ---
+30 packets transmitted, 30 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 2.771/7.493/19.829/3.896 ms

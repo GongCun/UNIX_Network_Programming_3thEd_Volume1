@@ -1,0 +1,14 @@
+# normal
+Cunteki-MacBook-Air:tcpcliserv-exercises gongcunjust$ cli_main 192.168.0.108 </etc/hosts
+
+# bad
+Cunteki-MacBook-Air:select-exercises gongcunjust$ cli_main 192.168.0.108 </etc/hosts
+
+# RTT
+# ping: 60 + 20 (ip header) + 20 (icmp) = 88 bytes
+ping -c 30 -s 60 192.168.0.108 | tee ping.count
+cat ping.count | grep "time="|awk -F= '{print $NF}'|awk '{count += $1}END{print count/30}'
+7.4927 ms
+# date; ../tcpcliserv-exercises/cli_main 192.168.0.108 </etc/services >/dev/null;date 
+Sat May  2 19:45:36 CST 2015
+Sat May  2 19:46:30 CST 2015
