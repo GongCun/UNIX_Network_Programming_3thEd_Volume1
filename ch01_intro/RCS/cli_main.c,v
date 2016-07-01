@@ -1,0 +1,112 @@
+head	1.2;
+access;
+symbols;
+locks
+	gongcunjust:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2015.04.26.13.32.13;	author gongcunjust;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.04.24.13.10.07;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@create 5 connection, but uses only the first one in the call str_cli,
+to test the difference between wait and waitpid.
+@
+
+
+1.2
+log
+@single mode.
+@
+text
+@#include "unp.h"
+
+int
+main(int argc, char **argv)
+{
+	int		sockfd;
+	struct sockaddr_in servaddr;
+
+	if (argc != 2)
+		err_quit("usage: %s <IPaddress>", *argv);
+
+	sockfd = Socket(AF_INET, SOCK_STREAM, 0);
+	bzero(&servaddr, sizeof servaddr);
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_port = htons(SERV_PORT);
+	Inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
+	Connect(sockfd, (SA *) & servaddr, sizeof servaddr);
+
+	str_cli(stdin, sockfd);	/* do it all */
+
+	exit(0);
+}
+@
+
+
+1.1
+log
+@establish 5 connection but only use the first in the call to str_cli
+@
+text
+@d3 1
+a3 1
+int 
+d6 1
+a6 1
+	int		sockfd     [5], i;
+d12 6
+a17 8
+	for (i = 0; i < 5; i++) {
+		sockfd[i] = Socket(AF_INET, SOCK_STREAM, 0);
+		bzero(&servaddr, sizeof servaddr);
+		servaddr.sin_family = AF_INET;
+		servaddr.sin_port = htons(SERV_PORT);
+		Inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
+		Connect(sockfd[i], (SA *) & servaddr, sizeof servaddr);
+	}
+d19 1
+a19 1
+	str_cli(stdin, sockfd[0]);	/* do it all */
+@
+
+
+1.1
+log
+@establish 5 connection but only use the first in the call to str_cli
+@
+text
+@#include "unp.h"
+
+int 
+main(int argc, char **argv)
+{
+	int		sockfd     [5], i;
+	struct sockaddr_in servaddr;
+
+	if (argc != 2)
+		err_quit("usage: %s <IPaddress>", *argv);
+
+	for (i = 0; i < 5; i++) {
+		sockfd[i] = Socket(AF_INET, SOCK_STREAM, 0);
+		bzero(&servaddr, sizeof servaddr);
+		servaddr.sin_family = AF_INET;
+		servaddr.sin_port = htons(SERV_PORT);
+		Inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
+		Connect(sockfd[i], (SA *) & servaddr, sizeof servaddr);
+	}
+
+	str_cli(stdin, sockfd);	/* do it all */
+
+	exit(0);
+}
+@

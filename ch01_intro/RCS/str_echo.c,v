@@ -1,0 +1,42 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcunjust:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2015.04.21.05.20.07;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include	"unp.h"
+
+void
+str_echo(int sockfd)
+{
+	ssize_t		n;
+	char		buf[MAXLINE];
+
+again:
+	while ( (n = read(sockfd, buf, MAXLINE)) > 0)
+		Writen(sockfd, buf, n);
+
+	if (n < 0 && errno == EINTR)
+		goto again;
+	else if (n < 0)
+		err_sys("str_echo: read error");
+}
+@
