@@ -1,0 +1,32 @@
+Cunteki-MacBook-Air:~ gongcunjust$ sudo tcpdump -v -i en0 port 60930
+tcpdump: listening on en0, link-type EN10MB (Ethernet), capture size 65535 bytes
+
+07:35:51.469726 IP (tos 0x0, ttl 64, id 15837, offset 0, flags [DF], proto TCP (6), length 52)
+    192.168.0.109.9877 > 192.168.0.100.60930: Flags [FP.], cksum 0xd561 (correct), seq 571253848, ack 699403348, win 227, options [nop,nop,TS val 10958252 ecr 1174573303], length 0
+07:35:51.469985 IP (tos 0x0, ttl 64, id 6989, offset 0, flags [DF], proto TCP (6), length 40)
+    192.168.0.100.60930 > 192.168.0.109.9877: Flags [R], cksum 0xe322 (correct), seq 699403348, win 0, length 0
+
+# just print
+make -n
+
+# tranfer binary data
+
+# local
+1 2
+3
+
+08:17:46.163551 IP localhost.62144 > localhost.9877: Flags [P.], seq 2085763604:2085763620, ack 46809267, win 9185, options [nop,nop,TS val 1186759684 ecr 1186738294], length 16
+08:17:46.163621 IP localhost.9877 > localhost.62144: Flags [.], ack 16, win 9182, options [nop,nop,TS val 1186759684 ecr 1186759684], length 0
+08:17:46.163649 IP localhost.9877 > localhost.62144: Flags [P.], seq 1:9, ack 16, win 9182, options [nop,nop,TS val 1186759684 ecr 1186759684], length 8
+08:17:46.163691 IP localhost.62144 > localhost.9877: Flags [.], ack 9, win 9184, options [nop,nop,TS val 1186759684 ecr 1186759684], length 0
+
+# remote: client(64bit) --> server(32bit)
+1 2
+8589934593 (bad)
+
+08:13:22.394745 IP 192.168.0.100.62011 > 192.168.0.110.9877: Flags [P.], seq 3357913774:3357913790, ack 3838637222, win 8234, options [nop,nop,TS val 1186497280 ecr 967387], length 16
+08:13:22.396724 IP 192.168.0.110.9877 > 192.168.0.100.62011: Flags [P.], seq 1:5, ack 16, win 227, options [nop,nop,TS val 981157 ecr 1186497280], length 4
+08:13:22.396962 IP 192.168.0.100.62011 > 192.168.0.110.9877: Flags [.], ack 5, win 8234, options [nop,nop,TS val 1186497336 ecr 981157], length 0
+08:13:22.398813 IP 192.168.0.110.9877 > 192.168.0.100.62011: Flags [P.], seq 5:9, ack 16, win 227, options [nop,nop,TS val 981157 ecr 1186497336], length 4
+08:13:22.399015 IP 192.168.0.100.62011 > 192.168.0.110.9877: Flags [.], ack 9, win 8234, options [nop,nop,TS val 1186497338 ecr 981157], length 0
+

@@ -1,0 +1,20 @@
+--- serv_main.c	2015/04/24 12:49:33	1.4
++++ serv_main.c	2015/04/26 02:50:11	1.6
+@@ -5,11 +5,13 @@
+     pid_t pid;
+     int stat;
+ 
+-    pid = wait(&stat);
+-    if (pid == -1)
+-        err_sys("wait error");
+-    printf("child %d terminated\n", pid);
++    while ((pid = waitpid((pid_t)-1, &stat, WNOHANG)) > 0)
++        printf("child %d terminated\n", pid);
++    if (pid == (pid_t)-1)
++        if (errno != ECHILD)
++            err_sys("waitpid error");
+     return;
++
+ }
+ 
+ int main(int argc, char **argv)
