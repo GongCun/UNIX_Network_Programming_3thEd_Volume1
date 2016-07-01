@@ -1,0 +1,194 @@
+head	1.3;
+access;
+symbols;
+locks
+	root:1.3; strict;
+comment	@ * @;
+
+
+1.3
+date	2016.07.01.03.38.10;	author root;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2016.07.01.03.28.56;	author root;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2016.06.30.23.34.20;	author root;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@/*
+ * Copy from unp/lib/error.c
+ */
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<stdarg.h>		/* ANSI C header file */
+#include	<errno.h>
+#include	<string.h>
+
+#define MAXLINE 1024
+
+
+static void	err_doit(int, const char *, va_list);
+
+/* Fatal error related to system call
+ * Print message and terminate */
+
+void
+err_sys(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(1, fmt, ap);
+	va_end(ap);
+	exit(1);
+}
+
+/* Fatal error unrelated to system call
+ * Print message and terminate */
+
+void
+err_quit(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(0, fmt, ap);
+	va_end(ap);
+	exit(1);
+}
+
+static void
+err_doit(int errnoflag, const char *fmt, va_list ap)
+{
+	int		errno_save, n;
+	char	buf[MAXLINE + 1];
+
+	errno_save = errno;		/* value caller might want printed */
+#ifdef	HAVE_VSNPRINTF
+	vsnprintf(buf, MAXLINE, fmt, ap);	/* safe */
+#else
+	vsprintf(buf, fmt, ap);					/* not safe */
+#endif
+	n = strlen(buf);
+	if (errnoflag)
+		snprintf(buf + n, MAXLINE - n, ": %s", strerror(errno_save));
+	strcat(buf, "\n");
+
+	fflush(stdout);		/* in case stdout and stderr are the same */
+	fputs(buf, stderr);
+	fflush(stderr);
+	return;
+}
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d4 2
+d7 2
+a8 1
+#include	<syslog.h>		/* for syslog() */
+d10 1
+a10 1
+int		daemon_proc;		/* set nonzero by daemon_init() */
+a11 1
+static void	err_doit(int, int, const char *, va_list);
+d13 1
+a13 13
+/* Nonfatal error related to system call
+ * Print message and return */
+
+void
+err_ret(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(1, LOG_INFO, fmt, ap);
+	va_end(ap);
+	return;
+}
+d24 1
+a24 1
+	err_doit(1, LOG_ERR, fmt, ap);
+a28 29
+/* Fatal error related to system call
+ * Print message, dump core, and terminate */
+
+void
+err_dump(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(1, LOG_ERR, fmt, ap);
+	va_end(ap);
+	abort();		/* dump core and terminate */
+	exit(1);		/* shouldn't get here */
+}
+
+/* Nonfatal error unrelated to system call
+ * Print message and return */
+
+void
+err_msg(const char *fmt, ...)
+{
+	va_list		ap;
+
+	va_start(ap, fmt);
+	err_doit(0, LOG_INFO, fmt, ap);
+	va_end(ap);
+	return;
+}
+
+d38 1
+a38 1
+	err_doit(0, LOG_ERR, fmt, ap);
+a42 3
+/* Print message and return to caller
+ * Caller specifies "errnoflag" and "level" */
+
+d44 1
+a44 1
+err_doit(int errnoflag, int level, const char *fmt, va_list ap)
+d60 3
+a62 7
+	if (daemon_proc) {
+		syslog(level, buf);
+	} else {
+		fflush(stdout);		/* in case stdout and stderr are the same */
+		fputs(buf, stderr);
+		fflush(stderr);
+	}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 3
+a3 2
+#include	"unp.h"
+
+@

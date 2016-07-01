@@ -1,0 +1,153 @@
+head	1.1;
+access;
+symbols;
+locks
+	root:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.07.01.05.12.27;	author root;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#define _KERNEL 1
+#include <sys/file.h>
+#undef _KERNEL
+#include <stdlib.h>
+#include <stdio.h>
+#include <libgen.h>
+#include <errno.h>
+#include <sys/socketvar.h>
+#include <sys/protosw.h>
+#include <netinet/in.h>
+#include <netinet/in_pcb.h>
+#include <sys/types.h>
+#include <procinfo.h>
+
+#define KMEM "/dev/kmem"
+#if (_AIX64)
+# define FDSINFO fdsinfo64
+# define PROCINFO procentry64
+# define GETPROCS getprocs64
+# define LSEEK lseek64
+# define OFF_T off64_t
+#else 
+# define FDSINFO fdsinfo
+# define PROCINFO procsinfo
+# define GETPROCS getprocs
+# define LSEEK lseek
+# define OFF_T off_t
+#endif
+
+#define PROCSIZE    sizeof(struct PROCINFO)
+
+#define FDSINFOSIZE sizeof(struct FDSINFO) /* (If we're lucky.) */
+#if defined(OPEN_SHRT_MAX)
+# if OPEN_SHRT_MAX<OPEN_MAX
+#   undef  FDSINFOSIZE /* (We weren't lucky.) */
+#   define FDSELEMSIZE (sizeof(struct FDSINFO)/OPEN_SHRT_MAX)
+#   define FDSINFOSIZE (OPEN_MAX * FDSELEMSIZE)
+# endif /* OPEN_SHRT_MAX<OPEN_MAX */
+#endif  /* defined(OPEN_SHRT_MAX) */
+
+typedef u_longlong_t KA_T; /* kernel memory address type */
+int Kd; /* KMEM descriptor */
+
+extern void err_sys(const char *fmt, ...);
+extern void err_quit(const char *fmt, ...);
+int _getprocs(struct PROCINFO *, int, struct FDSINFO *, int, pid_t *, int);
+void procfile(KA_T);
+
+static size_t kread(KA_T addr, char *buf, size_t len)
+{
+	if (LSEEK(Kd, (OFF_T)addr, L_SET) == (OFF_T)-1)
+		err_sys("LSEEK error");
+	return read(Kd, buf, len);
+}
+
+size_t Kread(KA_T addr, char *buf, size_t len)
+{
+	size_t n;
+	if ((n = kread(addr, buf, len)) != len)
+		err_sys("kread error");
+	return n;
+}
+
+
+int main(int argc, char *argv[])
+{
+	pid_t pid;
+	static struct FDSINFO *fds;
+	static struct PROCINFO pinfo;
+	KA_T fp; /* pointer */
+	unsigned int nf, i;
+	int n;
+
+	if (argc != 2)
+		err_quit("Usage: %s <PID>", basename(argv[0]));
+
+	pid = (pid_t)atol(argv[1]);
+
+	if ((Kd = open(KMEM, O_RDONLY, 0)) < 0)
+		err_sys("open KMEM error");
+
+	if ((fds = malloc(FDSINFOSIZE)) == NULL)
+		err_sys("malloc error");
+
+	if ((n = _getprocs(&pinfo, PROCSIZE, fds, FDSINFOSIZE, &pid, 1)) != 1) {
+		if (n < 0)
+			err_sys("GETPROCS error");
+		else
+			err_quit("Process table is empty");
+	}
+
+	nf = pinfo.pi_maxofile;
+	printf("nf = %d\n", nf);
+
+	for (i = 0; i < nf; i++) {
+		fp = fds->pi_ufd[i].fp;
+		procfile(fp);
+	}
+
+	free(fds);
+	return 0;
+}
+
+void procfile(KA_T fp) {
+	struct file file;
+	struct socket socket;
+	struct inpcb inpcb;
+	struct protosw protosw;
+
+	Kread(fp, (char *)&file, sizeof(struct file));
+	if (file.f_type == DTYPE_SOCKET) {
+		Kread((KA_T)file.f_data, (char *)&socket, sizeof(struct socket));
+		Kread((KA_T)socket.so_proto, (char *)&protosw, sizeof(struct protosw));
+		if (protosw.pr_protocol == IPPROTO_TCP) {
+			Kread((KA_T)socket.so_pcb, (char *)&inpcb, sizeof(struct inpcb));
+			printf("Recv-Q: %lu; Send-Q: %lu\n"
+					"Partial: %d; Incoming: %d\n"
+					"LPort: %d; FPort: %d\n",
+					socket.so_rcv.sb_cc, socket.so_snd.sb_cc,
+					socket.so_q0len, socket.so_qlen,
+					ntohs(inpcb.inp_lport), ntohs(inpcb.inp_fport));
+		}
+	}
+	return;
+}
+int _getprocs(struct PROCINFO *pp, int sp, struct FDSINFO *pf, int sf, pid_t *ptr, int count)
+{
+	return GETPROCS(pp, sp, pf, sf, ptr, count);
+}
+@

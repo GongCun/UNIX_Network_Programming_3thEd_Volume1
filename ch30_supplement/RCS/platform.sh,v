@@ -1,0 +1,45 @@
+head	1.1;
+access;
+symbols;
+locks
+	root:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.30.13.32.47;	author root;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#!/bin/sh
+
+PID=$$
+OS=`uname -s | tr '[:lower:]' '[:upper:]'`
+
+CFLAGS="-D_${OS}"
+
+if test "X$OS" = "XAIX" && ls -l /unix | grep unix_64 >/dev/null 2>&1; then
+    CFLAGS="-D_AIX64"
+    echo "main(){}" >${PID}.c
+    cc -o ${PID}.o -c ${PID}.c -qlist >/dev/null 2>&1
+    if head -1 ${PID}.lst 2>/dev/null | grep -i 'XL C for AIX' >/dev/null 2>&1; then
+        CFLAGS="$CFLAGS -q64"
+    else
+        CFLAGS="$CFLAGS -maix64" # suppose gcc
+    fi
+    rm -f ${PID}.* >/dev/null 2>&1
+fi
+
+echo "$OS:$CFLAGS"
+
+@

@@ -1,0 +1,48 @@
+head	1.1;
+access;
+symbols;
+locks
+	root:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2016.06.30.23.25.28;	author root;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@MAKE := gmake
+PLATFORM = $(shell ./platform.sh | cut -d':' -f1)
+
+CFLAGS = -D_$(PLATFORM) -g
+
+ifeq ($(PLATFORM), AIX)
+	CFLAGS += $(shell ./platform.sh | cut -d':' -f2)
+endif
+
+PROGS = x
+
+OBJ = func.o
+
+all: $(PROGS)
+
+$(PROGS): x.o $(OBJ)
+	$(CC) $(CFLAGS) -o $@@ $^
+
+$(OBJ):
+	(cd $(PLATFORM) && $(MAKE) CFLAGS="$(CFLAGS)" $(OBJ)) && ln -s -f $(PLATFORM)/$(OBJ) .
+
+clean:
+	rm -f $(PROGS) *.o
+	rm -f $(PLATFORM)/*.o
+@
