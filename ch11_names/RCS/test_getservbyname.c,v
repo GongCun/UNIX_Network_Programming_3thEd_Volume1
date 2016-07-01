@@ -1,0 +1,52 @@
+head	1.1;
+access;
+symbols;
+locks
+	gongcunjust:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2015.05.22.12.46.12;	author gongcunjust;	state Exp;
+branches;
+next	;
+
+
+desc
+@the err_ret and hstrerror no work because the errno == 0.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "mynames.h"
+
+int main(int argc, char **argv)
+{
+    char *ptr;
+    struct servent *sptr;
+
+    while (--argc > 0) {
+        ptr = *++argv;
+        sptr = getservbyname(ptr, "tcp");
+        if (sptr == NULL)
+            err_ret("getservbyname error for: %s", ptr);
+        else
+            printf("%s: %d/tcp\n", sptr->s_name, ntohs(sptr->s_port)); 
+
+        sptr = getservbyname(ptr, "udp");
+        if (sptr == NULL)
+            /* err_ret("getservbyname error for: %s", ptr); */
+            err_ret("getservbyname error for: %s: %s", ptr, hstrerror(h_errno));
+        else
+            printf("%s: %d/udp\n", sptr->s_name, ntohs(sptr->s_port)); 
+    }
+    
+    exit(0);
+}
+
+        
+@

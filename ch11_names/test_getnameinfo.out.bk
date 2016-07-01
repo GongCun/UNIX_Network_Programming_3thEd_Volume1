@@ -1,0 +1,56 @@
+recording to file <test_getnameinfo.out>
+
+<2015-05-30-20:36:08>
+
+tput -Txterm setf 6
+bash-3.2$ test_gethostbyname google.com
+official hostname: google.com
+address: 45.64.20.172
+address: 45.64.20.158
+address: 45.64.20.183
+address: 45.64.20.182
+address: 45.64.20.153
+address: 45.64.20.167
+address: 45.64.20.157
+address: 45.64.20.173
+address: 45.64.20.168
+address: 45.64.20.178
+address: 45.64.20.152
+address: 45.64.20.162
+address: 45.64.20.148
+address: 45.64.20.187
+address: 45.64.20.177
+address: 45.64.20.163
+bash-3.2$ ./test_getnameinfo 45.64.20.172
+official hostname: nz20l172.bb4564.ctm.net
+bash-3.2$ exit
+exit
+recording to file <test_getnameinfo.out>
+
+<2015-05-30-20:37:52>
+
+tput -Txterm setf 6
+[33mbash-3.2$ /gootest_gethostbyname google.com[C[C[C[C[C[C[C[C[C[C
+official hostname: google.com
+	address: 45.64.20.172
+	address: 45.64.20.158
+	address: 45.64.20.183
+	address: 45.64.20.182
+	address: 45.64.20.153
+	address: 45.64.20.167
+	address: 45.64.20.157
+	address: 45.64.20.173
+	address: 45.64.20.168
+	address: 45.64.20.178
+	address: 45.64.20.152
+	address: 45.64.20.162
+	address: 45.64.20.148
+	address: 45.64.20.187
+	address: 45.64.20.177
+	address: 45.64.20.163
+bash-3.2$ ./test_getnameinfo 45.64.20.172
+official hostname: nz20l172.bb4564.ctm.net
+bash-3.2$ exit
+exit
+
+recording to file typescript complete

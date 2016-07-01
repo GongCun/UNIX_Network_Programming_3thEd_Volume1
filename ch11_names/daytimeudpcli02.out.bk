@@ -1,0 +1,54 @@
+recording to file <daytimeudpcli02.out>
+
+<2015-05-30-15:25:23>
+
+bash-3.2$ tput -Txterm setf 6
+bash-3.2$ ./daytimeudpserv01 19999 &
+[1] 9316
+bash-3.2$ /netifconfig | grep inet
+ 9999
+
+udp4       0      0  *.9999                 *.*                               
+bash-3.2$ ./daytimeudpcli01 127.0.0.1 9999
+sending to 127.0.0.1:9999
+datagram from 127.0.0.1:54915
+Sat May 30 15:25:56 2015
+
+bash-3.2$ ./daytimeudpcli01 127.0.0.1 9999
+2
+datagram from 127.0.0.1:57573
+Sat May 30 15:25:58 2015
+
+bash-3.2$ 
+bash-3.2$ ./daytimeudpcli02 127.0.0.1 9999
+1
+
+sending to 192.168.0.106:13
+
+^C
+bash-3.2$ 
+bash-3.2$ 
+bash-3.2$ ./daytimeudpcli01 192.168.0.106 daytime
+2
+^C
+bash-3.2$ ./daytimeudpcli02 192.168.0.106 daytime
+
+30 MAY 2015 15:26:37 CST
+
+bash-3.2$ ./daytimeudpcli02 192.168.0.106 daytime
+1
+
+sending to 192.168.0.106:13
+30 MAY 2015 15:26:39 CST
+
+bash-3.2$ 
+bash-3.2$ ./daytimeudpcli01 192.168.0.106 daytime
+1234
+sending to 192.168.0.106:1234
+^C
+bash-3.2$ 
+bash-3.2$ ./daytimeudpcli01 192.168.0.106 1234
+2
+recvfrom error: Connection refused
+bash-3.2$ 
+stopped recording
