@@ -4,4 +4,4 @@
 
 ![Screenshot](protocols.png)
 
-![Screenshot](protocols_layres.gif)
+![Screenshot](protocols_layers.gif)
