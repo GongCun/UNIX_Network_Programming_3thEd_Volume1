@@ -7,7 +7,7 @@ LIBNETLIB := ${LIBNETROOT}/src
 LIBNETLIBS := ${LIBNETROOT}/src/libnet.a
 
 # Must specify the libpcap path
-# LIBPCAPROOT := /Users/gongcunjust/Develop/libpcap-1.1.1
+LIBPCAPROOT := /Users/gongcunjust/Develop/libpcap-1.1.1
 LIBPCAPINC := ${LIBPCAPROOT}
 LIBPCAPLIB := ${LIBPCAPROOT}
 LIBPCAPLIBS := ${LIBPCAPROOT}/libpcap.a
