@@ -1,10 +1,25 @@
-head	1.2;
+head	1.5;
 access;
 symbols;
 locks
-	gongcun:1.2; strict;
+	gongcun:1.5; strict;
 comment	@ * @;
 
+
+1.5
+date	2016.11.22.00.07.14;	author gongcun;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2016.11.21.13.50.42;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.11.21.13.15.10;	author gongcun;	state Exp;
+branches;
+next	1.2;
 
 1.2
 date	2016.05.07.01.47.42;	author gongcun;	state Exp;
@@ -21,7 +36,7 @@ desc
 @@
 
 
-1.2
+1.5
 log
 @*** empty log message ***
 @
@@ -35,19 +50,65 @@ struct raw_proto raw_proto = {raw_proc, raw_send, NULL, NULL, NULL, 0, IPPROTO_I
 int datalen = 56; /* # bytes of data following ICMP header
                      datalen = icmplen - 8 */
 int nsent = 0;
+struct in_addr src;
+int src_flag = 0;
+int raw_hdr = 0;
+int xmtu;
+int verbose;
+
+static void usage(const char *s) {
+        err_quit("Usage: %s -s <packet_size> -S <source_ip> -M <mtu> host", s);
+}
+
+
 
 int main(int argc, char *argv[])
 {
     struct addrinfo *paiRes, aiHints;
-    
-    host = argv[1];
+    int c;
+
+
+    opterr = 0;
+    optind = 1;
+    while ((c = getopt(argc, argv, "vs:S:M:")) != -1)
+            switch (c) {
+                    case 'v':
+                            verbose = 1;
+                            break;
+                    case 's':
+                            if (optarg) datalen = atoi(optarg);
+#ifdef _DEBUG
+                            printf("datalen = %d\n", datalen);
+#endif
+                            break;
+                    case 'S':
+                            if (optarg && inet_aton(optarg, &src) != 1)
+                                    err_quit("inet_aton() error");
+                            src_flag = 1;
+                            break;
+                    case 'M':
+                            if (optarg) xmtu  = atoi(optarg);
+                            raw_hdr = 1;
+                            break;
+                    case '?':
+                            usage(basename(argv[0]));
+            }
+
+
+    if (optind != argc - 1)
+            usage(basename(argv[0]));
+
+    if (raw_hdr && !src_flag)
+            err_quit("Must use -S to tell source address");
+
+    host = argv[optind];
 
     aiHints.ai_flags = AI_CANONNAME;
     aiHints.ai_family = AF_INET;
     aiHints.ai_socktype = 0;
     aiHints.ai_protocol = 0;
 
-    pid = getpid() & 0xffff; /* ICMP ID field is 4 bytes */
+    pid = getpid() & 0xffff; /* ICMP ID field is 2 bytes */
     if (signal(SIGALRM, raw_sig_alrm) == SIG_ERR)
         err_sys("signal error");
 
@@ -63,6 +124,10 @@ int main(int argc, char *argv[])
             paiRes->ai_canonname ? paiRes->ai_canonname : strHost, strHost, datalen);
 
     prp = &raw_proto; /* IPv4 */
+    if (raw_hdr) {
+            printf("calling raw_send_hdr()\n");
+            prp->fsend = raw_send_hdr;
+    }
     prp->sasend = paiRes->ai_addr;
     if ((prp->sarecv = calloc(1, paiRes->ai_addrlen)) == NULL)
         err_sys("calloc error");
@@ -72,6 +137,49 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d14 1
+d17 1
+a17 1
+        err_quit("Usage: %s -s <packet_size> -S <source_ip> host", s);
+d30 1
+a30 1
+    while ((c = getopt(argc, argv, "s:S:M:")) != -1)
+d32 3
+d37 3
+d57 4
+d84 4
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d10 10
+d24 27
+a50 2
+    
+    host = argv[1];
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d22 1
+a22 1
+    pid = getpid() & 0xffff; /* ICMP ID field is 4 bytes */
 @
 
 

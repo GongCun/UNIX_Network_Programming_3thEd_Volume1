@@ -7,12 +7,58 @@ struct raw_proto raw_proto = {raw_proc, raw_send, NULL, NULL, NULL, 0, IPPROTO_I
 int datalen = 56; /* # bytes of data following ICMP header
                      datalen = icmplen - 8 */
 int nsent = 0;
+struct in_addr src;
+int src_flag = 0;
+int raw_hdr = 0;
+int xmtu;
+int verbose;
+
+static void usage(const char *s) {
+        err_quit("Usage: %s -s <packet_size> -S <source_ip> -M <mtu> host", s);
+}
+
+
 
 int main(int argc, char *argv[])
 {
     struct addrinfo *paiRes, aiHints;
-    
-    host = argv[1];
+    int c;
+
+
+    opterr = 0;
+    optind = 1;
+    while ((c = getopt(argc, argv, "vs:S:M:")) != -1)
+            switch (c) {
+                    case 'v':
+                            verbose = 1;
+                            break;
+                    case 's':
+                            if (optarg) datalen = atoi(optarg);
+#ifdef _DEBUG
+                            printf("datalen = %d\n", datalen);
+#endif
+                            break;
+                    case 'S':
+                            if (optarg && inet_aton(optarg, &src) != 1)
+                                    err_quit("inet_aton() error");
+                            src_flag = 1;
+                            break;
+                    case 'M':
+                            if (optarg) xmtu  = atoi(optarg);
+                            raw_hdr = 1;
+                            break;
+                    case '?':
+                            usage(basename(argv[0]));
+            }
+
+
+    if (optind != argc - 1)
+            usage(basename(argv[0]));
+
+    if (raw_hdr && !src_flag)
+            err_quit("Must use -S to tell source address");
+
+    host = argv[optind];
 
     aiHints.ai_flags = AI_CANONNAME;
     aiHints.ai_family = AF_INET;
@@ -35,6 +81,10 @@ int main(int argc, char *argv[])
             paiRes->ai_canonname ? paiRes->ai_canonname : strHost, strHost, datalen);
 
     prp = &raw_proto; /* IPv4 */
+    if (raw_hdr) {
+            printf("calling raw_send_hdr()\n");
+            prp->fsend = raw_send_hdr;
+    }
     prp->sasend = paiRes->ai_addr;
     if ((prp->sarecv = calloc(1, paiRes->ai_addrlen)) == NULL)
         err_sys("calloc error");

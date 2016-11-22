@@ -1,10 +1,20 @@
-head	1.2;
+head	1.4;
 access;
 symbols;
 locks
-	gongcun:1.2; strict;
+	gongcun:1.4; strict;
 comment	@ * @;
 
+
+1.4
+date	2016.11.22.00.07.14;	author gongcun;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.11.21.13.50.42;	author gongcun;	state Exp;
+branches;
+next	1.2;
 
 1.2
 date	2016.05.07.01.47.37;	author gongcun;	state Exp;
@@ -21,7 +31,7 @@ desc
 @@
 
 
-1.2
+1.4
 log
 @*** empty log message ***
 @
@@ -37,12 +47,21 @@ void raw_init(void)
 
 void raw_readloop(void)
 {
+        const int on = 1;
 
     /* the program must have superuser privileges to 
      * create the raw socket */
     sockfd = socket(prp->sasend->sa_family, SOCK_RAW, prp->icmpproto); /* AF_INET, SOCK_RAW, IPPROTO_ICMP */
     if (sockfd < 0)
         err_sys("socket error");
+
+    if (raw_hdr)
+            if (setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
+                    err_sys("setsockopt IP_HDRINCL error");
+
+    recvfd = socket(prp->sasend->sa_family, SOCK_RAW, prp->icmpproto); /* AF_INET, SOCK_RAW, IPPROTO_ICMP */
+    if (recvfd < 0)
+            err_sys("socket error");
 
     /* no longer need superuser privileges */
     if (setuid(getuid()) < 0)
@@ -56,8 +75,7 @@ void raw_readloop(void)
                          default, in case the user _pings_ either the
                          IPv4 broadcast address or a multicast address,
                          avoid overflow the recv buff */
-    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size)) < 0)
-        err_sys("setsockopt error");
+    setsockopt(recvfd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size)); /* OK if set failed */
 
 #ifdef _THREAD_TEST
     pthread_t tid;
@@ -89,7 +107,7 @@ void raw_readloop(void)
     for (;;) {
         msg.msg_namelen = prp->salen;
         msg.msg_controllen = sizeof(controlbuf);
-        if ((n = recvmsg(sockfd, &msg, 0)) < 0) {
+        if ((n = recvmsg(recvfd, &msg, 0)) < 0) {
             if (errno == EINTR)
                 continue;
             err_sys("recvmsg error");
@@ -172,18 +190,125 @@ void raw_send(void)
     int len;
     len = 8 + datalen; /* checksum ICMP header and data */
     icmp->icmp_cksum = 0;
-    icmp->icmp_cksum = raw_in_cksum((u_short *) icmp, len);
+    icmp->icmp_cksum = raw_in_cksum((uint16_t *) icmp, len);
     if (sendto(sockfd, sendbuf, len, 0, prp->sasend, prp->salen) < 0)
         err_sys("sendto error");
 }
 
+void 
+raw_send_hdr(void)
+{
+#ifndef IP_OFFMASK
+#define IP_OFFMASK 0x1fff
+#endif
+	struct icmp *icmp;
+	struct ip *ip;
+
+	int remlen = datalen + 8;
+	int offunit = (xmtu - 20) / 8;
+	int offsize = offunit * 8;
+	static int count = 0;
+	int loop = 0;
+	int len;
+	u_short id = htons((u_short) (time(0) + count++) & 0xffff);
+
+        if (verbose)
+                printf("MTU = %d, offset size = %d\n", xmtu, offsize);
+
+	while (remlen > 0) {
+#ifdef _DEBUG
+                printf("loop = %d, remlen = %d\n", loop, remlen);
+#endif
+		ip = (struct ip *)sendbuf;
+		ip->ip_hl = 5;
+		ip->ip_v = 4;
+		ip->ip_tos = 0;
+#if defined(_LINUX) || defined (_OPENBSD)
+		/* ip->ip_len = htons(20 + remlen); */
+		ip->ip_len = htons(20 + min(remlen, offsize));
+#else
+		/* ip->ip_len = 20 + remlen; */
+		ip->ip_len = 20 + min(remlen, offsize);
+#endif
+
+		ip->ip_id = id;
+
+		if (remlen <= offsize) {
+			if (loop == 0) {
+#ifdef _LINUX
+				ip->ip_off = htons(IP_DF);
+#else
+				ip->ip_off = IP_DF;
+#endif
+			} else { /* last packet */
+				/* ip->ip_off = htons(loop * offunit); */
+				/* ip->ip_off = htons(loop * offunit & IP_OFFMASK); */
+#ifdef _LINUX
+				ip->ip_off = htons(loop * offunit);
+#else
+				ip->ip_off = loop * offunit;
+#endif
+			}
+		} else {
+			if (loop == 0) {
+#ifdef _LINUX
+				ip->ip_off = htons(IP_MF);
+#else
+				ip->ip_off = IP_MF;
+                                printf("MF\n");
+#endif
+			} else {
+				ip->ip_off = htons(loop * offunit | IP_MF);
+			}
+		}
+
+		ip->ip_ttl = 255;
+		ip->ip_p = IPPROTO_ICMP;
+		ip->ip_dst = ((struct sockaddr_in *)prp->sasend)->sin_addr;
+		ip->ip_src = src;
+		ip->ip_sum = 0;
+		ip->ip_sum = raw_in_cksum((uint16_t *) ip, ip->ip_hl * 4);
+
+		if (loop == 0) {
+
+			icmp = (struct icmp *)(sendbuf + ip->ip_hl * 4);
+			icmp->icmp_type = ICMP_ECHO;
+			icmp->icmp_code = 0;
+			icmp->icmp_id = pid;
+			icmp->icmp_seq = nsent++;
+			memset(icmp->icmp_data, 0xa5, datalen);
+			if (gettimeofday((struct timeval *)icmp->icmp_data, NULL) < 0)
+				err_sys("gettimeofday error");
+
+			len = 8 + datalen;	/* checksum ICMP header and
+						 * data */
+			icmp->icmp_cksum = 0;
+			icmp->icmp_cksum = raw_in_cksum((uint16_t *) icmp, len);
+                        /* sleep(1000); */
+                        printf("len = %d, offsize = %d\n", len, offsize);
+			/* if (sendto(sockfd, sendbuf, 20 + (len < offsize ? len : offsize), 0, prp->sasend, prp->salen) < 0) */
+			if (sendto(sockfd, sendbuf, 20 + offsize, 0, prp->sasend, prp->salen) < 0)
+			/* if (sendto(sockfd, sendbuf, 20 + len, 0, prp->sasend, prp->salen) < 0) */
+				err_sys("sendto error");
+#ifdef _DEBUG
+                        printf("sendto success\n");
+#endif
+		} else {
+			memmove(sendbuf + 20, sendbuf + 20 + offsize, remlen);
+			if (sendto(sockfd, sendbuf, 20 + remlen, 0, prp->sasend, prp->salen) < 0)
+				err_sys("sendto error");
+		}
+		loop++;
+		remlen -= offsize;
+	}
+}
 void *sendloop(void *arg)
 {
 #if defined(_THREAD_TEST) && defined(_DEBUG)
     printf("thread id = %p\n", pthread_self());
 #endif
     for (;;) {
-        raw_send();
+            (*prp->fsend)();
 #if defined(_THREAD_TEST) && defined(_DEBUG)
         printf("thread sent\n");
 #endif
@@ -222,6 +347,38 @@ void raw_sig_alrm(int signo)
     alarm(1);
     return;
 }
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d155 1
+a155 1
+    icmp->icmp_cksum = raw_in_cksum((u_short *) icmp, len);
+d160 107
+d273 1
+a273 1
+        raw_send();
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d12 1
+d20 8
+d40 1
+a40 2
+    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size)) < 0)
+        err_sys("setsockopt error");
+d72 1
+a72 1
+        if ((n = recvmsg(sockfd, &msg, 0)) < 0) {
 @
 
 
