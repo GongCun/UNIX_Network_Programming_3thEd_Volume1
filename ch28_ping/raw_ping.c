@@ -1,5 +1,7 @@
 #include "raw_ping.h"
 #include <assert.h>
+#include <ifaddrs.h>
+#include "unpifi.h"
 
 void raw_init(void)
 {
@@ -16,6 +18,58 @@ void raw_readloop(void)
     sockfd = socket(prp->sasend->sa_family, SOCK_RAW, prp->icmpproto); /* AF_INET, SOCK_RAW, IPPROTO_ICMP */
     if (sockfd < 0)
         err_sys("socket error");
+
+    if (src_flag) { /* checking MTU and the src IP exists */
+            struct sockaddr_in *sa;
+            int exist = 0;
+
+            /* find the interface name */
+#if defined (HAVE_GETIFADDRS) && defined (HAVE_IFADDRS_STRUCT)
+            struct ifaddrs *ifap, *ifa;
+            struct ifreq ifr;
+
+            if (getifaddrs(&ifap) < 0)
+                    err_sys("getifaddrs() error");
+            for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+                    if (ifa->ifa_addr->sa_family != AF_INET || (ifa->ifa_flags & IFF_UP) == 0)
+                            continue;
+                    sa = (struct sockaddr_in *)ifa->ifa_addr;
+                    if (sa->sin_addr.s_addr != src.s_addr)
+                            continue;
+                    exist = 1;
+#if defined (SIOCGIFMTU) && defined (HAVE_STRUCT_IFREQ_IFR_MTU)
+		if (xmtu) {
+			/* check MTU size */
+			strncpy(ifr.ifr_name, ifa->ifa_name, IFNAMSIZ);
+			if (ioctl(sockfd, SIOCGIFMTU, &ifr) < 0)
+				err_sys("ioctl error");
+			if (ifr.ifr_mtu < xmtu)
+				err_quit("mtu larger than the real MTU: %d", ifr.ifr_mtu);
+		}
+#endif
+                break;
+            }
+            freeifaddrs(ifap);
+#else /* Don't have getifaddrs() */
+            struct ifi_info *ifi, *ifihead;
+            for (ifihead = ifi = Get_ifi_info(inet4, 1);
+                            ifi != NULL; ifi = ifi->ifi_next) {
+                    ;
+            }
+#endif /* HAVE_GETIFADDRS */
+            if (!exist)
+                    err_quit("can't find the interface");
+    }
+
+#if defined (_AIX) && defined (_DISC_DONT)
+    const int off = 0;
+    if (setsockopt(sockfd, IPPROTO_IP, IP_FINDPMTU, &off, sizeof(off)) < 0)
+	    err_sys("setsockopt IP_FINDPMTU error");
+#elif defined (_LINUX) && defined (IP_MTU_DISCOVER)
+    int off = IP_PMTUDISC_DONT; /* or IP_PMTUDISC_DO to turn it on */
+    if (setsockopt(sockfd, IPPROTO_IP, IP_MTU_DISCOVER, &off, sizeof(off)) < 0)
+	    err_sys("setsockopt IP_MTU_DISCOVER error");
+#endif
 
     if (raw_hdr)
             if (setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
@@ -39,13 +93,18 @@ void raw_readloop(void)
                          avoid overflow the recv buff */
     setsockopt(recvfd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size)); /* OK if set failed */
 
+    size = 60 * 1024;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size)) < 0)
+	    err_sys("setsockopt SO_SNDBUF error");
+
 #ifdef _THREAD_TEST
+    sleep(1);
     pthread_t tid;
     int errcode;
     if ((errcode = pthread_create(&tid, NULL, sendloop, NULL)) != 0)
         err_quit("pthread_create error: %s", strerror(errcode));
 #ifdef _DEBUG
-    printf("external thread id = %p\n", tid);
+    printf("external thread id = %ld\n", (long)tid);
 #endif
 
 #else
@@ -53,7 +112,7 @@ void raw_readloop(void)
 #endif
 
     struct iovec iov;
-    char recvbuf[BUFSIZE]; /* 1500 */
+    char recvbuf[BUFSIZE]; /* 9216 */
     iov.iov_base = recvbuf;
     iov.iov_len = sizeof(recvbuf);
 
@@ -167,15 +226,10 @@ raw_send_hdr(void)
 	struct ip *ip;
 
 	int remlen = datalen + 8;
-	int offunit = (xmtu - 20) / 8;
-	int offsize = offunit * 8;
 	static int count = 0;
 	int loop = 0;
 	int len;
 	u_short id = htons((u_short) (time(0) + count++) & 0xffff);
-
-        if (verbose)
-                printf("MTU = %d, offset size = %d\n", xmtu, offsize);
 
 	while (remlen > 0) {
 #ifdef _DEBUG
@@ -186,10 +240,8 @@ raw_send_hdr(void)
 		ip->ip_v = 4;
 		ip->ip_tos = 0;
 #if defined(_LINUX) || defined (_OPENBSD)
-		/* ip->ip_len = htons(20 + remlen); */
 		ip->ip_len = htons(20 + min(remlen, offsize));
 #else
-		/* ip->ip_len = 20 + remlen; */
 		ip->ip_len = 20 + min(remlen, offsize);
 #endif
 
@@ -197,15 +249,13 @@ raw_send_hdr(void)
 
 		if (remlen <= offsize) {
 			if (loop == 0) {
-#ifdef _LINUX
+#if defined (_LINUX)
 				ip->ip_off = htons(IP_DF);
 #else
 				ip->ip_off = IP_DF;
 #endif
 			} else { /* last packet */
-				/* ip->ip_off = htons(loop * offunit); */
-				/* ip->ip_off = htons(loop * offunit & IP_OFFMASK); */
-#ifdef _LINUX
+#if defined (_LINUX) || defined (_AIX)
 				ip->ip_off = htons(loop * offunit);
 #else
 				ip->ip_off = loop * offunit;
@@ -213,14 +263,17 @@ raw_send_hdr(void)
 			}
 		} else {
 			if (loop == 0) {
-#ifdef _LINUX
+#if defined (_LINUX)
 				ip->ip_off = htons(IP_MF);
 #else
 				ip->ip_off = IP_MF;
-                                printf("MF\n");
 #endif
 			} else {
-				ip->ip_off = htons(loop * offunit | IP_MF);
+#if defined (_LINUX) || defined (_AIX)
+				ip->ip_off = htons((loop * offunit) | IP_MF);
+#else
+				ip->ip_off = (loop * offunit) | IP_MF;
+#endif
 			}
 		}
 
@@ -246,18 +299,14 @@ raw_send_hdr(void)
 						 * data */
 			icmp->icmp_cksum = 0;
 			icmp->icmp_cksum = raw_in_cksum((uint16_t *) icmp, len);
-                        /* sleep(1000); */
-                        printf("len = %d, offsize = %d\n", len, offsize);
-			/* if (sendto(sockfd, sendbuf, 20 + (len < offsize ? len : offsize), 0, prp->sasend, prp->salen) < 0) */
-			if (sendto(sockfd, sendbuf, 20 + offsize, 0, prp->sasend, prp->salen) < 0)
-			/* if (sendto(sockfd, sendbuf, 20 + len, 0, prp->sasend, prp->salen) < 0) */
+			if (sendto(sockfd, sendbuf, 20 + min(len, offsize), 0, prp->sasend, prp->salen) < 0)
 				err_sys("sendto error");
 #ifdef _DEBUG
                         printf("sendto success\n");
 #endif
 		} else {
-			memmove(sendbuf + 20, sendbuf + 20 + offsize, remlen);
-			if (sendto(sockfd, sendbuf, 20 + remlen, 0, prp->sasend, prp->salen) < 0)
+			memmove(sendbuf + 20, sendbuf + 20 + offsize * loop, min(remlen, offsize));
+			if (sendto(sockfd, sendbuf, 20 + min(remlen, offsize), 0, prp->sasend, prp->salen) < 0)
 				err_sys("sendto error");
 		}
 		loop++;
@@ -267,7 +316,7 @@ raw_send_hdr(void)
 void *sendloop(void *arg)
 {
 #if defined(_THREAD_TEST) && defined(_DEBUG)
-    printf("thread id = %p\n", pthread_self());
+    printf("thread id = %ld\n", (long)pthread_self());
 #endif
     for (;;) {
             (*prp->fsend)();

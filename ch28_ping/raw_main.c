@@ -12,9 +12,13 @@ int src_flag = 0;
 int raw_hdr = 0;
 int xmtu;
 int verbose;
+int offunit;
+int offsize;
+char dev[IFNAMSIZ];
 
-static void usage(const char *s) {
-        err_quit("Usage: %s -s <packet_size> -S <source_ip> -M <mtu> host", s);
+static void usage(void)
+{
+	err_quit("Usage: rawping -s <packet_size> -S <source_ip> -M <mtu> host");
 }
 
 
@@ -34,9 +38,8 @@ int main(int argc, char *argv[])
                             break;
                     case 's':
                             if (optarg) datalen = atoi(optarg);
-#ifdef _DEBUG
-                            printf("datalen = %d\n", datalen);
-#endif
+			    if (datalen >= BUFSIZE - 20 - 8)
+				    err_quit("too large message");
                             break;
                     case 'S':
                             if (optarg && inet_aton(optarg, &src) != 1)
@@ -48,15 +51,16 @@ int main(int argc, char *argv[])
                             raw_hdr = 1;
                             break;
                     case '?':
-                            usage(basename(argv[0]));
+			    usage();
             }
 
 
     if (optind != argc - 1)
-            usage(basename(argv[0]));
+	    usage();
 
     if (raw_hdr && !src_flag)
-            err_quit("Must use -S to tell source address");
+            err_quit("Must use -S options");
+
 
     host = argv[optind];
 
@@ -81,15 +85,19 @@ int main(int argc, char *argv[])
             paiRes->ai_canonname ? paiRes->ai_canonname : strHost, strHost, datalen);
 
     prp = &raw_proto; /* IPv4 */
-    if (raw_hdr) {
-            printf("calling raw_send_hdr()\n");
-            prp->fsend = raw_send_hdr;
-    }
+    if (raw_hdr)
+	    prp->fsend = raw_send_hdr;
     prp->sasend = paiRes->ai_addr;
     if ((prp->sarecv = calloc(1, paiRes->ai_addrlen)) == NULL)
         err_sys("calloc error");
     prp->salen = paiRes->ai_addrlen;
 
+    if (xmtu) {
+	    offunit = (xmtu - 20) / 8;
+	    offsize = offunit * 8;
+	    if (verbose)
+		    printf("Set MTU = %d, offset = %d\n", xmtu, offsize);
+    }
     raw_readloop();
     return 0;
 }

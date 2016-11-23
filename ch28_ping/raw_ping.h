@@ -5,8 +5,9 @@
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
+#include <net/if.h>
 
-#define BUFSIZE 1500
+#define BUFSIZE 9216 /* Cisco jumbo frame */
 
 /* globals */
 extern int datalen;
@@ -20,6 +21,9 @@ extern int src_flag;
 extern int raw_hdr;
 extern int xmtu;
 extern int verbose;
+extern int offunit;
+extern int offsize;
+extern char dev[IFNAMSIZ];
 
 /* function prototypes */
 void *sendloop(void *);

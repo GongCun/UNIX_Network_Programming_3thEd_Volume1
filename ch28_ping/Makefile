@@ -1,5 +1,10 @@
 include ../Make.defines
-CFLAGS += -D_DEBUG -D_THREAD_TEST
+OS=_$(shell uname -s)
+#CFLAGS += -D_DEBUG -D_THREAD_TEST -D$(OS)
+#CFLAGS += -D_DEBUG -D$(OS)
+#CFLAGS += -D$(OS)
+#CFLAGS += -D_THREAD_TEST -D$(OS)
+CFLAGS += -D_THREAD_TEST -D$(OS) -D_DISC_DONT
 
 PROGS =	rawping
 
