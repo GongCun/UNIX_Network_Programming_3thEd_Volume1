@@ -1,10 +1,15 @@
-head	1.5;
+head	1.6;
 access;
 symbols;
 locks
-	gongcun:1.5; strict;
+	gongcun:1.6; strict;
 comment	@ * @;
 
+
+1.6
+date	2016.11.23.13.05.44;	author gongcun;	state Exp;
+branches;
+next	1.5;
 
 1.5
 date	2016.11.22.14.25.57;	author gongcun;	state Exp;
@@ -36,13 +41,15 @@ desc
 @@
 
 
-1.5
+1.6
 log
 @*** empty log message ***
 @
 text
 @#include "raw_ping.h"
 #include <assert.h>
+#include <ifaddrs.h>
+#include "unpifi.h"
 
 void raw_init(void)
 {
@@ -60,16 +67,46 @@ void raw_readloop(void)
     if (sockfd < 0)
         err_sys("socket error");
 
-    if (xmtu && dev[0] != 0) {
-#if defined (SIOCGIFMTU) && defined (HAVE_STRUCT_IFREQ_IFR_MTU)
-            struct ifreq ifr;
-            strncpy(ifr.ifr_name, dev, IFNAMSIZ);
-            if (ioctl(sockfd, SIOCGIFMTU, &ifr) < 0)
-                    err_sys("ioctl error");
-            if (ifr.ifr_mtu < xmtu)
-                    err_quit("mtu larger than the real MTU: %d", ifr.ifr_mtu);
+    if (src_flag) { /* checking MTU and the src IP exists */
+            struct sockaddr_in *sa;
+            int exist = 0;
 
+            /* find the interface name */
+#if defined (HAVE_GETIFADDRS) && defined (HAVE_IFADDRS_STRUCT)
+            struct ifaddrs *ifap, *ifa;
+            struct ifreq ifr;
+
+            if (getifaddrs(&ifap) < 0)
+                    err_sys("getifaddrs() error");
+            for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+                    if (ifa->ifa_addr->sa_family != AF_INET || (ifa->ifa_flags & IFF_UP) == 0)
+                            continue;
+                    sa = (struct sockaddr_in *)ifa->ifa_addr;
+                    if (sa->sin_addr.s_addr != src.s_addr)
+                            continue;
+                    exist = 1;
+#if defined (SIOCGIFMTU) && defined (HAVE_STRUCT_IFREQ_IFR_MTU)
+		if (xmtu) {
+			/* check MTU size */
+			strncpy(ifr.ifr_name, ifa->ifa_name, IFNAMSIZ);
+			if (ioctl(sockfd, SIOCGIFMTU, &ifr) < 0)
+				err_sys("ioctl error");
+			if (ifr.ifr_mtu < xmtu)
+				err_quit("mtu larger than the real MTU: %d", ifr.ifr_mtu);
+		}
 #endif
+                break;
+            }
+            freeifaddrs(ifap);
+#else /* Don't have getifaddrs() */
+            struct ifi_info *ifi, *ifihead;
+            for (ifihead = ifi = Get_ifi_info(inet4, 1);
+                            ifi != NULL; ifi = ifi->ifi_next) {
+                    ;
+            }
+#endif /* HAVE_GETIFADDRS */
+            if (!exist)
+                    err_quit("can't find the interface");
     }
 
 #if defined (_AIX) && defined (_DISC_DONT)
@@ -369,6 +406,27 @@ void raw_sig_alrm(int signo)
     alarm(1);
     return;
 }
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d3 2
+d22 7
+a28 2
+    if (xmtu && dev[0] != 0) {
+#if defined (SIOCGIFMTU) && defined (HAVE_STRUCT_IFREQ_IFR_MTU)
+a29 5
+            strncpy(ifr.ifr_name, dev, IFNAMSIZ);
+            if (ioctl(sockfd, SIOCGIFMTU, &ifr) < 0)
+                    err_sys("ioctl error");
+            if (ifr.ifr_mtu < xmtu)
+                    err_quit("mtu larger than the real MTU: %d", ifr.ifr_mtu);
+d31 18
+d50 12
 @
 
 

@@ -7,6 +7,8 @@
 #include <netinet/ip_icmp.h>
 #include <net/if.h>
 
+#include "check.h"
+
 #define BUFSIZE 9216 /* Cisco jumbo frame */
 
 /* globals */

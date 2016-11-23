@@ -1,10 +1,15 @@
-head	1.6;
+head	1.7;
 access;
 symbols;
 locks
-	gongcun:1.6; strict;
+	gongcun:1.7; strict;
 comment	@ * @;
 
+
+1.7
+date	2016.11.23.13.05.39;	author gongcun;	state Exp;
+branches;
+next	1.6;
 
 1.6
 date	2016.11.22.14.26.02;	author gongcun;	state Exp;
@@ -41,7 +46,7 @@ desc
 @@
 
 
-1.6
+1.7
 log
 @*** empty log message ***
 @
@@ -79,7 +84,7 @@ int main(int argc, char *argv[])
 
     opterr = 0;
     optind = 1;
-    while ((c = getopt(argc, argv, "vs:S:M:d:")) != -1)
+    while ((c = getopt(argc, argv, "vs:S:M:")) != -1)
             switch (c) {
                     case 'v':
                             verbose = 1;
@@ -98,9 +103,6 @@ int main(int argc, char *argv[])
                             if (optarg) xmtu  = atoi(optarg);
                             raw_hdr = 1;
                             break;
-                    case 'd':
-                            strncpy(dev, optarg, strlen(optarg));
-                            break;
                     case '?':
 			    usage();
             }
@@ -109,8 +111,8 @@ int main(int argc, char *argv[])
     if (optind != argc - 1)
 	    usage();
 
-    if (raw_hdr && !(src_flag && dev[0] != 0))
-            err_quit("Must use -S and -d options");
+    if (raw_hdr && !src_flag)
+            err_quit("Must use -S options");
 
 
     host = argv[optind];
@@ -153,6 +155,25 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d34 1
+a34 1
+    while ((c = getopt(argc, argv, "vs:S:M:d:")) != -1)
+a52 3
+                    case 'd':
+                            strncpy(dev, optarg, strlen(optarg));
+                            break;
+d61 2
+a62 2
+    if (raw_hdr && !(src_flag && dev[0] != 0))
+            err_quit("Must use -S and -d options");
 @
 
 

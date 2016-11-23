@@ -1,6 +1,8 @@
 #include "raw_ping.h"
 #include <assert.h>
+#ifdef HAVE_IFADDRS_H
 #include <ifaddrs.h>
+#endif
 #include "unpifi.h"
 
 void raw_init(void)
@@ -22,11 +24,11 @@ void raw_readloop(void)
     if (src_flag) { /* checking MTU and the src IP exists */
             struct sockaddr_in *sa;
             int exist = 0;
+            struct ifreq ifr;
 
             /* find the interface name */
 #if defined (HAVE_GETIFADDRS) && defined (HAVE_IFADDRS_STRUCT)
             struct ifaddrs *ifap, *ifa;
-            struct ifreq ifr;
 
             if (getifaddrs(&ifap) < 0)
                     err_sys("getifaddrs() error");
@@ -36,29 +38,36 @@ void raw_readloop(void)
                     sa = (struct sockaddr_in *)ifa->ifa_addr;
                     if (sa->sin_addr.s_addr != src.s_addr)
                             continue;
+		    strncpy(dev, ifa->ifa_name, IFNAMSIZ);
                     exist = 1;
-#if defined (SIOCGIFMTU) && defined (HAVE_STRUCT_IFREQ_IFR_MTU)
-		if (xmtu) {
-			/* check MTU size */
-			strncpy(ifr.ifr_name, ifa->ifa_name, IFNAMSIZ);
-			if (ioctl(sockfd, SIOCGIFMTU, &ifr) < 0)
-				err_sys("ioctl error");
-			if (ifr.ifr_mtu < xmtu)
-				err_quit("mtu larger than the real MTU: %d", ifr.ifr_mtu);
-		}
-#endif
-                break;
+		    break;
             }
             freeifaddrs(ifap);
 #else /* Don't have getifaddrs() */
             struct ifi_info *ifi, *ifihead;
-            for (ifihead = ifi = Get_ifi_info(inet4, 1);
-                            ifi != NULL; ifi = ifi->ifi_next) {
-                    ;
+            for (ifihead = ifi = Get_ifi_info(AF_INET, 1); ifi; ifi = ifi->ifi_next) {
+		    sa = (struct sockaddr_in *)ifi->ifi_addr;
+		    if (sa->sin_addr.s_addr != src.s_addr)
+			    continue;
+		    strncpy(dev, ifi->ifi_name, IFNAMSIZ);
+		    exist = 1;
+		    break;
             }
+	    free_ifi_info(ifihead);
 #endif /* HAVE_GETIFADDRS */
             if (!exist)
-                    err_quit("can't find the interface");
+		    err_quit("can't find the interface");
+	    if (verbose) printf("interface: %s\n", dev);
+#if defined (SIOCGIFMTU) && defined (HAVE_STRUCT_IFREQ_IFR_MTU)
+	    if (xmtu) {
+		    strncpy(ifr.ifr_name, dev, IFNAMSIZ);
+		    if (ioctl(sockfd, SIOCGIFMTU, &ifr) < 0)
+				err_sys("ioctl error");
+		    if (verbose) printf("real MTU: %d\n", (int)ifr.ifr_mtu);
+		    if (ifr.ifr_mtu < xmtu)
+			    err_quit("MTU larger than the real MTU");
+	    }
+#endif
     }
 
 #if defined (_AIX) && defined (_DISC_DONT)
