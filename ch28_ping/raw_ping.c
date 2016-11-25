@@ -20,6 +20,8 @@ void raw_readloop(void)
     sockfd = socket(prp->sasend->sa_family, SOCK_RAW, prp->icmpproto); /* AF_INET, SOCK_RAW, IPPROTO_ICMP */
     if (sockfd < 0)
         err_sys("socket error");
+    if (setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) < 0)
+            err_sys("setsockopt SO_BROADCAST");
 
     if (src_flag) { /* checking MTU and the src IP exists */
             struct sockaddr_in *sa;
@@ -162,12 +164,14 @@ void raw_tv_sub(struct timeval *out, struct timeval *in)
 void raw_proc(char *ptr, ssize_t len, struct msghdr *pmsg, struct timeval *tvrecv)
 {
     struct ip *ip;
+    struct in_addr sender;
     ip = (struct ip *)ptr;
     
     int iplen;
     iplen = ip->ip_hl * 4; /* length of IP header, include any option */
     if (ip->ip_p != IPPROTO_ICMP)
         return; /* not ICMP */
+    sender.s_addr = ip->ip_src.s_addr;
 
     struct icmp *icmp;
     icmp = (struct icmp *)(ptr + iplen); /* start of ICMP header */
@@ -188,10 +192,10 @@ void raw_proc(char *ptr, ssize_t len, struct msghdr *pmsg, struct timeval *tvrec
         raw_tv_sub(tvrecv, tvsend);
         rtt = tvrecv->tv_sec*1000.0 + tvrecv->tv_usec/1000.0;
         printf("%d bytes from %s: seq=%u, ttl=%d, rtt=%.3f ms\n",
-                icmplen, strHost, icmp->icmp_seq, ip->ip_ttl, rtt);
+                icmplen, inet_ntoa(sender), icmp->icmp_seq, ip->ip_ttl, rtt);
     } else {
         printf("%d bytes from %s: type = %d, code = %d\n",
-                icmplen, strHost, icmp->icmp_type, icmp->icmp_code);
+                icmplen, inet_ntoa(sender), icmp->icmp_type, icmp->icmp_code);
     }
 }
 

@@ -14,3 +14,6 @@ rawping 224.0.0.1 (224.0.0.1): 56 data bytes
 
 # see the thread id on mac os
 $ sudo dtruss -ap *pid*
+
+# Reply the ping broadcast on linux
+sudo sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=0
