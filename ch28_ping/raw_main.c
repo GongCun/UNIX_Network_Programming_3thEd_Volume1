@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <libgen.h>
 
+/* $Id: raw_main.c,v 1.8 2016/12/21 12:24:03 gongcun Exp gongcun $ */
+
 struct raw_proto raw_proto = {raw_proc, raw_send, NULL, NULL, NULL, 0, IPPROTO_ICMP};
 
 int datalen = 56; /* # bytes of data following ICMP header
@@ -18,7 +20,7 @@ char dev[IFNAMSIZ];
 
 static void usage(void)
 {
-	err_quit("Usage: rawping -s <packet_size> -S <source_ip> -M <mtu> host");
+	err_quit("Usage: rawping -V -v -s <packet_size> -S <source_ip> -M <mtu> host");
 }
 
 
@@ -31,7 +33,7 @@ int main(int argc, char *argv[])
 
     opterr = 0;
     optind = 1;
-    while ((c = getopt(argc, argv, "vs:S:M:")) != -1)
+    while ((c = getopt(argc, argv, "Vvs:S:M:")) != -1)
             switch (c) {
                     case 'v':
                             verbose = 1;
@@ -50,6 +52,9 @@ int main(int argc, char *argv[])
                             if (optarg) xmtu  = atoi(optarg);
                             raw_hdr = 1;
                             break;
+                    case 'V':
+#include "version.h"
+                            exit(0);
                     case '?':
 			    usage();
             }

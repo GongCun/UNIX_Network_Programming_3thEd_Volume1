@@ -1,10 +1,15 @@
-head	1.7;
+head	1.8;
 access;
 symbols;
 locks
-	gongcun:1.7; strict;
+	gongcun:1.8; strict;
 comment	@ * @;
 
+
+1.8
+date	2016.12.21.12.24.03;	author gongcun;	state Exp;
+branches;
+next	1.7;
 
 1.7
 date	2016.11.23.13.05.39;	author gongcun;	state Exp;
@@ -46,7 +51,7 @@ desc
 @@
 
 
-1.7
+1.8
 log
 @*** empty log message ***
 @
@@ -54,6 +59,8 @@ text
 @#include "raw_ping.h"
 #include <assert.h>
 #include <libgen.h>
+
+/* $Id$ */
 
 struct raw_proto raw_proto = {raw_proc, raw_send, NULL, NULL, NULL, 0, IPPROTO_ICMP};
 
@@ -71,7 +78,7 @@ char dev[IFNAMSIZ];
 
 static void usage(void)
 {
-	err_quit("Usage: rawping -s <packet_size> -S <source_ip> -M <mtu> host");
+	err_quit("Usage: rawping -V -v -s <packet_size> -S <source_ip> -M <mtu> host");
 }
 
 
@@ -84,7 +91,7 @@ int main(int argc, char *argv[])
 
     opterr = 0;
     optind = 1;
-    while ((c = getopt(argc, argv, "vs:S:M:")) != -1)
+    while ((c = getopt(argc, argv, "Vvs:S:M:")) != -1)
             switch (c) {
                     case 'v':
                             verbose = 1;
@@ -103,6 +110,9 @@ int main(int argc, char *argv[])
                             if (optarg) xmtu  = atoi(optarg);
                             raw_hdr = 1;
                             break;
+                    case 'V':
+#include "version.h"
+                            exit(0);
                     case '?':
 			    usage();
             }
@@ -155,6 +165,22 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d5 2
+d23 1
+a23 1
+	err_quit("Usage: rawping -s <packet_size> -S <source_ip> -M <mtu> host");
+d36 1
+a36 1
+    while ((c = getopt(argc, argv, "vs:S:M:")) != -1)
+d55 3
 @
 
 
